@@ -22,7 +22,7 @@ import java.util.Optional;
 class ReboraApplicationTests {
 
     @Autowired
-    UserRepository userRepository;
+    UserTestRepository userTestRepository;
 
     @Autowired
     RecruitmentRepository recruitmentRepository;
@@ -33,12 +33,13 @@ class ReboraApplicationTests {
     @Test
     public void LetGo() {
         User user = User.builder()
+                .userEmail("test@test.com")
                 .password("1234")
-                .user_name("기봉")
-                .user_nickname("기봉김2")
-                .user_grade(UserGrade.NORMAL)
-                .user_push_yn(true)
-                .user_use_yn(true)
+                .userName("기봉")
+                .userNickname("기봉김2")
+                .userGrade(UserGrade.NORMAL)
+                .userPushYn(true)
+                .userUseYn(true)
                 .build();
 
         Recruitment recruitment = Recruitment.builder()
@@ -58,7 +59,7 @@ class ReboraApplicationTests {
                 .user_recruitment_yn(true)
                 .build();
 
-        userRepository.save(user);
+        userTestRepository.save(user);
         recruitmentRepository.save(recruitment);
         userRecruitmentRepository.save(userRecruitment);
     }
@@ -72,9 +73,9 @@ class ReboraApplicationTests {
         Optional<Recruitment> recruitmentOptional = recruitmentRepository.findById(5L);
         if (recruitmentOptional.isPresent()) {
             Recruitment recruitment = recruitmentOptional.get();
-            List<UserRecruitment> userRecruitmentList = recruitment.getUserRecruitment();
+            List<UserRecruitment> userRecruitmentList = recruitment.getUserRecruitmentList();
             User user = userRecruitmentList.get(0).getUser();
-            log.info("hello={}",user.getUser_nickname());
+            log.info("hello={}",user.getId());
         }
 
         stopWatch.stop();

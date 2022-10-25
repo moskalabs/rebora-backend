@@ -16,52 +16,56 @@ public class User extends BaseTimeEntity {
     @Column(name = "user_id", nullable = false)
     private Long id;
 
+    @Column(unique = true)
+    private String userEmail;
+
     @Column
     private String password;
 
     @Column(length = 50, nullable = false)
-    private String user_name;
+    private String userName;
 
     @Column(length = 50, nullable = false, unique = true)
-    private String user_nickname;
+    private String userNickname;
 
     @Column(length = 100)
-    private String user_push_key;
+    private String userPushKey;
 
     @Column(nullable = false)
-    private Boolean user_push_yn;
+    private Boolean userPushYn;
 
     @Column(nullable = false)
-    private Boolean user_use_yn;
+    private Boolean userUseYn;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private UserGrade user_grade;
+    private UserGrade userGrade;
 
     @Column
-    private String user_image;
+    private String userImage;
 
     @Column
-    private String user_billing_key;
+    private String userBillingKey;
 
     @Column(length = 10)
-    private String user_sns_kind;
+    private String userSnsKind;
 
     @Column
-    private String user_sns_id;
+    private String userSnsId;
 
     @Builder
-    public User(String password, String user_name, String user_nickname, String user_push_key, Boolean user_push_yn, Boolean user_use_yn, UserGrade user_grade, String user_image, String user_billing_key, String user_sns_kind, String user_sns_id) {
+    public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userSnsKind, String userSnsId) {
+        this.userEmail = userEmail;
         this.password = password;
-        this.user_name = user_name;
-        this.user_nickname = user_nickname;
-        this.user_push_key = user_push_key;
-        this.user_push_yn = user_push_yn;
-        this.user_use_yn = user_use_yn;
-        this.user_grade = user_grade;
-        this.user_image = user_image;
-        this.user_billing_key = user_billing_key;
-        this.user_sns_kind = user_sns_kind;
-        this.user_sns_id = user_sns_id;
+        this.userName = userName;
+        this.userNickname = userNickname;
+        this.userPushKey = userPushKey;
+        this.userPushYn = userPushYn;
+        this.userUseYn = userUseYn;
+        this.userGrade = userGrade;
+        this.userImage = userImage;
+        this.userBillingKey = userBillingKey;
+        this.userSnsKind = userSnsKind;
+        this.userSnsId = userSnsId;
     }
 }
