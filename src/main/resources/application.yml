@@ -4,7 +4,6 @@ spring:
     username: moskastudio
     password: moskastudio~!1
     driver-class-name: com.mysql.cj.jdbc.Driver
-
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
@@ -24,3 +23,11 @@ jwt:
   header: Authorization
   secret: 65E7CD943CF85FA177D2D81D99ECEF92FA34F49B5C72B313927F3A3627
   token-validity-in-seconds: 86400
+
+server:
+  error:
+    include-exception: true
+
+mail:
+  username: kkp02052@gmail.com
+  password: jhbpwkcvougoljlx

@@ -1,11 +1,15 @@
 package moska.rebora.User.Service;
 
+import moska.rebora.Common.BaseResponse;
 import moska.rebora.Config.PasswordAuthAuthenticationToken;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
+import moska.rebora.User.Entity.User;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import javax.validation.Valid;
 
 public interface UserService {
 
@@ -19,4 +23,9 @@ public interface UserService {
                         @Param("userPushYn") Boolean userPushYn,
                         @Param("userPushKey") String userPushKey
     );
+
+    BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail,
+                                       @Param("verifyNumber") String verifyNumber);
+
+    User getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail);
 }

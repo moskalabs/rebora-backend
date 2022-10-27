@@ -14,7 +14,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig{
+public class SecurityConfig {
 
     @Autowired
     JwtAuthTokenProvider jwtAuthTokenProvider;
@@ -39,8 +39,9 @@ public class SecurityConfig{
                 .authorizeRequests()
                 .antMatchers("/api/user/login").permitAll()
                 .antMatchers("/api/user/signUp").permitAll()
-                .antMatchers("/api/**").authenticated()
-                .anyRequest().authenticated().and()
+                .antMatchers("/api/user/sendVerificationEmail").permitAll()
+                .antMatchers("/api/user/**").authenticated()
+                .anyRequest().permitAll().and()
                 .addFilterBefore(new JwtFilter(jwtAuthTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

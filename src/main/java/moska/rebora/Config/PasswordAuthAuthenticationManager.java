@@ -23,6 +23,7 @@ public class PasswordAuthAuthenticationManager implements AuthenticationProvider
     @Autowired
     PasswordEncoder passwordEncoder;
 
+
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         User user = userRepository.getUserByUserEmail(authentication.getPrincipal().toString());
@@ -31,10 +32,10 @@ public class PasswordAuthAuthenticationManager implements AuthenticationProvider
         }
 
         PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(user.getUserEmail(), user.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority("role")));
+                Collections.singleton(new SimpleGrantedAuthority("NORMAL")));
 
         token.setId(user.getId());
-        token.setRole("role");
+        token.setRole(user.getUserGrade().name());
         token.setUserEmail(user.getUserEmail());
         token.setUserName(user.getUserName());
         return token;

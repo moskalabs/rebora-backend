@@ -3,9 +3,6 @@ package moska.rebora.Config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.ErrorCode;
@@ -13,6 +10,7 @@ import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -30,7 +28,7 @@ import java.util.Optional;
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
 
-    public static final String AUTHORIZATION_HEADER = "x-auth-token";
+    public static final String AUTHORIZATION_HEADER = "token";
 
     @Autowired
     private JwtAuthTokenProvider jwtAuthTokenProvider;
@@ -50,10 +48,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     Authentication authentication = jwtAuthTokenProvider.getAuthentication(jwtAuthToken);
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            }else{
-                setErrorResponse(HttpStatus.UNAUTHORIZED, response, ErrorCode.JWT_UNAUTHORIZED);
             }
-        } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException | SignatureException | IllegalArgumentException e) {
+        } catch (ExpiredJwtException | AccessDeniedException e) {
             setErrorResponse(HttpStatus.UNAUTHORIZED, response, ErrorCode.JWT_UNAUTHORIZED);
         }
         filterChain.doFilter(request, response);

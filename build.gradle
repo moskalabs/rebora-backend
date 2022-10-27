@@ -10,10 +10,10 @@ plugins {
     id 'io.spring.dependency-management' version '1.0.14.RELEASE'
     id "com.ewerk.gradle.plugins.querydsl" version "1.0.10"
     id 'java'
+    id 'war'
 }
 
 group = 'moska'
-version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
 configurations {
@@ -46,6 +46,9 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
+
+    //이메일
+    implementation group: 'javax.mail', name: 'mail', version: '1.4.7'
 
     // QueryDSL
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
