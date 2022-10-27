@@ -40,6 +40,8 @@ public class SecurityConfig {
                 .antMatchers("/api/user/login").permitAll()
                 .antMatchers("/api/user/signUp").permitAll()
                 .antMatchers("/api/user/sendVerificationEmail").permitAll()
+                .antMatchers("/api/user/checkRedundancyNickname").permitAll()
+                .antMatchers("/api/user/sendPasswordChangeEmail").permitAll()
                 .antMatchers("/api/user/**").authenticated()
                 .anyRequest().permitAll().and()
                 .addFilterBefore(new JwtFilter(jwtAuthTokenProvider), UsernamePasswordAuthenticationFilter.class)

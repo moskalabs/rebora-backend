@@ -27,18 +27,21 @@ public class PasswordAuthAuthenticationManager implements AuthenticationProvider
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         User user = userRepository.getUserByUserEmail(authentication.getPrincipal().toString());
-        if (!passwordEncoder.matches(authentication.getCredentials().toString(), user.getPassword())) {
-            throw new BadCredentialsException("비밀번호 오류입니다.");
+        if(user != null){
+            if (!passwordEncoder.matches(authentication.getCredentials().toString(), user.getPassword())) {
+                throw new BadCredentialsException("비밀번호 오류입니다.");
+            }
+            PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(user.getUserEmail(), user.getPassword(),
+                    Collections.singleton(new SimpleGrantedAuthority("NORMAL")));
+
+            token.setId(user.getId());
+            token.setRole(user.getUserGrade().name());
+            token.setUserEmail(user.getUserEmail());
+            token.setUserName(user.getUserName());
+            return token;
+        }else{
+            throw new BadCredentialsException("아이디가 존재하지 않습니다.");
         }
-
-        PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(user.getUserEmail(), user.getPassword(),
-                Collections.singleton(new SimpleGrantedAuthority("NORMAL")));
-
-        token.setId(user.getId());
-        token.setRole(user.getUserGrade().name());
-        token.setUserEmail(user.getUserEmail());
-        token.setUserName(user.getUserName());
-        return token;
     }
 
     @Override

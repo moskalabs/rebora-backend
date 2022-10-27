@@ -10,9 +10,10 @@ public class UserLoginDto extends BaseResponse {
     private String token;
 
     @Builder
-    public UserLoginDto(String token, Boolean result, String errorCode) {
+    public UserLoginDto(String token, Boolean result, String errorCode,String message) {
         setResult(result);
         setErrorCode(errorCode);
+        setMessage(message);
         this.token = token;
     }
 }

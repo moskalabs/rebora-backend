@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -50,6 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         } catch (ExpiredJwtException | AccessDeniedException e) {
+            log.error(e.toString());
             setErrorResponse(HttpStatus.UNAUTHORIZED, response, ErrorCode.JWT_UNAUTHORIZED);
         }
         filterChain.doFilter(request, response);
@@ -73,6 +76,7 @@ public class JwtFilter extends OncePerRequestFilter {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", false);
         jsonObject.put("errorCode", errorCode.getStatus());
+        jsonObject.put("message", "인증오류");
 
         ObjectMapper mapper = new ObjectMapper();
         try {

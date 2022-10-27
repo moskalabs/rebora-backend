@@ -10,11 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    User getUserById (Long id);
+    User getUserById(Long id);
 
     User getUserByUserEmail(String userEmail);
 
     int countUSerByUserEmail(@Param("userEmail") String userEmail);
+
+    int countUserByUserNickname(@Param("userNickname") String userNickname);
 
     int countUserByUserEmailOrUserNickname(@Param("userEmail") String userEmail, @Param("userNickname") String userNickname);
 }

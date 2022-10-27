@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.validation.Valid;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 public interface UserService {
 
@@ -28,4 +29,12 @@ public interface UserService {
                                        @Param("verifyNumber") String verifyNumber);
 
     User getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail);
+
+    BaseResponse checkRedundancyNickname(@Param("userNickname") String userNickname);
+
+    BaseResponse sendPasswordChangeEmail(@Param("userEmail") String userEmail,
+                                         @Param("verifyNumber") String verifyNumber);
+
+    UserLoginDto changePassword(@Param("userEmail") String userEmail,
+                                @Param("password") String password);
 }

@@ -11,6 +11,7 @@ import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Repository.UserRepository;
 import moska.rebora.User.Service.UserServiceImpl;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
 import org.springframework.http.HttpStatus;
@@ -30,20 +31,20 @@ public class UserController {
     UserServiceImpl userService;
 
     @PostMapping("/login")
-    UserLoginDto login(@Param("userEmail") String userEmail,
-                       @Param("password") String password) {
+    UserLoginDto login(@RequestParam("userEmail") String userEmail,
+                       @RequestParam("password") String password) {
         log.info("user login userEmail={}, password={}", userEmail, password);
 
         return userService.login(userEmail, password);
     }
 
     @PostMapping("/signUp")
-    UserLoginDto signUp(@Param("userEmail") String userEmail,
-                        @Param("password") String password,
-                        @Param("userName") String userName,
-                        @Param("userNickname") String userNickname,
-                        @Param("userPushYn") Boolean userPushYn,
-                        @Param("userPushKey") String userPushKey) {
+    UserLoginDto signUp(@RequestParam("userEmail") String userEmail,
+                        @RequestParam("password") String password,
+                        @RequestParam("userName") String userName,
+                        @RequestParam("userNickname") String userNickname,
+                        @RequestParam(value = "userPushYn", required = false) Boolean userPushYn,
+                        @RequestParam(value = "userPushKey", required = false) String userPushKey) {
         return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushKey);
     }
 
@@ -56,8 +57,8 @@ public class UserController {
     }
 
     @PostMapping("/sendVerificationEmail")
-    BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail,
-                                       @Param("verifyNumber") String verifyNumber) {
+    BaseResponse sendVerificationEmail(@RequestParam("userEmail") String userEmail,
+                                       @RequestParam("verifyNumber") String verifyNumber) {
         return userService.sendVerificationEmail(userEmail, verifyNumber);
     }
 
@@ -66,4 +67,23 @@ public class UserController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return new UserDto(userService.getUserInfoByUserEmail(authentication.getName()));
     }
+
+    @GetMapping("/checkRedundancyNickname")
+    BaseResponse checkRedundancyNickname(@RequestParam("userNickname") String userNickname) {
+        return userService.checkRedundancyNickname(userNickname);
+    }
+
+    @PostMapping("/sendPasswordChangeEmail")
+    BaseResponse sendPasswordChangeEmail(@RequestParam(value = "userEmail") String userEmail,
+                                         @RequestParam(value = "verifyNumber") String verifyNumber) {
+
+        return userService.sendPasswordChangeEmail(userEmail, verifyNumber);
+    }
+
+    @PostMapping("/changePassword")
+    UserLoginDto changePassword(@RequestParam("userEmail") String userEmail,
+                                @RequestParam("password") String password) {
+        return userService.changePassword(userEmail, password);
+    }
+
 }

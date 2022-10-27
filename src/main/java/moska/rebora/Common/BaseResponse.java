@@ -9,4 +9,5 @@ public class BaseResponse {
 
     private Boolean result;
     private String errorCode;
+    private String message;
 }

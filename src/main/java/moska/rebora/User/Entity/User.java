@@ -53,6 +53,10 @@ public class User extends BaseTimeEntity {
     @Column
     private String userSnsId;
 
+    public void changePassword(String password){
+        this.password = password;
+    }
+
     @Builder
     public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userSnsKind, String userSnsId) {
         this.userEmail = userEmail;

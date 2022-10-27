@@ -27,26 +27,26 @@ public class Recruitment extends BaseEntity {
     private Long id;
 
     @Column
-    private String recruitment_introduce;
+    private String recruitmentIntroduce;
 
     @Column
-    private String recruitment_main_text;
+    private String recruitmentMainText;
 
     @Column
-    private String recruitment_sub_text;
+    private String recruitmentSubText;
 
     @Column(nullable = false)
-    private LocalDateTime recruitment_end_date;
+    private LocalDateTime recruitmentEndDate;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private RecruitmentStatus recruitment_status;
+    private RecruitmentStatus recruitmentStatus;
 
     @Column(nullable = false)
-    private Boolean recruitment_banner;
+    private Boolean recruitmentBanner;
 
     @Column(nullable = false)
-    private Boolean recruitment_expose_yn;
+    private Boolean recruitmentExposeYn;
 
     @OneToMany(mappedBy = "recruitment")
     List<UserRecruitment> userRecruitmentList = new ArrayList<UserRecruitment>();
@@ -59,14 +59,14 @@ public class Recruitment extends BaseEntity {
     private Movie movie;
 
     @Builder
-    public Recruitment(String recruitment_introduce, String recruitment_main_text, String recruitment_sub_text, LocalDateTime recruitment_end_date, RecruitmentStatus recruitment_status, Boolean recruitment_banner, Boolean recruitment_expose_yn, Theater theater, Movie movie) {
-        this.recruitment_introduce = recruitment_introduce;
-        this.recruitment_main_text = recruitment_main_text;
-        this.recruitment_sub_text = recruitment_sub_text;
-        this.recruitment_end_date = recruitment_end_date;
-        this.recruitment_status = recruitment_status;
-        this.recruitment_banner = recruitment_banner;
-        this.recruitment_expose_yn = recruitment_expose_yn;
+    public Recruitment(String recruitmentIntroduce, String recruitmentMainText, String recruitmentSubText, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentBanner, Boolean recruitmentExposeYn, Theater theater, Movie movie) {
+        this.recruitmentIntroduce = recruitmentIntroduce;
+        this.recruitmentMainText = recruitmentMainText;
+        this.recruitmentSubText = recruitmentSubText;
+        this.recruitmentEndDate = recruitmentEndDate;
+        this.recruitmentStatus = recruitmentStatus;
+        this.recruitmentBanner = recruitmentBanner;
+        this.recruitmentExposeYn = recruitmentExposeYn;
         this.theater = theater;
         this.movie = movie;
     }

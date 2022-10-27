@@ -23,6 +23,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -103,11 +104,18 @@ public class UserServiceImpl implements UserService {
         return UserLoginDto.builder().token(createToken(userEmail, password)).result(true).build();
     }
 
-    public User getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail){
+    public User getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail) {
         return userRepository.getUserByUserEmail(userEmail);
     }
 
-
+    /**
+     * 이메일 인증 발송
+     *
+     * @param userEmail    유저 이메일
+     * @param verifyNumber 인증번호
+     * @return BaseResponse
+     */
+    @Override
     public BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail,
                                               @Param("verifyNumber") String verifyNumber) {
 
@@ -129,6 +137,13 @@ public class UserServiceImpl implements UserService {
         return baseResponse;
     }
 
+    /**
+     * 토큰 발행
+     *
+     * @param userEmail 유저이메일
+     * @param password  비밀번호
+     * @return String
+     */
     public String createToken(String userEmail, String password) {
 
         PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(userEmail, password);
@@ -166,5 +181,72 @@ public class UserServiceImpl implements UserService {
         );
 
         return jwtAuthToken.getToken(jwtAuthToken);
+    }
+
+    /**
+     * 닉네임 중복확인
+     *
+     * @param userNickname 유저닉네임
+     * @return BaseResponse
+     */
+    @Override
+    public BaseResponse checkRedundancyNickname(@Param("userNickname") String userNickname) {
+        BaseResponse baseResponse = new BaseResponse();
+        int userCount = userRepository.countUserByUserNickname(userNickname);
+        try {
+            if (userCount == 0) {
+                baseResponse.setResult(true);
+            } else {
+                throw new SQLIntegrityConstraintViolationException("이미 존재하는 유저 이름입니다.");
+            }
+        } catch (SQLIntegrityConstraintViolationException e) {
+            baseResponse.setResult(false);
+            baseResponse.setErrorCode("409");
+            baseResponse.setMessage(e.getMessage());
+        }
+        return baseResponse;
+    }
+
+    /**
+     * 비밀번호 변경 이메일 전송
+     *
+     * @param userEmail    유저 이메일
+     * @param verifyNumber 인증 번호
+     * @return BaseResponse
+     */
+    @Override
+    public BaseResponse sendPasswordChangeEmail(@Param("userEmail") String userEmail, @Param("verifyNumber") String verifyNumber) {
+        BaseResponse baseResponse = new BaseResponse();
+
+        try {
+            int userCount = userRepository.countUSerByUserEmail(userEmail);
+            if (userCount == 0) {
+                throw new NullPointerException("존재하지 않는 이메일입니다.");
+            }
+            String subject = "리보라 비밀번호 변경 인증 메일입니다.";
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("리보라 비밀변호 변경 인증 번호입니다. \n");
+            stringBuilder.append(verifyNumber);
+            util.sendEmail(userEmail, subject, stringBuilder.toString());
+            baseResponse.setResult(true);
+            return baseResponse;
+        } catch (NullPointerException e) {
+            baseResponse.setResult(false);
+            baseResponse.setErrorCode("500");
+            baseResponse.setMessage(e.getMessage());
+        }
+
+        return baseResponse;
+    }
+
+    @Override
+    public UserLoginDto changePassword(String userEmail, String password) {
+
+        User user = userRepository.getUserByUserEmail(userEmail);
+        String bcryptPassword = passwordEncoder.encode(password);
+        user.changePassword(bcryptPassword);
+        userRepository.save(user);
+        String token = createToken(userEmail, password);
+        return UserLoginDto.builder().token(token).result(true).build();
     }
 }
