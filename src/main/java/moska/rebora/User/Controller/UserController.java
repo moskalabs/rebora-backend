@@ -7,9 +7,11 @@ import moska.rebora.Common.ResponseFormat;
 import moska.rebora.Config.JwtAuthToken;
 import moska.rebora.Config.JwtAuthTokenProvider;
 import moska.rebora.Config.PasswordAuthAuthenticationToken;
+import moska.rebora.Enum.EmailAuthKind;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Repository.UserRepository;
+import moska.rebora.User.Service.UserEmailAuthService;
 import moska.rebora.User.Service.UserServiceImpl;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.cert.CertificateExpiredException;
+
 @RestController
 @RequestMapping("/api/user")
 @Slf4j
@@ -30,6 +34,16 @@ public class UserController {
     @Autowired
     UserServiceImpl userService;
 
+    @Autowired
+    UserEmailAuthService userEmailAuthService;
+
+    /**
+     * 로그인
+     *
+     * @param userEmail 유저 이메일
+     * @param password  패스워드
+     * @return UserLoginDto
+     */
     @PostMapping("/login")
     UserLoginDto login(@RequestParam("userEmail") String userEmail,
                        @RequestParam("password") String password) {
@@ -38,52 +52,93 @@ public class UserController {
         return userService.login(userEmail, password);
     }
 
+    /**
+     * 회원 가입
+     *
+     * @param userEmail    유저 이메일
+     * @param password     패스워드
+     * @param userName     유저 이름
+     * @param userNickname 유저 닉네임
+     * @param userPushYn   유저 푸쉬 여부
+     * @param userPushKey  유저 푸쉬 키
+     * @param authKey      유저 인증 키
+     * @return UserLoginDto
+     */
     @PostMapping("/signUp")
     UserLoginDto signUp(@RequestParam("userEmail") String userEmail,
                         @RequestParam("password") String password,
                         @RequestParam("userName") String userName,
                         @RequestParam("userNickname") String userNickname,
                         @RequestParam(value = "userPushYn", required = false) Boolean userPushYn,
-                        @RequestParam(value = "userPushKey", required = false) String userPushKey) {
-        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushKey);
+                        @RequestParam(value = "userPushKey", required = false) String userPushKey,
+                        @RequestParam(value = "authKey") String authKey
+    ) {
+        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushKey, authKey);
     }
 
-    @GetMapping("/check")
-    public ResponseEntity<ResponseFormat> check() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        log.info("name={}", authentication.getName());
-        ResponseFormat res = new ResponseFormat().of("check");
-        return new ResponseEntity<>(res, HttpStatus.OK);
-    }
-
+    /**
+     * 유저 인증메일 전송
+     *
+     * @param userEmail 유저 이메일
+     * @param emailAuthKind 유저 이메일 인증 종류
+     * @return BaseResponse
+     */
     @PostMapping("/sendVerificationEmail")
     BaseResponse sendVerificationEmail(@RequestParam("userEmail") String userEmail,
-                                       @RequestParam("verifyNumber") String verifyNumber) {
-        return userService.sendVerificationEmail(userEmail, verifyNumber);
+                                       @RequestParam("emailAuthKind") EmailAuthKind emailAuthKind) {
+        return userService.sendVerificationEmail(userEmail, emailAuthKind);
     }
 
+    /**
+     * 유저 정보 가져오기
+     *
+     * @return UserDto
+     */
     @GetMapping("/info")
     UserDto info() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return new UserDto(userService.getUserInfoByUserEmail(authentication.getName()));
     }
 
+    /**
+     * 유저 닉네임 체크
+     *
+     * @param userNickname 유저 닉네임
+     * @return BaseResponse
+     */
     @GetMapping("/checkRedundancyNickname")
     BaseResponse checkRedundancyNickname(@RequestParam("userNickname") String userNickname) {
         return userService.checkRedundancyNickname(userNickname);
     }
 
-    @PostMapping("/sendPasswordChangeEmail")
-    BaseResponse sendPasswordChangeEmail(@RequestParam(value = "userEmail") String userEmail,
-                                         @RequestParam(value = "verifyNumber") String verifyNumber) {
-
-        return userService.sendPasswordChangeEmail(userEmail, verifyNumber);
-    }
-
+    /**
+     * 패스워드 변경
+     *
+     * @param userEmail 유저 이메일
+     * @param password 패스워드
+     * @param authKey 인증 키
+     * @return UserLoginDto
+     */
     @PostMapping("/changePassword")
     UserLoginDto changePassword(@RequestParam("userEmail") String userEmail,
-                                @RequestParam("password") String password) {
-        return userService.changePassword(userEmail, password);
+                                @RequestParam("password") String password,
+                                @RequestParam("authKey") String authKey
+    ) {
+        return userService.changePassword(userEmail, password, authKey);
     }
 
+    /**
+     * 인증 이메일 검사
+     *
+     * @param userEmail 유저 이메일
+     * @param verifyNumber 인증번호
+     * @param emailAuthKind 유저 인증 종류
+     * @return JSONObject
+     */
+    @PostMapping("/validationEmailCode")
+    JSONObject validationEmailCode(@RequestParam("userEmail") String userEmail,
+                                   @RequestParam("verifyNumber") String verifyNumber,
+                                   @Param("emailAuthKind") EmailAuthKind emailAuthKind) {
+        return userEmailAuthService.validationEmailCode(userEmail, verifyNumber, emailAuthKind);
+    }
 }

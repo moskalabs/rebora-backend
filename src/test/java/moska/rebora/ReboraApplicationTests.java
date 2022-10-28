@@ -30,27 +30,27 @@ class ReboraApplicationTests {
     @Autowired
     UserRecruitmentRepository userRecruitmentRepository;
 
-    @Test
-    public void LetGo() {
-        LocalDateTime now = LocalDateTime.now();
-        User user = userTestRepository.findById(55L).get();
-
-        Recruitment recruitment = Recruitment.builder()
-                .recruitmentEndDate(now)
-                .recruitmentBanner(false)
-                .recruitmentExposeYn(true)
-                .recruitmentStatus(RecruitmentStatus.RECRUITING)
-                .build();
-
-        UserRecruitment userRecruitment = UserRecruitment.builder()
-                .user_recruitment_yn(true)
-                .user_recruitment_wish(false)
-                .user_recruitment_people(1)
-                .user(user)
-                .recruitment(recruitment)
-                .build();
-
-        recruitmentRepository.save(recruitment);
-        userRecruitmentRepository.save(userRecruitment);
-    }
+//    @Test
+//    public void LetGo() {
+//        LocalDateTime now = LocalDateTime.now();
+//        User user = userTestRepository.findById(55L).get();
+//
+//        Recruitment recruitment = Recruitment.builder()
+//                .recruitmentEndDate(now)
+//                .recruitmentBanner(false)
+//                .recruitmentExposeYn(true)
+//                .recruitmentStatus(RecruitmentStatus.RECRUITING)
+//                .build();
+//
+//        UserRecruitment userRecruitment = UserRecruitment.builder()
+//                .user_recruitment_yn(true)
+//                .user_recruitment_wish(false)
+//                .user_recruitment_people(1)
+//                .user(user)
+//                .recruitment(recruitment)
+//                .build();
+//
+//        recruitmentRepository.save(recruitment);
+//        userRecruitmentRepository.save(userRecruitment);
+//    }
 }

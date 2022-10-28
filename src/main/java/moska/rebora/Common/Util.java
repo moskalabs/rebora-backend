@@ -57,4 +57,23 @@ public class Util {
             e.printStackTrace();
         }
     }
+
+    public String createRandomString(int size) {
+
+        String result = "";
+        if (size > 0) {
+            char[] tmp = new char[size];
+            for (int i = 0; i < tmp.length; i++) {
+                int div = (int) Math.floor(Math.random() * 2);
+                if (div == 0) {
+                    tmp[i] = (char) (Math.random() * 10 + '0');
+                } else {
+                    tmp[i] = (char) (Math.random() * 26 + 'A');
+                }
+            }
+            result = new String(tmp);
+        }
+
+        return result;
+    }
 }

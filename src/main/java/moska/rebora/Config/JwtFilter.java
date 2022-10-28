@@ -52,8 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 }
             }
         } catch (ExpiredJwtException | AccessDeniedException e) {
-            log.error(e.toString());
-            setErrorResponse(HttpStatus.UNAUTHORIZED, response, ErrorCode.JWT_UNAUTHORIZED);
+            setErrorResponse(HttpStatus.UNAUTHORIZED, response, ErrorCode.JWT_UNAUTHORIZED,e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
@@ -67,7 +66,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
     }
 
-    public void setErrorResponse(HttpStatus status, HttpServletResponse response, ErrorCode errorCode) {
+    public void setErrorResponse(HttpStatus status, HttpServletResponse response, ErrorCode errorCode, String message) {
         response.setStatus(status.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         BaseResponse baseResponse = new BaseResponse();
@@ -76,7 +75,7 @@ public class JwtFilter extends OncePerRequestFilter {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", false);
         jsonObject.put("errorCode", errorCode.getStatus());
-        jsonObject.put("message", "인증오류");
+        jsonObject.put("message", message);
 
         ObjectMapper mapper = new ObjectMapper();
         try {

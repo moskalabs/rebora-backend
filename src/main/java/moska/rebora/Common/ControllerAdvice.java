@@ -8,6 +8,7 @@ import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,6 +17,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
+import java.security.cert.CertificateExpiredException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 @Slf4j
@@ -29,6 +31,11 @@ public class ControllerAdvice{
     protected ResponseEntity<Object> HandlerIllegalJwtException(JwtException e) {
 
         return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), "인증 오류");
+    }
+
+    @ExceptionHandler(CredentialsExpiredException.class)
+    protected ResponseEntity<Object> HandlerCertificateExpiredException(CredentialsExpiredException e){
+        return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), e.getMessage());
     }
 
     //중복 예외
@@ -53,8 +60,7 @@ public class ControllerAdvice{
 
     @ExceptionHandler(NullPointerException.class)
     protected ResponseEntity<Object> handlerNullPointerException(NullPointerException e) {
-        initMessage = "오류가 발생했습니다. 다시 시도해주세요";
-        return handleExceptionInternal(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTER_SERVER_ERROR.getStatus(), initMessage);
+        return handleExceptionInternal(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTER_SERVER_ERROR.getStatus(), e.getMessage());
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -66,7 +72,7 @@ public class ControllerAdvice{
     //
     @ExceptionHandler(BadCredentialsException.class)
     protected ResponseEntity<Object> handlerBadCredentialsException(BadCredentialsException e) {
-        initMessage = "인증 오류";
+        initMessage = e.getMessage();
         return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), initMessage);
     }
 

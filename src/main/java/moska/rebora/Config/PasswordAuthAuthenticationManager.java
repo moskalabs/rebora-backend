@@ -29,7 +29,7 @@ public class PasswordAuthAuthenticationManager implements AuthenticationProvider
         User user = userRepository.getUserByUserEmail(authentication.getPrincipal().toString());
         if(user != null){
             if (!passwordEncoder.matches(authentication.getCredentials().toString(), user.getPassword())) {
-                throw new BadCredentialsException("비밀번호 오류입니다.");
+                throw new BadCredentialsException("비밀번호가 일치하지 않습니다.");
             }
             PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(user.getUserEmail(), user.getPassword(),
                     Collections.singleton(new SimpleGrantedAuthority("NORMAL")));
@@ -40,7 +40,7 @@ public class PasswordAuthAuthenticationManager implements AuthenticationProvider
             token.setUserName(user.getUserName());
             return token;
         }else{
-            throw new BadCredentialsException("아이디가 존재하지 않습니다.");
+            throw new BadCredentialsException("존재하지 않는 아이디입니다.");
         }
     }
 
