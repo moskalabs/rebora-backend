@@ -23,15 +23,15 @@ public class UserRecruitment extends BaseEntity {
 
     @Column(nullable = false)
     @ColumnDefault("0")
-    private Boolean user_recruitment_wish;
+    private Boolean userRecruitmentWish;
 
     @Column(nullable = false)
     @ColumnDefault("0")
-    private Boolean user_recruitment_yn;
+    private Boolean userRecruitmentYn;
 
     @Column(nullable = false)
     @ColumnDefault("1")
-    private Integer user_recruitment_people;
+    private Integer userRecruitmentPeople;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -46,10 +46,10 @@ public class UserRecruitment extends BaseEntity {
     private Payment payment;
 
     @Builder
-    public UserRecruitment(Boolean user_recruitment_wish, Boolean user_recruitment_yn, Integer user_recruitment_people, User user, Recruitment recruitment, Payment payment) {
-        this.user_recruitment_wish = user_recruitment_wish;
-        this.user_recruitment_yn = user_recruitment_yn;
-        this.user_recruitment_people = user_recruitment_people;
+    public UserRecruitment(Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, User user, Recruitment recruitment, Payment payment) {
+        this.userRecruitmentWish = userRecruitmentWish;
+        this.userRecruitmentYn = userRecruitmentYn;
+        this.userRecruitmentPeople = userRecruitmentPeople;
         this.user = user;
         this.recruitment = recruitment;
         this.payment = payment;

@@ -38,6 +38,7 @@ public class SecurityConfig {
                 .headers().frameOptions().disable().and()
                 .authorizeRequests()
                 .antMatchers("/api/user/login").permitAll()
+                .antMatchers("/api/policy/**").permitAll()
                 .antMatchers("/api/user/signUp").permitAll()
                 .antMatchers("/api/user/sendVerificationEmail").permitAll()
                 .antMatchers("/api/user/checkRedundancyNickname").permitAll()

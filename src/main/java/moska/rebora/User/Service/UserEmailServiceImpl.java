@@ -8,15 +8,23 @@ import moska.rebora.User.Repository.UserEmailAuthRepository;
 import moska.rebora.User.Repository.UserRepository;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDateTime;
+import java.util.List;
 import java.util.Optional;
+
+import static moska.rebora.User.Entity.QUser.user;
+import static moska.rebora.User.Entity.QUserRecruitment.userRecruitment;
 
 @Service
 @NoArgsConstructor
@@ -166,4 +174,6 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
 
         return jsonObject;
     }
+
+
 }

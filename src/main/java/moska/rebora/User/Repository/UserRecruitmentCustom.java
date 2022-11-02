@@ -1,5 +1,9 @@
 package moska.rebora.User.Repository;
 
+import moska.rebora.User.DTO.UserImageListDto;
+import moska.rebora.User.DTO.UserRecruitmentDto;
+import moska.rebora.User.DTO.UserRecruitmentListDto;
+import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.UserRecruitment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,6 +19,6 @@ public interface UserRecruitmentCustom {
 
     Long countMyRecruiter(@Param("userEmail") @Valid String userEmail);
 
-    Page<UserRecruitment> getParticipationHistory(@Param("userEmail") @Valid String userEmail,
-                                                  Pageable pageable);
+    Page<UserRecruitmentListDto> getUserRecruitmentList(@Param("userEmail") @Valid String userEmail,
+                                                        Pageable pageable, UserSearchCondition userSearchCondition);
 }

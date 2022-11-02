@@ -19,6 +19,7 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = @Index(name = "i_reg_date", columnList = "reg_date"))
 public class Recruitment extends BaseEntity {
 
     @Id
@@ -42,6 +43,9 @@ public class Recruitment extends BaseEntity {
     @Column(nullable = false)
     private RecruitmentStatus recruitmentStatus;
 
+    @Column(length = 1200)
+    private String recruitmentUserImages;
+
     @Column(nullable = false)
     private Boolean recruitmentBanner;
 
@@ -58,8 +62,13 @@ public class Recruitment extends BaseEntity {
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
+    public void updateMovie(Movie movie) {
+        this.movie = movie;
+    }
+
     @Builder
-    public Recruitment(String recruitmentIntroduce, String recruitmentMainText, String recruitmentSubText, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentBanner, Boolean recruitmentExposeYn, Theater theater, Movie movie) {
+    public Recruitment(String recruitmentIntroduce, String recruitmentMainText, String recruitmentSubText, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentBanner, Boolean recruitmentExposeYn, Theater theater, Movie movie, String recruitmentUserImages) {
+
         this.recruitmentIntroduce = recruitmentIntroduce;
         this.recruitmentMainText = recruitmentMainText;
         this.recruitmentSubText = recruitmentSubText;
@@ -67,6 +76,7 @@ public class Recruitment extends BaseEntity {
         this.recruitmentStatus = recruitmentStatus;
         this.recruitmentBanner = recruitmentBanner;
         this.recruitmentExposeYn = recruitmentExposeYn;
+        this.recruitmentUserImages = recruitmentUserImages;
         this.theater = theater;
         this.movie = movie;
     }

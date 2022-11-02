@@ -20,19 +20,19 @@ public class Notification extends BaseEntity {
     private Long id;
 
     @Column
-    private String notification_subject;
+    private String notificationSubject;
 
     @Column
-    private String notification_content;
+    private String notificationContent;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
     @Builder
-    public Notification(String notification_subject, String notification_content, User user) {
-        this.notification_subject = notification_subject;
-        this.notification_content = notification_content;
+    public Notification(String notificationSubject, String notificationContent, User user) {
+        this.notificationSubject = notificationSubject;
+        this.notificationContent = notificationContent;
         this.user = user;
     }
 }

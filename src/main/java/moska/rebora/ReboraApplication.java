@@ -18,8 +18,13 @@ public class ReboraApplication {
         SpringApplication.run(ReboraApplication.class, args);
     }
 
+//    @Bean
+//    public AuditorAware<String> auditorProvider() {
+//        return () -> Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
+//    }
+
     @Bean
     public AuditorAware<String> auditorProvider() {
-        return () -> Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
+        return () -> Optional.of(UUID.randomUUID().toString());
     }
 }

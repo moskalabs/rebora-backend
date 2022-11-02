@@ -20,24 +20,24 @@ public class PaymentLog extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String payment_log_content;
+    private String paymentLogContent;
 
     @Enumerated(value = EnumType.STRING)
     @Column(length = 20, nullable = false)
-    private PaymentStatus payment_log_status;
+    private PaymentStatus paymentLogStatus;
 
     @Column(nullable = false)
-    private Integer payment_log_amount;
+    private Integer paymentLogAmount;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
     @Builder
-    public PaymentLog(String payment_log_content, PaymentStatus payment_log_status, Integer payment_log_amount, Payment payment) {
-        this.payment_log_content = payment_log_content;
-        this.payment_log_status = payment_log_status;
-        this.payment_log_amount = payment_log_amount;
+    public PaymentLog(String paymentLogContent, PaymentStatus paymentLogStatus, Integer paymentLogAmount, Payment payment) {
+        this.paymentLogContent = paymentLogContent;
+        this.paymentLogStatus = paymentLogStatus;
+        this.paymentLogAmount = paymentLogAmount;
         this.payment = payment;
     }
 }

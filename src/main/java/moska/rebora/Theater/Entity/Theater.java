@@ -22,34 +22,34 @@ public class Theater extends BaseEntity {
     private Long id;
 
     @Column(length = 50)
-    private String theater_name;
+    private String theaterName;
 
     @Column
-    private LocalDateTime theater_start_datetime;
+    private LocalDateTime theaterStartDatetime;
 
     @Column
-    private LocalDateTime theater_end_datetime;
+    private LocalDateTime theaterEndDatetime;
 
     @Column(length = 10)
-    private String theater_day;
+    private String theaterDay;
 
     @Column
-    private Integer theater_people;
+    private Integer theaterPeople;
 
     @Column
-    private Integer theater_min_people;
+    private Integer theaterMinPeople;
 
     @Column(length = 50)
-    private String theater_cinema_name;
+    private String theaterCinemaName;
 
     @Column(length = 50)
-    private String theater_cinema_brand_name;
+    private String theaterCinemaBrandName;
 
     @Column(length = 50)
-    private String theater_region;
+    private String theaterRegion;
 
     @Column
-    private Integer theater_time;
+    private Integer theaterTime;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitment_id")
@@ -60,17 +60,17 @@ public class Theater extends BaseEntity {
     private Brand brand;
 
     @Builder
-    public Theater(String theater_name, LocalDateTime theater_start_datetime, LocalDateTime theater_end_datetime, String theater_day, Integer theater_people, Integer theater_min_people, String theater_cinema_name, String theater_cinema_brand_name, String theater_region, Integer theater_time, Recruitment recruitment, Brand brand) {
-        this.theater_name = theater_name;
-        this.theater_start_datetime = theater_start_datetime;
-        this.theater_end_datetime = theater_end_datetime;
-        this.theater_day = theater_day;
-        this.theater_people = theater_people;
-        this.theater_min_people = theater_min_people;
-        this.theater_cinema_name = theater_cinema_name;
-        this.theater_cinema_brand_name = theater_cinema_brand_name;
-        this.theater_region = theater_region;
-        this.theater_time = theater_time;
+    public Theater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterTime, Recruitment recruitment, Brand brand) {
+        this.theaterName = theaterName;
+        this.theaterStartDatetime = theaterStartDatetime;
+        this.theaterEndDatetime = theaterEndDatetime;
+        this.theaterDay = theaterDay;
+        this.theaterPeople = theaterPeople;
+        this.theaterMinPeople = theaterMinPeople;
+        this.theaterCinemaName = theaterCinemaName;
+        this.theaterCinemaBrandName = theaterCinemaBrandName;
+        this.theaterRegion = theaterRegion;
+        this.theaterTime = theaterTime;
         this.recruitment = recruitment;
         this.brand = brand;
     }

@@ -25,35 +25,35 @@ public class Movie extends BaseEntity {
     private Long id;
 
     @Column(length = 50, nullable = false)
-    private String movie_name;
+    private String movieName;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
-    private MovieRating movie_rating;
+    private MovieRating movieRating;
 
     @Column(length = 50)
-    private String movie_category;
+    private String movieCategory;
 
     @Column(length = 20)
-    private String movie_director;
+    private String movieDirector;
 
     @Column
-    private String movie_image;
+    private String movieImage;
 
     @Column
-    private String movie_banner_image;
+    private String movieBannerImage;
 
     @Column
-    private String movie_detail_link;
+    private String movieDetailLink;
 
     @Column
-    private Integer movie_running_time;
+    private Integer movieRunningTime;
 
     @Column
-    private Integer movie_popular_count;
+    private Integer moviePopularCount;
 
     @Column
-    private Integer movie_star_rating;
+    private Integer movieStarRating;
 
     @OneToMany(mappedBy = "movie")
     List<Recruitment> recruitmentList = new ArrayList<>();
@@ -62,16 +62,18 @@ public class Movie extends BaseEntity {
     List<BrandMovie> cinemaBrandMovieList = new ArrayList<>();
 
     @Builder
-    public Movie(String movie_name, MovieRating movie_rating, String movie_category, String movie_director, String movie_image, String movie_banner_image, String movie_detail_link, Integer movie_running_time, Integer movie_popular_count, Integer movie_star_rating) {
-        this.movie_name = movie_name;
-        this.movie_rating = movie_rating;
-        this.movie_category = movie_category;
-        this.movie_director = movie_director;
-        this.movie_image = movie_image;
-        this.movie_banner_image = movie_banner_image;
-        this.movie_detail_link = movie_detail_link;
-        this.movie_running_time = movie_running_time;
-        this.movie_popular_count = movie_popular_count;
-        this.movie_star_rating = movie_star_rating;
+    public Movie(String movieName, MovieRating movieRating, String movieCategory, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList) {
+        this.movieName = movieName;
+        this.movieRating = movieRating;
+        this.movieCategory = movieCategory;
+        this.movieDirector = movieDirector;
+        this.movieImage = movieImage;
+        this.movieBannerImage = movieBannerImage;
+        this.movieDetailLink = movieDetailLink;
+        this.movieRunningTime = movieRunningTime;
+        this.moviePopularCount = moviePopularCount;
+        this.movieStarRating = movieStarRating;
+        this.recruitmentList = recruitmentList;
+        this.cinemaBrandMovieList = cinemaBrandMovieList;
     }
 }
