@@ -12,13 +12,17 @@ import moska.rebora.User.DTO.UserSearchCondition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.querydsl.QuerydslUtils;
 import org.springframework.data.repository.query.Param;
 
 import javax.persistence.EntityManager;
+import java.util.ArrayList;
 import java.util.List;
 
 import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.User.Entity.QUserMovie.userMovie;
+import static org.apache.logging.log4j.ThreadContext.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
 public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
@@ -34,6 +38,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                                            @Param("userEmail") String userEmail,
                                            @Param("pageable") Pageable pageable
     ) {
+        List<OrderSpecifier> ORDERS = getListOrders(pageable);
+
         List<MoviePageDto> content = queryFactory
                 .select(Projections.fields(
                         MoviePageDto.class,
@@ -48,17 +54,28 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                         movie.movieRunningTime,
                         movie.moviePopularCount,
                         movie.movieStarRating,
-                        userMovie.userMovieWish
+                        userMovie.userMovieWish,
+                        userMovie.id.as("userMovieId")
                 ))
                 .from(movie)
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .where(getCategory(searchCondition.getCategory()))
-                .orderBy(getListOrders(searchCondition.getOrderByMovie()))
+                .where(getCategory(searchCondition.getCategory()),
+                        getSearchWord(searchCondition.getSearchWord())
+                )
+                .orderBy(ORDERS.toArray(OrderSpecifier[]::new))
                 .fetch();
 
-        long total = queryFactory.select(movie.count()).from(movie).fetchFirst();
+        long total = queryFactory
+                .select(movie.count())
+                .from(movie)
+                .where(getCategory(searchCondition.getCategory()),
+                        getSearchWord(searchCondition.getSearchWord())
+                        )
+                .fetchFirst();
+
+        content.forEach(m -> m.setConvertStartRation(convertStarRating(m.getMovieStarRating())));
 
         return new PageImpl<>(content, pageable, total);
     }
@@ -67,15 +84,37 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         return hasText(category) && !category.equals("all") ? movie.movieCategory.contains(category) : null;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public OrderSpecifier<?> getListOrders(String orderByMovie) {
+    public BooleanExpression getSearchWord(String searchWord) {
+        return hasText(searchWord) ? movie.movieName.contains(searchWord) : null;
+    }
 
-        if (orderByMovie.equals("popular")) {
-            return new OrderSpecifier(Order.DESC, movie.moviePopularCount);
-        } else if (orderByMovie.equals("name")) {
-            return new OrderSpecifier(Order.ASC, movie.movieName);
-        } else {
-            return new OrderSpecifier(Order.DESC, movie.movieStarRating);
+    public List<OrderSpecifier> getListOrders(Pageable pageable) {
+        List<OrderSpecifier> ORDERS = new ArrayList<>();
+
+        for (Sort.Order order : pageable.getSort()) {
+            Order direction = order.getDirection().isAscending() ? Order.ASC : Order.DESC;
+            switch (order.getProperty()) {
+                case "moviePopularCount":
+                    ORDERS.add(new OrderSpecifier(direction, movie.moviePopularCount));
+                    break;
+                case "movieName":
+                    ORDERS.add(new OrderSpecifier(direction, movie.movieName));
+                    break;
+                case "movieStarRating":
+                    ORDERS.add(new OrderSpecifier(direction, movie.movieStarRating));
+                    break;
+                default:
+                    ORDERS.add(new OrderSpecifier(Order.DESC, movie.regDate));
+                    break;
+            }
         }
+
+        return ORDERS;
+    }
+
+    public String convertStarRating(Integer movieStartRating) {
+        int front = movieStartRating / 10;
+        int back = movieStartRating % 10;
+        return front + "." + back;
     }
 }

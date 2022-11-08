@@ -9,6 +9,7 @@ public class UserSearchCondition {
     private boolean createByMe;
     private RecruitmentStatus recruitmentStatus;
     private Boolean theaterStartDatetime;
+    private String searchWord;
     private String orderByMovie;
     private String category;
 }

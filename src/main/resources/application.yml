@@ -32,3 +32,15 @@ server:
 mail:
   username: kkp02052@gmail.com
   password: jhbpwkcvougoljlx
+
+cloud:
+  aws:
+    credentials:
+      access-key: AKIATWD4P5YEQHZVBPCE
+      secret-key: 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
+    stack:
+      auto: false
+    region:
+      static: ap-northeast-2
+    s3:
+      bucket: rebora

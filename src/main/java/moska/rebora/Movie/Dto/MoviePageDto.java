@@ -21,5 +21,7 @@ public class MoviePageDto{
     private Integer movieRunningTime;
     private Integer moviePopularCount;
     private Integer movieStarRating;
+    private String convertStartRation;
     private Boolean userMovieWish;
+    private Long userMovieId;
 }

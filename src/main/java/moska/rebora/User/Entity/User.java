@@ -66,6 +66,18 @@ public class User extends BaseTimeEntity {
         this.userPushYn = userPushYn;
     }
 
+    public void changeUserInfo(String userImage, String password, String userNickname){
+        if(!userImage.equals("")){
+            this.userImage = userImage;
+        }
+        if(!password.equals("")){
+            this.password = password;
+        }
+        if(!userNickname.equals("")) {
+            this.userNickname = userNickname;
+        }
+    }
+
     @Builder
     public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userSnsKind, String userSnsId) {
         this.userEmail = userEmail;

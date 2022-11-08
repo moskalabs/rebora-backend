@@ -1,24 +1,35 @@
 package moska.rebora.User.Service;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
+import moska.rebora.Common.Service.FileUploadService;
+import moska.rebora.Common.Util;
+import moska.rebora.User.DTO.MypageUpdateDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
 import net.minidev.json.JSONObject;
+import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class MypageServiceImpl implements MypageService {
 
     @Autowired
@@ -26,6 +37,15 @@ public class MypageServiceImpl implements MypageService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
+    Util util;
+
+    @Autowired
+    FileUploadService fileUploadService;
 
     /**
      * 마이페이지 정보 가져오기
@@ -100,5 +120,62 @@ public class MypageServiceImpl implements MypageService {
         } else {
             throw new JwtException("옳바르지 않은 접근입니다.");
         }
+    }
+
+    /**
+     * 내정보 변경
+     *
+     * @param userId          유저 아이디
+     * @param userEmail       유저 이메일
+     * @param mypageUpdateDto 내정보 업데이트 DTO
+     * @return BaseResponse
+     * @throws SQLIntegrityConstraintViolationException 중복된 경우 Exception
+     */
+    @Override
+    public BaseResponse changeMyInfo(Long userId,
+                                     String userEmail,
+                                     MypageUpdateDto mypageUpdateDto) throws SQLIntegrityConstraintViolationException {
+
+        try {
+
+            User user = userRepository.getUserByUserEmail(userEmail);
+
+            if (!certifyUser(userId, user)) {
+                throw new JwtException("옳바르지 않은 접근입니다.");
+            }
+
+            MultipartFile file = mypageUpdateDto.getFile();
+            String password = ""; //패스워드
+            if (!mypageUpdateDto.getChangePassword().isEmpty()) {
+                if (!passwordEncoder.matches(mypageUpdateDto.getCurrentPassword(), user.getPassword())) {
+                    throw new JwtException("비밀번호가 맞지 않습니다.");
+                }
+                password = passwordEncoder.encode(mypageUpdateDto.getChangePassword());
+            }
+
+            String originalFileName = file.getOriginalFilename(); //원본 파일 이름
+            String ext = FilenameUtils.getExtension(originalFileName); //확장자
+
+            String newFileName = "user/" + userId + "/" + userId + "_" + util.createRandomString(8) + "." + ext; //새로운 파일 이름
+            String fileUrl = fileUploadService.uploadImage(file, newFileName); //파일 Url
+
+            user.changeUserInfo(fileUrl, password, mypageUpdateDto.getUserNickname());
+            log.info("userNickname={}", user.getUserNickname());
+            log.info("password={}", user.getPassword());
+            log.info("userImage={}", user.getUserImage());
+            userRepository.save(user);
+
+            BaseResponse baseResponse = new BaseResponse();
+            baseResponse.setResult(true);
+
+
+            return baseResponse;
+        } catch (DataIntegrityViolationException e) {
+            throw new SQLIntegrityConstraintViolationException("중복된 닉네임입니다.");
+        }
+    }
+
+    public Boolean certifyUser(Long userId, User user) {
+        return userId.equals(user.getId());
     }
 }
