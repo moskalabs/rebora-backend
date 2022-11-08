@@ -4,7 +4,6 @@ package moska.rebora.Common;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Enum.ErrorCode;
-import net.minidev.json.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -12,8 +11,6 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
@@ -30,7 +27,7 @@ public class ControllerAdvice{
     @ExceptionHandler(JwtException.class)
     protected ResponseEntity<Object> HandlerIllegalJwtException(JwtException e) {
 
-        return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), "인증 오류");
+        return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), e.getMessage());
     }
 
     @ExceptionHandler(CredentialsExpiredException.class)
@@ -41,7 +38,8 @@ public class ControllerAdvice{
     //중복 예외
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     protected ResponseEntity<Object> HandlerIllegalSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException e) {
-        return handleExceptionInternal(HttpStatus.CONFLICT, ErrorCode.DUPLICATION.getStatus(), e.toString());
+        return handleExceptionInternal(HttpStatus.CONFLICT, ErrorCode.DUPLICATION.getStatus(), e.getMessage());
+
     }
 
     //메일 사용자 에러

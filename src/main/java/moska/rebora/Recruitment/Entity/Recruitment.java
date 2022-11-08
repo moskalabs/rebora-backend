@@ -19,7 +19,11 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(indexes = @Index(name = "i_reg_date", columnList = "reg_date"))
+@Table(indexes = {
+        @Index(name = "i_reg_date", columnList = "reg_date")
+        ,@Index(name = "recruitment_status", columnList = "recruitmentStatus")
+        ,@Index(name = "recruitmentExposeYn", columnList = "recruitmentExposeYn")
+})
 public class Recruitment extends BaseEntity {
 
     @Id
@@ -29,12 +33,6 @@ public class Recruitment extends BaseEntity {
 
     @Column
     private String recruitmentIntroduce;
-
-    @Column
-    private String recruitmentMainText;
-
-    @Column
-    private String recruitmentSubText;
 
     @Column(nullable = false)
     private LocalDateTime recruitmentEndDate;
@@ -46,8 +44,8 @@ public class Recruitment extends BaseEntity {
     @Column(length = 1200)
     private String recruitmentUserImages;
 
-    @Column(nullable = false)
-    private Boolean recruitmentBanner;
+    @Column
+    private Integer recruitmentPeople;
 
     @Column(nullable = false)
     private Boolean recruitmentExposeYn;
@@ -66,17 +64,19 @@ public class Recruitment extends BaseEntity {
         this.movie = movie;
     }
 
+    public void updateRecruitmentPeople(Integer recruitmentPeople) {
+        this.recruitmentPeople = recruitmentPeople;
+    }
+
     @Builder
-    public Recruitment(String recruitmentIntroduce, String recruitmentMainText, String recruitmentSubText, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentBanner, Boolean recruitmentExposeYn, Theater theater, Movie movie, String recruitmentUserImages) {
+    public Recruitment(String recruitmentIntroduce, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentExposeYn, Theater theater, Movie movie, String recruitmentUserImages, Integer recruitmentPeople) {
 
         this.recruitmentIntroduce = recruitmentIntroduce;
-        this.recruitmentMainText = recruitmentMainText;
-        this.recruitmentSubText = recruitmentSubText;
         this.recruitmentEndDate = recruitmentEndDate;
         this.recruitmentStatus = recruitmentStatus;
-        this.recruitmentBanner = recruitmentBanner;
         this.recruitmentExposeYn = recruitmentExposeYn;
         this.recruitmentUserImages = recruitmentUserImages;
+        this.recruitmentPeople = recruitmentPeople;
         this.theater = theater;
         this.movie = movie;
     }

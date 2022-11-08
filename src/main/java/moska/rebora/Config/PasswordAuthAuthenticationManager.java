@@ -40,7 +40,7 @@ public class PasswordAuthAuthenticationManager implements AuthenticationProvider
             token.setUserName(user.getUserName());
             return token;
         }else{
-            throw new BadCredentialsException("존재하지 않는 아이디입니다.");
+            throw new BadCredentialsException("가입이 되지 않은 아이디입니다.");
         }
     }
 

@@ -42,8 +42,11 @@ public class SecurityConfig {
                 .antMatchers("/api/user/signUp").permitAll()
                 .antMatchers("/api/user/sendVerificationEmail").permitAll()
                 .antMatchers("/api/user/checkRedundancyNickname").permitAll()
+                .antMatchers("/api/user/changePassword").permitAll()
                 .antMatchers("/api/user/validationEmailCode").permitAll()
                 .antMatchers("/api/user/**").authenticated()
+                .antMatchers("/api/movie/**").authenticated()
+                .antMatchers("/api/main").authenticated()
                 .anyRequest().permitAll().and()
                 .addFilterBefore(new JwtFilter(jwtAuthTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();

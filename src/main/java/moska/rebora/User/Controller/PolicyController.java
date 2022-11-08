@@ -17,11 +17,13 @@ public class PolicyController {
     PolicyRepository policyRepository;
 
     @GetMapping("/getPolicy")
-    JSONObject getPolicy(@RequestParam("policySubject") PolicySubject policySubject){
+    JSONObject getPolicy(){
 
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("result", true);
-        jsonObject.put("policy", policyRepository.getFirstByPolicySubjectOrderByRegDateDesc(policySubject));
+        jsonObject.put("termsCondition", policyRepository.getFirstByPolicySubjectOrderByRegDateDesc(PolicySubject.TERMS_CONDITION));
+        jsonObject.put("privacyPolicy", policyRepository.getFirstByPolicySubjectOrderByRegDateDesc(PolicySubject.PRIVACY_POLICY));
+        jsonObject.put("eventMarketing", policyRepository.getFirstByPolicySubjectOrderByRegDateDesc(PolicySubject.EVENT_MARKETING));
 
         return jsonObject;
     }

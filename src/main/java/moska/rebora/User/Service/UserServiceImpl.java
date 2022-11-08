@@ -16,6 +16,7 @@ import moska.rebora.User.Repository.UserEmailAuthRepository;
 import moska.rebora.User.Repository.UserRepository;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
@@ -93,30 +94,34 @@ public class UserServiceImpl implements UserService {
                                @Param("userPushKey") String userPushKey,
                                @Param("authKey") String authKey
 
-    ) {
-        UserEmailAuth userEmailAuth = userEmailAuthService.checkUserEmailAuth(userEmail, authKey, EmailAuthKind.SIGNUP);
+    ) throws SQLIntegrityConstraintViolationException {
 
-        //비밀번호 인코딩
-        String bcryptPassword = passwordEncoder.encode(password);
+        UserEmailAuth userEmailAuth = null;
+        try {
+            userEmailAuth = userEmailAuthService.checkUserEmailAuth(userEmail, authKey, EmailAuthKind.SIGNUP);
+            //비밀번호 인코딩
+            String bcryptPassword = passwordEncoder.encode(password);
 
-        //유저 객체 생성
-        User user = User.builder()
-                .userEmail(userEmail)
-                .password(bcryptPassword)
-                .userUseYn(true)
-                .userPushYn(userPushYn)
-                .userGrade(UserGrade.NORMAL)
-                .userNickname(userNickname)
-                .userName(userName)
-                .userPushKey(userPushKey)
-                .build();
+            //유저 객체 생성
+            User user = User.builder()
+                    .userEmail(userEmail)
+                    .password(bcryptPassword)
+                    .userUseYn(true)
+                    .userPushYn(userPushYn)
+                    .userGrade(UserGrade.NORMAL)
+                    .userNickname(userNickname)
+                    .userName(userName)
+                    .userPushKey(userPushKey)
+                    .build();
 
-        userRepository.save(user);
+            userRepository.save(user);
 
-        userEmailAuth.expireAuth();
-        userEmailAuthRepository.save(userEmailAuth);
-
-        return UserLoginDto.builder().token(createToken(userEmail, password)).result(true).build();
+            userEmailAuth.expireAuth();
+            userEmailAuthRepository.save(userEmailAuth);
+            return UserLoginDto.builder().token(createToken(userEmail, password)).result(true).build();
+        } catch (DataIntegrityViolationException e) {
+            throw new SQLIntegrityConstraintViolationException("중복된 이메일 또는 닉네임입니다.");
+        }
     }
 
     public User getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail) {
@@ -136,17 +141,18 @@ public class UserServiceImpl implements UserService {
         String verifyNumber = util.createRandomString(6);
         BaseResponse baseResponse = new BaseResponse();
         try {
-            if (userRepository.countUSerByUserEmail(userEmail) >= 1) {
-                baseResponse.setResult(false);
-                baseResponse.setErrorCode("409");
-                baseResponse.setMessage("이미 존재하는 이메일입니다.");
-
-            } else if (emailAuthKind == EmailAuthKind.SIGNUP) {
-                userEmailAuthService.sendSignUpEmail(userEmail, verifyNumber);
-                baseResponse.setResult(true);
-            } else {
+            if (emailAuthKind == EmailAuthKind.PASSWORD) {
                 userEmailAuthService.sendPasswordEmail(userEmail, verifyNumber);
                 baseResponse.setResult(true);
+            } else {
+                if (userRepository.countUSerByUserEmail(userEmail) >= 1) {
+                    baseResponse.setResult(false);
+                    baseResponse.setErrorCode("409");
+                    baseResponse.setMessage("이미 존재하는 이메일입니다.");
+                } else {
+                    userEmailAuthService.sendSignUpEmail(userEmail, verifyNumber);
+                    baseResponse.setResult(true);
+                }
             }
         } catch (NullPointerException e) {
             baseResponse.setResult(false);
@@ -156,9 +162,6 @@ public class UserServiceImpl implements UserService {
 
         return baseResponse;
     }
-
-
-
 
     /**
      * 닉네임 중복확인

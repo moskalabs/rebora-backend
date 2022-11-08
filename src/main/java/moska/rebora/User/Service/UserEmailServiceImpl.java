@@ -15,11 +15,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.chrono.ChronoLocalDateTime;
+import java.time.chrono.ChronoZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,9 +63,9 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
             if (!passwordEncoder.matches(userEmail, authKey)) {
                 throw new CredentialsExpiredException("이메일 인증이 옳바르지 않습니다. 인증을 다시 시도해주세요");
             }
-            if (userEmailAuth.getExpireDate().isBefore(ChronoLocalDateTime.from(LocalDateTime.now().atZone(ZoneId.systemDefault())))) {
-                throw new CredentialsExpiredException("이메일 인증시간이 만료 되었습니다. 인증을 다시 시도해주세요");
-            }
+//            if (LocalDateTime.now().atZone(ZoneId.systemDefault()).isBefore(ChronoZonedDateTime.from(userEmailAuth.getExpireDate().atZone(ZoneId.systemDefault())))) {
+//                throw new CredentialsExpiredException("이메일 인증시간이 만료 되었습니다. 인증을 다시 시도해주세요");
+//            }
 
             return userEmailAuth;
         }
@@ -75,8 +77,9 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
      * @param userEmail    유저 이메일
      * @param verifyNumber 인증 번호
      */
+    @Transactional
     public void sendSignUpEmail(@Param("userEmail") String userEmail, @Param("verifyNumber") String verifyNumber) {
-
+        userEmailAuthRepository.updateExposeFalse(userEmail, EmailAuthKind.SIGNUP);
         String subject = "리보라 인증 메일입니다.";
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("리보라 인증 번호입니다. \n");
@@ -92,10 +95,12 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
      * @param userEmail    유저 이메일
      * @param verifyNumber 인증 번호
      */
+    @Transactional
     public void sendPasswordEmail(@Param("userEmail") String userEmail, @Param("verifyNumber") String verifyNumber) {
+        userEmailAuthRepository.updateExposeFalse(userEmail, EmailAuthKind.PASSWORD);
         int userCount = userRepository.countUSerByUserEmail(userEmail);
         if (userCount == 0) {
-            throw new NullPointerException("존재하지 않는 이메일입니다.");
+            throw new NullPointerException("가입이 되지 않은 이메일입니다.");
         }
 
         String subject = "리보라 비밀번호 변경 인증 메일입니다.";
@@ -119,13 +124,13 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
         UserEmailAuth userEmailAuth;
         if (userEmailAuthOptional.isPresent()) {
             userEmailAuth = userEmailAuthOptional.get();
-            userEmailAuth.sendEmailAuth(userEmail, verifyNumber, true, EmailAuthKind.SIGNUP);
+            userEmailAuth.sendEmailAuth(userEmail, verifyNumber, true, userEmailAuth.getEmailAuthKind());
         } else {
             userEmailAuth = UserEmailAuth.builder()
                     .email(userEmail)
                     .verifyNumber(verifyNumber)
                     .expireYn(true)
-                    .emailAuthKind(EmailAuthKind.SIGNUP)
+                    .emailAuthKind(emailAuthKind)
                     .build();
         }
         userEmailAuthRepository.save(userEmailAuth);

@@ -14,6 +14,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = {@Index(name = "user_recruitment_index", columnList = "user_id, recruitment_id")})
 public class UserRecruitment extends BaseEntity {
 
     @Id
@@ -29,7 +30,6 @@ public class UserRecruitment extends BaseEntity {
     @ColumnDefault("0")
     private Boolean userRecruitmentYn;
 
-    @Column(nullable = false)
     @ColumnDefault("1")
     private Integer userRecruitmentPeople;
 

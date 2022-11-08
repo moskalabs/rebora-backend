@@ -9,6 +9,7 @@ import moska.rebora.Cinema.Entity.BrandMovie;
 import moska.rebora.Common.BaseEntity;
 import moska.rebora.Enum.MovieRating;
 import moska.rebora.Recruitment.Entity.Recruitment;
+import moska.rebora.User.Entity.UserMovie;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import java.util.List;
 public class Movie extends BaseEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "movie_id", nullable = false)
     private Long id;
 
@@ -57,6 +58,9 @@ public class Movie extends BaseEntity {
 
     @OneToMany(mappedBy = "movie")
     List<Recruitment> recruitmentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "movie")
+    List<UserMovie> userMovieList = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
     List<BrandMovie> cinemaBrandMovieList = new ArrayList<>();

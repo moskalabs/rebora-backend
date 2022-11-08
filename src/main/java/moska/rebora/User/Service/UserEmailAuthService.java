@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserEmailAuthService {
 
-    public UserEmailAuth checkUserEmailAuth(String userEmail, String authKey, EmailAuthKind emailAuthKind);
+    UserEmailAuth checkUserEmailAuth(String userEmail, String authKey, EmailAuthKind emailAuthKind);
 
     public void sendSignUpEmail(@Param("userEmail") String userEmail, @Param("verifyNumber") String verifyNumber);
 

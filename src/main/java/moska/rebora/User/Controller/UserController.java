@@ -12,6 +12,7 @@ import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Repository.UserRepository;
 import moska.rebora.User.Service.UserEmailAuthService;
+import moska.rebora.User.Service.UserService;
 import moska.rebora.User.Service.UserServiceImpl;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.cert.CertificateExpiredException;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestController
 @RequestMapping("/api/user")
@@ -32,7 +34,7 @@ public class UserController {
 
 
     @Autowired
-    UserServiceImpl userService;
+    UserService userService;
 
     @Autowired
     UserEmailAuthService userEmailAuthService;
@@ -72,8 +74,8 @@ public class UserController {
                         @RequestParam(value = "userPushYn", required = false) Boolean userPushYn,
                         @RequestParam(value = "userPushKey", required = false) String userPushKey,
                         @RequestParam(value = "authKey") String authKey
-    ) {
-        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushKey, authKey);
+    ) throws SQLIntegrityConstraintViolationException {
+        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushKey, authKey) ;
     }
 
     /**

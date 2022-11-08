@@ -10,7 +10,7 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(indexes = {
-        @Index(name = "i_user_email", columnList = "userEmail"),
+        @Index(name = "i_user_email_use", columnList = "userEmail,userUseYn"),
         @Index(name = "search_recruitment", columnList = "user_id,userEmail")
 }
 )
@@ -60,6 +60,10 @@ public class User extends BaseTimeEntity {
 
     public void changePassword(String password) {
         this.password = password;
+    }
+
+    public void changePushYn(Boolean userPushYn) {
+        this.userPushYn = userPushYn;
     }
 
     @Builder

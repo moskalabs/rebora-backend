@@ -28,7 +28,7 @@ public class UserRecruitmentListDto {
     private LocalDateTime theaterStartDatetime;
     private LocalDateTime theaterEndDatetime;
     private String theaterDay;
-    private Integer theaterPeople;
+    private Integer theaterMaxPeople;
     private Integer theaterMinPeople;
     private String theaterCinemaName;
     private String theaterCinemaBrandName;
@@ -41,12 +41,13 @@ public class UserRecruitmentListDto {
     private String recruitmentUserImage;
     private String recruitmentUserImages;
     private List<UserImageListDto> userImageList;
+    private Integer recruitmentPeople;
 
     public void addUserImage(List<UserImageListDto> userImageList) {
         this.userImageList = userImageList;
     }
 
-    public UserRecruitmentListDto(Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, String movieName, String movieImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruitmentUsername, String recruitmentUserImage,String recruitmentUserImages) {
+    public UserRecruitmentListDto(Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, String movieName, String movieImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruitmentUsername, String recruitmentUserImage, String recruitmentUserImages, Integer recruitmentPeople) {
         this.userRecruitmentId = userRecruitmentId;
         this.userRecruitmentWish = userRecruitmentWish;
         this.userRecruitmentYn = userRecruitmentYn;
@@ -58,7 +59,7 @@ public class UserRecruitmentListDto {
         this.theaterStartDatetime = theaterStartDatetime;
         this.theaterEndDatetime = theaterEndDatetime;
         this.theaterDay = theaterDay;
-        this.theaterPeople = theaterPeople;
+        this.theaterMaxPeople = theaterMaxPeople;
         this.theaterMinPeople = theaterMinPeople;
         this.theaterCinemaName = theaterCinemaName;
         this.theaterCinemaBrandName = theaterCinemaBrandName;
@@ -69,5 +70,6 @@ public class UserRecruitmentListDto {
         this.recruitmentUsername = recruitmentUsername;
         this.recruitmentUserImage = recruitmentUserImage;
         this.recruitmentUserImages = recruitmentUserImages;
+        this.recruitmentPeople = recruitmentPeople;
     }
 }

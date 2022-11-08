@@ -27,7 +27,7 @@ public interface UserService {
                         @Param("userPushYn") Boolean userPushYn,
                         @Param("userPushKey") String userPushKey,
                         @Param("authKey") String authKey
-    ) throws CertificateExpiredException;
+    ) throws SQLIntegrityConstraintViolationException;
 
     BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail,
                                        @Param("emailAuthKind") EmailAuthKind emailAuthKind);

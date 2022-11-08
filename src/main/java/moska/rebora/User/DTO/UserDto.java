@@ -1,15 +1,13 @@
 package moska.rebora.User.DTO;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.User.Entity.User;
 
 import javax.persistence.*;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class UserDto extends BaseResponse {
 

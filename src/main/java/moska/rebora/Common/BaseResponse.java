@@ -13,5 +13,4 @@ public class BaseResponse {
     private Boolean result; //반환 성공 유무
     private String errorCode; //에러 코드
     private String message; // 메세지
-
 }

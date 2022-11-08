@@ -1,5 +1,6 @@
 package moska.rebora.User.Service;
 
+import moska.rebora.Common.BaseResponse;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import net.minidev.json.JSONObject;
 import org.springframework.data.domain.Page;
@@ -13,4 +14,6 @@ public interface MypageService {
     Page<UserRecruitmentListDto> getParticipationHistory(Pageable pageable);
 
     Page<UserRecruitmentListDto> getMyRecruiter(Pageable pageable);
+
+    void updatePushYn(Long userId, Boolean userPushYn, String userEmail);
 }

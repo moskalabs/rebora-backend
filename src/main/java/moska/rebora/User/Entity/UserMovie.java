@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import moska.rebora.Common.BaseTimeEntity;
 import moska.rebora.Movie.Entity.Movie;
 
 import javax.persistence.*;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserMovie {
+public class UserMovie extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +20,7 @@ public class UserMovie {
     private Long id;
 
     @Column
-    private Boolean user_movie_wish;
+    private Boolean userMovieWish;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
@@ -30,8 +31,8 @@ public class UserMovie {
     private Movie movie;
 
     @Builder
-    public UserMovie(Boolean user_movie_wish, User user, Movie movie) {
-        this.user_movie_wish = user_movie_wish;
+    public UserMovie(Boolean userMovieWish, User user, Movie movie) {
+        this.userMovieWish = userMovieWish;
         this.user = user;
         this.movie = movie;
     }
