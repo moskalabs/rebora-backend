@@ -3,6 +3,8 @@ package moska.rebora.Config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.ErrorCode;
@@ -51,8 +53,9 @@ public class JwtFilter extends OncePerRequestFilter {
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
             }
-        } catch (ExpiredJwtException | AccessDeniedException e) {
-            setErrorResponse(HttpStatus.UNAUTHORIZED, response, ErrorCode.JWT_UNAUTHORIZED,e.getMessage());
+        } catch (ExpiredJwtException | AccessDeniedException | MalformedJwtException e)
+        {
+            setErrorResponse(HttpStatus.UNAUTHORIZED, response, ErrorCode.JWT_UNAUTHORIZED,"NOT UNAUTHORIZED TOKEN");
         }
         filterChain.doFilter(request, response);
     }

@@ -1,27 +1,19 @@
-package moska.rebora.User.DTO;
+package moska.rebora.Recruitment.Dto;
 
-import com.querydsl.core.annotations.QueryProjection;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
+import moska.rebora.Comment.Dto.CommentDto;
 import moska.rebora.Enum.RecruitmentStatus;
-import moska.rebora.User.Entity.User;
+import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.ArrayList;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
-public class UserRecruitmentListDto {
-
-    private Long userRecruitmentId;
-    private Boolean userRecruitmentWish;
-    private Boolean userRecruitmentYn;
-    private Integer userRecruitmentPeople;
-
+public class RecruitmentInfoDto {
     private String movieName;
-    private String movieImage;
+    private String movieRecruitmentImage;
     private Long movieId;
 
     private Long theaterId;
@@ -39,21 +31,19 @@ public class UserRecruitmentListDto {
     private RecruitmentStatus recruitmentStatus;
     private String recruiterNickname;
     private String recruiterUserImage;
-    private String recruitmentUserImages;
-    private List<UserImageListDto> userImageList;
     private Integer recruitmentPeople;
+    private String myNickname;
+    private String myImage;
 
-    public void addUserImage(List<UserImageListDto> userImageList) {
-        this.userImageList = userImageList;
+    private Page<CommentDto> pageComment;
+
+    public void addPageComment(Page<CommentDto> pageComment){
+        this.pageComment = pageComment;
     }
 
-    public UserRecruitmentListDto(Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, String movieName, String movieImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, String recruitmentUserImages, Integer recruitmentPeople) {
-        this.userRecruitmentId = userRecruitmentId;
-        this.userRecruitmentWish = userRecruitmentWish;
-        this.userRecruitmentYn = userRecruitmentYn;
-        this.userRecruitmentPeople = userRecruitmentPeople;
+    public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople, String myNickname, String myImage) {
         this.movieName = movieName;
-        this.movieImage = movieImage;
+        this.movieRecruitmentImage = movieRecruitmentImage;
         this.movieId = movieId;
         this.theaterId = theaterId;
         this.theaterStartDatetime = theaterStartDatetime;
@@ -69,7 +59,8 @@ public class UserRecruitmentListDto {
         this.recruitmentStatus = recruitmentStatus;
         this.recruiterNickname = recruiterNickname;
         this.recruiterUserImage = recruiterUserImage;
-        this.recruitmentUserImages = recruitmentUserImages;
         this.recruitmentPeople = recruitmentPeople;
+        this.myNickname = myNickname;
+        this.myImage = myImage;
     }
 }

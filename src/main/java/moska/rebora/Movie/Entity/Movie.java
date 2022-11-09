@@ -45,6 +45,9 @@ public class Movie extends BaseEntity {
     private String movieBannerImage;
 
     @Column
+    private String movieRecruitmentImage;
+
+    @Column
     private String movieDetailLink;
 
     @Column
@@ -66,7 +69,7 @@ public class Movie extends BaseEntity {
     List<BrandMovie> cinemaBrandMovieList = new ArrayList<>();
 
     @Builder
-    public Movie(String movieName, MovieRating movieRating, String movieCategory, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList) {
+    public Movie(String movieName, MovieRating movieRating, String movieCategory, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList,String movieRecruitmentImage) {
         this.movieName = movieName;
         this.movieRating = movieRating;
         this.movieCategory = movieCategory;
@@ -79,5 +82,6 @@ public class Movie extends BaseEntity {
         this.movieStarRating = movieStarRating;
         this.recruitmentList = recruitmentList;
         this.cinemaBrandMovieList = cinemaBrandMovieList;
+        this.movieRecruitmentImage = movieRecruitmentImage;
     }
 }

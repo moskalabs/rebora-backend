@@ -4,7 +4,9 @@ import moska.rebora.Main.Repository.RecruitmentRepositoryMain;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface RecruitmentRepository extends JpaRepository<Recruitment, Long>, RecruitmentRepositoryMain {
+public interface RecruitmentRepository extends JpaRepository<Recruitment, Long>, RecruitmentRepositoryMain ,RecruitmentCustom{
 
     Recruitment getRecruitmentById(Long id);
+
+
 }

@@ -12,4 +12,6 @@ public class UserSearchCondition {
     private String searchWord;
     private String orderByMovie;
     private String category;
+    private String theaterRegion;
+    private Long movieId;
 }

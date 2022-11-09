@@ -10,6 +10,7 @@ import moska.rebora.User.DTO.UserRecruitmentListDto;
 
 import static moska.rebora.User.Entity.QUserRecruitment.userRecruitment;
 
+import moska.rebora.User.Entity.QUser;
 import moska.rebora.User.Entity.QUserRecruitment;
 import org.springframework.data.repository.query.Param;
 
@@ -33,6 +34,8 @@ public class RecruitmentRepositoryMainImpl implements RecruitmentRepositoryMain 
 
     @Override
     public List<UserRecruitmentListDto> getRecruitmentMainList(@Param("userEmail") String userEmail) {
+
+        QUser recruiterUser = new QUser("recruiterUser");
 
         List<UserRecruitmentListDto> content = queryFactory.select(
                         Projections.fields(
@@ -58,9 +61,12 @@ public class RecruitmentRepositoryMainImpl implements RecruitmentRepositoryMain 
                                 recruitment.recruitmentStatus,
                                 recruitment.createdBy.as("recruitmentUsername"),
                                 recruitment.recruitmentPeople,
-                                ExpressionUtils.as(select(user.userImage.as("recruitmentUserImage"))
+                                ExpressionUtils.as(select(user.userImage.as("recruiterUserImage"))
                                         .from(user)
-                                        .where(user.userEmail.eq(recruitment.createdBy)), "recruitmentUserImage"),
+                                        .where(user.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
+                                ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))
+                                        .from(recruiterUser)
+                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname"),
                                 recruitment.recruitmentUserImages
                         ))
                 .from(recruitment)

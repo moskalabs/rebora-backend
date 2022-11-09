@@ -30,6 +30,13 @@ public class ControllerAdvice{
         return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), e.getMessage());
     }
 
+    //Jwt 에러
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ResponseEntity<Object> HandlerIllegalArgumentException(IllegalArgumentException e) {
+
+        return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.INTER_SERVER_ERROR.getStatus(), "오류가 발생했습니다. 다시 시도해주세요");
+    }
+
     @ExceptionHandler(CredentialsExpiredException.class)
     protected ResponseEntity<Object> HandlerCertificateExpiredException(CredentialsExpiredException e){
         return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), e.getMessage());

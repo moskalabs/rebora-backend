@@ -3,6 +3,7 @@ package moska.rebora.User.Entity;
 import lombok.*;
 import moska.rebora.Common.BaseTimeEntity;
 import moska.rebora.Enum.UserGrade;
+import org.hibernate.annotations.Comment;
 
 import javax.persistence.*;
 
@@ -18,38 +19,49 @@ public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Comment("유저 아이디")
     @Column(name = "user_id", nullable = false)
     private Long id;
 
     @Column(unique = true)
+    @Comment("유저 이메일")
     private String userEmail;
 
     @Column
+    @Comment("패스워드")
     private String password;
 
     @Column(length = 50, nullable = false)
+    @Comment("유저 이름")
     private String userName;
 
     @Column(length = 50, nullable = false, unique = true)
+    @Comment("유저 닉네임")
     private String userNickname;
 
     @Column(length = 100)
+    @Comment("유저 푸쉬 키")
     private String userPushKey;
 
     @Column(nullable = false)
+    @Comment("유저 푸쉬 여부")
     private Boolean userPushYn;
 
     @Column(nullable = false)
+    @Comment("유저 사용 여부")
     private Boolean userUseYn;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
+    @Comment("유저 등급")
     private UserGrade userGrade;
 
     @Column
+    @Comment("유저 이미지")
     private String userImage;
 
     @Column
+    @Comment("유저 빌링 키")
     private String userBillingKey;
 
     @Column(length = 10)

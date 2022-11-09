@@ -96,9 +96,12 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                                 recruitment.recruitmentStatus,
                                 recruitment.createdBy.as("recruitmentUsername"),
                                 recruitment.recruitmentPeople,
-                                ExpressionUtils.as(select(recruiterUser.userImage.as("recruitmentUserImage"))
+                                ExpressionUtils.as(select(recruiterUser.userImage.as("recruiterUserImage"))
                                         .from(recruiterUser)
-                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruitmentUserImage"),
+                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
+                                ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))
+                                        .from(recruiterUser)
+                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname"),
                                 recruitment.recruitmentUserImages
                         ))
                 .from(userRecruitment)

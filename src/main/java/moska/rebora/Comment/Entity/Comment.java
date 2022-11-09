@@ -23,6 +23,9 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private String commentContent;
 
+    @Column
+    private Boolean commentUseYn;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
@@ -36,5 +39,6 @@ public class Comment extends BaseEntity {
         this.commentContent = commentContent;
         this.user = user;
         this.recruitment = recruitment;
+        this.commentUseYn = true;
     }
 }
