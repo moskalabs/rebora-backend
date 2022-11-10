@@ -45,6 +45,10 @@ public class UserRecruitment extends BaseEntity {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
+    public void changeWish(Boolean userRecruitmentWish) {
+        this.userRecruitmentWish = userRecruitmentWish;
+    }
+
     @Builder
     public UserRecruitment(Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, User user, Recruitment recruitment, Payment payment) {
         this.userRecruitmentWish = userRecruitmentWish;

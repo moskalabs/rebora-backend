@@ -3,9 +3,11 @@ package moska.rebora.Common;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class BaseInfoResponse<T> extends BaseResponse{
+public class BaseListResponse<T> extends BaseResponse{
 
-    private T content;
+    private List<T> list;
 }

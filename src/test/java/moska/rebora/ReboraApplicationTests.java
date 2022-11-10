@@ -5,6 +5,10 @@ import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Entity.MainBanner;
 import moska.rebora.Banner.Repository.BannerRepository;
 import moska.rebora.Banner.Repository.MainBannerRepository;
+import moska.rebora.Cinema.Entity.Brand;
+import moska.rebora.Cinema.Entity.BrandMovie;
+import moska.rebora.Cinema.Repository.BrandMovieRepository;
+import moska.rebora.Cinema.Repository.BrandRepository;
 import moska.rebora.Enum.MovieRating;
 import moska.rebora.Enum.PolicySubject;
 import moska.rebora.Enum.RecruitmentStatus;
@@ -66,6 +70,12 @@ class ReboraApplicationTests {
 
     @Autowired
     MainBannerRepository mainBannerRepository;
+
+    @Autowired
+    BrandRepository brandRepository;
+
+    @Autowired
+    BrandMovieRepository brandMovieRepository;
 
     @Test
     @Transactional
@@ -230,6 +240,29 @@ class ReboraApplicationTests {
 
             mainBannerRepository.save(mainBanner);
         }
+    }
+
+    @Test
+    public void createBrand(){
+        Brand brand = Brand
+                .builder()
+                .brandName("롯데시네마")
+                .build();
+
+        brandRepository.save(brand);
+    }
+
+    @Test
+    public void createBrandMovie(){
+        Movie movie = movieRepository.getMovieById(1L);
+        Brand brand = brandRepository.getReferenceById(1L);
+        BrandMovie brandMovie = BrandMovie
+                .builder()
+                .movie(movie)
+                .brand(brand)
+                .build();
+
+        brandMovieRepository.save(brandMovie);
     }
 
 }

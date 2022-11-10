@@ -48,6 +48,8 @@ public class SecurityConfig {
                 .antMatchers("/api/movie/**").authenticated()
                 .antMatchers("/api/recruitment/**").authenticated()
                 .antMatchers("/api/comment/**").authenticated()
+                .antMatchers("/api/theater/**").authenticated()
+                .antMatchers("/api/wish/**").authenticated()
                 .antMatchers("/api/main").authenticated()
                 .anyRequest().permitAll().and()
                 .addFilterBefore(new JwtFilter(jwtAuthTokenProvider), UsernamePasswordAuthenticationFilter.class)

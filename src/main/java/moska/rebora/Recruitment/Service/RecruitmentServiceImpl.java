@@ -7,6 +7,7 @@ import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
+import moska.rebora.User.Repository.UserRecruitmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
@@ -20,6 +21,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     @Autowired
     CommentRepository commentRepository;
+
+    @Autowired
+    UserRecruitmentRepository userRecruitmentRepository;
 
     @Override
     public BasePageResponse<UserRecruitmentListDto> getList(Pageable pageable, String userEmail, UserSearchCondition userSearchCondition) {
@@ -36,14 +40,20 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             @Param("recruitmentId") Long recruitmentId,
             @Param("userEmail") String userEmail,
             @Param("commentPageable") Pageable commentPageable
-            ) {
+    ) {
 
         BaseInfoResponse<RecruitmentInfoDto> baseInfoResponse = new BaseInfoResponse<>();
         baseInfoResponse.setResult(true);
         RecruitmentInfoDto recruitmentInfoDto = recruitmentRepository.getRecruitmentInfo(recruitmentId, userEmail);
         recruitmentInfoDto.addPageComment(commentRepository.getCommentPage(commentPageable, recruitmentId));
+        recruitmentInfoDto.addUserImageList(userRecruitmentRepository.getUserImageListByRecruitment(userEmail, recruitmentId));
         baseInfoResponse.setContent(recruitmentInfoDto);
 
         return baseInfoResponse;
+    }
+
+    @Override
+    public void createRecruitment(Long movieId, Long theaterId, String userEmail, String recruitmentIntroduce, Integer userRecruitmentPeople) {
+
     }
 }

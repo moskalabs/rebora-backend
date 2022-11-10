@@ -21,4 +21,7 @@ public interface UserRecruitmentCustom {
 
     Page<UserRecruitmentListDto> getUserRecruitmentList(@Param("userEmail") @Valid String userEmail,
                                                         Pageable pageable, UserSearchCondition userSearchCondition);
+
+    List<UserImageListDto> getUserImageListByRecruitment(@Param("userEmail") @Valid String userEmail,
+                                                         @Param("recruitmentId") Long recruitmentId);
 }

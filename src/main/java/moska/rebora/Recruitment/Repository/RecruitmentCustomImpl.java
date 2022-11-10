@@ -161,15 +161,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                                         .where(
                                                 myUser.userEmail.eq(userEmail),
                                                 recruitment.id.eq(recruitmentId))
-                                , "myNickname"),
-                        ExpressionUtils.as(select(myUser.userImage.as("myImage"))
-                                        .from(myUserRecruitment)
-                                        .leftJoin(myUserRecruitment.user, myUser)
-                                        .leftJoin(myUserRecruitment.recruitment, recruitment)
-                                        .where(
-                                                myUser.userEmail.eq(userEmail),
-                                                recruitment.id.eq(recruitmentId))
-                                , "myImage")
+                                , "myNickname")
                 ))
                 .from(recruitment)
                 .leftJoin(recruitment.theater, theater)

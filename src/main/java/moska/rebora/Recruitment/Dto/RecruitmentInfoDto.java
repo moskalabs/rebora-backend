@@ -4,10 +4,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import moska.rebora.Comment.Dto.CommentDto;
 import moska.rebora.Enum.RecruitmentStatus;
+import moska.rebora.User.DTO.UserImageListDto;
 import org.springframework.data.domain.Page;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -36,10 +38,12 @@ public class RecruitmentInfoDto {
     private String myImage;
 
     private Page<CommentDto> pageComment;
+    private List<UserImageListDto> userImageList;
 
     public void addPageComment(Page<CommentDto> pageComment){
         this.pageComment = pageComment;
     }
+    public void addUserImageList(List<UserImageListDto> userImageList){this.userImageList = userImageList; }
 
     public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople, String myNickname, String myImage) {
         this.movieName = movieName;

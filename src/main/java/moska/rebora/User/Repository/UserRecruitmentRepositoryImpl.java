@@ -6,11 +6,15 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Recruitment.Entity.QRecruitment;
+import moska.rebora.User.DTO.QUserImageListDto;
 import moska.rebora.User.DTO.UserImageListDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -142,6 +146,33 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
         return PageableExecutionUtils.getPage(content, pageable, total::fetchFirst);
     }
 
+    /**
+     * 모집별 이미지 가져오기
+     *
+     * @param userEmail 유저 이메일
+     * @param recruitmentId 모집 아이디
+     * @return List<UserImageListDto>
+     */
+    @Override
+    public List<UserImageListDto> getUserImageListByRecruitment(String userEmail, Long recruitmentId) {
+        return queryFactory.select(new QUserImageListDto(
+                        user.userImage,
+                        user.userNickname
+                ))
+                .from(userRecruitment)
+                .join(userRecruitment.recruitment, recruitment)
+                .join(userRecruitment.user, user)
+                .where(recruitment.id.eq(recruitmentId))
+                .orderBy(userEmailOrderBy(userEmail))
+                .fetch();
+    }
+
+    /**
+     * 유저 이미지 변환
+     *
+     * @param recruitmentUserImages 유저 섬네일 이미지
+     * @return List<UserImageListDto>
+     */
     public List<UserImageListDto> getUserImageList(String recruitmentUserImages) {
         List<String> splitList = List.of(recruitmentUserImages.split("\\|"));
         if (splitList.isEmpty()) {
@@ -150,6 +181,11 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
             List<UserImageListDto> userImageListDtoList = splitList.stream().map(UserImageListDto::new).collect(Collectors.toList());
             return userImageListDtoList;
         }
+    }
+
+    private OrderSpecifier<Integer> userEmailOrderBy(String userEmail) {
+        NumberExpression<Integer> cases = new CaseBuilder().when(user.userEmail.eq(userEmail)).then(1).otherwise(2);
+        return new OrderSpecifier<>(Order.ASC, cases);
     }
 
     private BooleanExpression userEmailEq(String userEmail) {

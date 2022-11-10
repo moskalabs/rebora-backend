@@ -1,5 +1,5 @@
 package moska.rebora.Enum;
 
 public enum RecruitmentStatus {
-    CANCEL, RECRUITING, CONFIRMATION, COMPLETED
+    CANCEL, WAIT, RECRUITING, CONFIRMATION, COMPLETED
 }

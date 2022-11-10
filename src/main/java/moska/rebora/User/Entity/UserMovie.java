@@ -30,6 +30,10 @@ public class UserMovie extends BaseTimeEntity {
     @JoinColumn(name = "movie_id")
     private Movie movie;
 
+    public void changeWish(Boolean userMovieWish){
+        this.userMovieWish = userMovieWish;
+    }
+
     @Builder
     public UserMovie(Boolean userMovieWish, User user, Movie movie) {
         this.userMovieWish = userMovieWish;

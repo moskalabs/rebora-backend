@@ -14,10 +14,11 @@ public interface RecruitmentService {
                                                             String userEmail,
                                                             UserSearchCondition userSearchCondition);
 
-    public BaseInfoResponse<RecruitmentInfoDto> getRecruitmentInfo(
+    BaseInfoResponse<RecruitmentInfoDto> getRecruitmentInfo(
             @Param("recruitmentId") Long recruitmentId,
             @Param("userEmail") String userEmail,
             @Param("commentPageable") Pageable commentPageable
     );
 
+    void createRecruitment(Long movieId, Long theaterId, String userEmail, String recruitmentIntroduce, Integer userRecruitmentPeople);
 }

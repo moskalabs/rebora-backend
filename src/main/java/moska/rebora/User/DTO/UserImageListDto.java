@@ -13,8 +13,14 @@ import java.util.List;
 public class UserImageListDto {
 
     private String userImage;
+    private String userNickname;
 
     @QueryProjection
+    public UserImageListDto(String userImage, String userNickname) {
+        this.userImage = userImage;
+        this.userNickname = userNickname;
+    }
+
     public UserImageListDto(String userImage) {
         this.userImage = userImage;
     }

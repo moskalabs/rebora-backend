@@ -1,6 +1,7 @@
 package moska.rebora.Cinema.Entity;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import moska.rebora.Common.BaseEntity;
@@ -21,12 +22,13 @@ public class Brand extends BaseEntity {
     private Long id;
 
     @Column(length = 50, nullable = false)
-    private String brand_name;
+    private String brandName;
 
     @OneToMany(mappedBy = "brand")
     List<Theater> theaterList = new ArrayList<>();
 
-    public Brand(String brand_name) {
-        this.brand_name = brand_name;
+    @Builder
+    public Brand(String brandName) {
+        this.brandName = brandName;
     }
 }

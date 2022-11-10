@@ -113,4 +113,6 @@ public class RecruitmentController {
         Pageable commentPageable = PageRequest.of(0, 10);
         return recruitmentService.getRecruitmentInfo(recruitmentId, userEmail, commentPageable);
     }
+
+
 }
