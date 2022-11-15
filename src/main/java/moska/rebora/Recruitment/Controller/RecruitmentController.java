@@ -3,15 +3,16 @@ package moska.rebora.Recruitment.Controller;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
+import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Service.RecruitmentService;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -114,5 +115,71 @@ public class RecruitmentController {
         return recruitmentService.getRecruitmentInfo(recruitmentId, userEmail, commentPageable);
     }
 
+    /**
+     * 모집 개시
+     *
+     * @param movieId               영화 PK
+     * @param theaterId             상영관 PK
+     * @param recruitmentIntroduce  모집 소개글
+     * @param userRecruitmentPeople 모집 신청 인원
+     * @param bannerYn              배너 유무
+     * @param bannerSubText         배너 서브 텍스트
+     * @param bannerMainText        배너 메인 텍스트
+     * @return JSONObject
+     */
+    @PostMapping("/createRecruitment")
+    public JSONObject createRecruitment(
+            @RequestParam Long movieId,
+            @RequestParam Long theaterId,
+            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
+            @RequestParam("userRecruitmentPeople") Integer userRecruitmentPeople,
+            @RequestParam("bannerYn") Boolean bannerYn,
+            @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
+            @RequestParam(value = "bannerMainText", required = false) String bannerMainText
+    ) {
+        JSONObject jsonObject = new JSONObject();
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
+        jsonObject.put("result", true);
+        jsonObject.put("recruitmentId", recruitmentService.createRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, userRecruitmentPeople, bannerYn, bannerSubText, bannerMainText));
+
+        return jsonObject;
+    }
+
+    /**
+     * 모집 신청
+     *
+     * @param recruitmentId         모집 PK
+     * @param userRecruitmentPeople 모집 신청 인원
+     * @return BaseResponse
+     */
+    @PostMapping("/applyRecruitment/{recruitmentId}")
+    public BaseResponse applyRecruitment(
+            @PathVariable Long recruitmentId,
+            @RequestParam("userRecruitmentPeople") Integer userRecruitmentPeople
+    ) {
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+
+        recruitmentService.applyRecruitment(recruitmentId, userEmail, userRecruitmentPeople);
+
+        return baseResponse;
+    }
+
+    /**
+     * 모집 신청 취소
+     *
+     * @param recruitmentId 모집 PK
+     * @return BaseResponse
+     */
+    @PutMapping("/cancelRecruitment/{recruitmentId}")
+    public BaseResponse cancelRecruitment(@PathVariable Long recruitmentId) {
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        recruitmentService.cancelRecruitment(recruitmentId, userEmail);
+        return baseResponse;
+    }
 }

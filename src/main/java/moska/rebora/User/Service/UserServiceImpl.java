@@ -14,11 +14,9 @@ import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserEmailAuth;
 import moska.rebora.User.Repository.UserEmailAuthRepository;
 import moska.rebora.User.Repository.UserRepository;
-import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,11 +26,9 @@ import javax.validation.Valid;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -196,7 +192,7 @@ public class UserServiceImpl implements UserService {
      * @return UserLoginDto
      */
     @Override
-    public UserLoginDto changePassword(String userEmail, String password, @Param("authKey") String authKey) {
+    public BaseResponse changePassword(String userEmail, String password, @Param("authKey") String authKey) {
 
         UserEmailAuth userEmailAuth = userEmailAuthService.checkUserEmailAuth(userEmail, authKey, EmailAuthKind.PASSWORD);
 
@@ -208,8 +204,9 @@ public class UserServiceImpl implements UserService {
         userEmailAuth.expireAuth();
         userEmailAuthRepository.save(userEmailAuth);
 
-        String token = createToken(userEmail, password);
-        return UserLoginDto.builder().token(token).result(true).build();
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+        return  baseResponse;
     }
 
     /**

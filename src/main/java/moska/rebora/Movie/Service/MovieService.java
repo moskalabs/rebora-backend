@@ -3,7 +3,6 @@ package moska.rebora.Movie.Service;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.User.DTO.UserSearchCondition;
-import net.minidev.json.JSONObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 

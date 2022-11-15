@@ -1,7 +1,5 @@
 package moska.rebora.User.Controller;
 
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.User.DTO.MypageUpdateDto;
@@ -81,6 +79,14 @@ public class MypageController {
     public BaseResponse updatePushYn(@PathVariable Long userId, @RequestParam("userPushYn") Boolean userPushYn) {
         BaseResponse baseResponse = new BaseResponse();
         mypageService.updatePushYn(userId, userPushYn, SecurityContextHolder.getContext().getAuthentication().getName());
+        baseResponse.setResult(true);
+        return baseResponse;
+    }
+
+    @PutMapping("/updatePushNightYn/{userId}")
+    public BaseResponse updatePushNightYn(@PathVariable Long userId, @RequestParam("userPushYn") Boolean userPushNightYn){
+        BaseResponse baseResponse = new BaseResponse();
+        mypageService.updatePushNightYn(userId, userPushNightYn, SecurityContextHolder.getContext().getAuthentication().getName());
         baseResponse.setResult(true);
         return baseResponse;
     }

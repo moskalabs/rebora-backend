@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
-import java.security.cert.CertificateExpiredException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 @Slf4j

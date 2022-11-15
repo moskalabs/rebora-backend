@@ -9,20 +9,19 @@ import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.User.Entity.UserRecruitment;
-import org.hibernate.annotations.Fetch;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(indexes = {
         @Index(name = "i_reg_date", columnList = "reg_date")
-        ,@Index(name = "recruitment_status", columnList = "recruitmentStatus")
-        ,@Index(name = "recruitmentExposeYn", columnList = "recruitmentExposeYn")
+        , @Index(name = "recruitmentGetList", columnList = "recruitmentStatus, recruitmentExposeYn, recruitmentEndDate")
 })
 public class Recruitment extends BaseEntity {
 
@@ -41,9 +40,6 @@ public class Recruitment extends BaseEntity {
     @Column(nullable = false)
     private RecruitmentStatus recruitmentStatus;
 
-    @Column(length = 1200)
-    private String recruitmentUserImages;
-
     @Column
     private Integer recruitmentPeople;
 
@@ -53,7 +49,7 @@ public class Recruitment extends BaseEntity {
     @OneToMany(mappedBy = "recruitment")
     List<UserRecruitment> userRecruitmentList = new ArrayList<UserRecruitment>();
 
-    @OneToOne(mappedBy = "recruitment", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "recruitment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Theater theater;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -64,18 +60,25 @@ public class Recruitment extends BaseEntity {
         this.movie = movie;
     }
 
+    public void plusRecruitmentPeople(Integer recruitmentPeople) {
+        this.recruitmentPeople += recruitmentPeople;
+    }
+
+    public void minusRecruitmentPeople(Integer recruitmentPeople) {
+        this.recruitmentPeople -= recruitmentPeople;
+    }
+
     public void updateRecruitmentPeople(Integer recruitmentPeople) {
         this.recruitmentPeople = recruitmentPeople;
     }
 
     @Builder
-    public Recruitment(String recruitmentIntroduce, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentExposeYn, Theater theater, Movie movie, String recruitmentUserImages, Integer recruitmentPeople) {
+    public Recruitment(String recruitmentIntroduce, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentExposeYn, Theater theater, Movie movie, Integer recruitmentPeople) {
 
         this.recruitmentIntroduce = recruitmentIntroduce;
         this.recruitmentEndDate = recruitmentEndDate;
         this.recruitmentStatus = recruitmentStatus;
         this.recruitmentExposeYn = recruitmentExposeYn;
-        this.recruitmentUserImages = recruitmentUserImages;
         this.recruitmentPeople = recruitmentPeople;
         this.theater = theater;
         this.movie = movie;

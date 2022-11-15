@@ -5,8 +5,6 @@ import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.User.Entity.User;
 
-import javax.persistence.*;
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class UserDto extends BaseResponse {

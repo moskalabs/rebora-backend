@@ -2,9 +2,11 @@ package moska.rebora.Theater.Service;
 
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Theater.Dto.TheaterMovieDto;
+import moska.rebora.Theater.Dto.TheaterPageDto;
 import moska.rebora.Theater.Repository.TheaterRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,7 +31,6 @@ public class TheaterServiceImpl implements TheaterService {
     @Override
     public List<String> getAvailableDate(String theaterRegion, String selectMonth, Long movieId) {
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
         log.info("selectMonth={}", selectMonth);
 
         LocalDate parseSelectMonth = LocalDate.parse(selectMonth);
@@ -41,5 +42,16 @@ public class TheaterServiceImpl implements TheaterService {
         log.info("endMonthDate={}", endMonthDate);
 
         return theaterRepository.getAvailableDate(theaterRegion, startMonthDate, endMonthDate, movieId);
+    }
+
+    @Override
+    public Page<TheaterPageDto> getPageTheater(String theaterRegion,
+                                               String selectDate,
+                                               Long movieId,
+                                               Pageable pageable) {
+
+
+
+        return theaterRepository.getPageTheater(theaterRegion, LocalDate.parse(selectDate), movieId, pageable);
     }
 }

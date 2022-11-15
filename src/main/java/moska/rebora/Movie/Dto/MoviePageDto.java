@@ -1,10 +1,8 @@
 package moska.rebora.Movie.Dto;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import moska.rebora.Common.BaseResponse;
+import moska.rebora.Common.Entity.Category;
 import moska.rebora.Enum.MovieRating;
-import moska.rebora.User.DTO.UserMovieDto;
 
 import java.util.List;
 
@@ -13,7 +11,6 @@ public class MoviePageDto{
     private Long id;
     private String movieName;
     private MovieRating movieRating;
-    private String movieCategory;
     private String movieDirector;
     private String movieImage;
     private String movieBannerImage;
@@ -24,4 +21,5 @@ public class MoviePageDto{
     private String convertStartRation;
     private Boolean userMovieWish;
     private Long userMovieId;
+    private List<Category> categoryList;
 }

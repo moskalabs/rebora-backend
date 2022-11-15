@@ -14,4 +14,6 @@ public class UserSearchCondition {
     private String category;
     private String theaterRegion;
     private Long movieId;
+    private Boolean userRecruitmentWish;
+    private Boolean userMovieWish;
 }

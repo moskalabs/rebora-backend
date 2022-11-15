@@ -4,7 +4,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import moska.rebora.Cinema.Entity.Brand;
 import moska.rebora.Cinema.Entity.BrandMovie;
 import moska.rebora.Common.BaseEntity;
 import moska.rebora.Enum.MovieRating;
@@ -18,6 +17,8 @@ import java.util.List;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(indexes = {
+})
 public class Movie extends BaseEntity {
 
     @Id
@@ -31,9 +32,6 @@ public class Movie extends BaseEntity {
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private MovieRating movieRating;
-
-    @Column(length = 50)
-    private String movieCategory;
 
     @Column(length = 20)
     private String movieDirector;
@@ -66,13 +64,15 @@ public class Movie extends BaseEntity {
     List<UserMovie> userMovieList = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
+    List<MovieCategory> movieCategoryList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "movie")
     List<BrandMovie> cinemaBrandMovieList = new ArrayList<>();
 
     @Builder
-    public Movie(String movieName, MovieRating movieRating, String movieCategory, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList,String movieRecruitmentImage) {
+    public Movie(String movieName, MovieRating movieRating, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList,String movieRecruitmentImage) {
         this.movieName = movieName;
         this.movieRating = movieRating;
-        this.movieCategory = movieCategory;
         this.movieDirector = movieDirector;
         this.movieImage = movieImage;
         this.movieBannerImage = movieBannerImage;

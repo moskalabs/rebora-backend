@@ -8,6 +8,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.List;
+
 public interface UserRepository extends JpaRepository<User, Long>, UserCustom {
 
     User getUserById(Long id);

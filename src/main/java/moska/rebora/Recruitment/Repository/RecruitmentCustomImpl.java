@@ -78,8 +78,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                                         .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
                                 ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))
                                         .from(recruiterUser)
-                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname"),
-                                recruitment.recruitmentUserImages
+                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname")
                         ))
                 .from(recruitment)
                 .leftJoin(recruitment.movie, movie)
@@ -99,12 +98,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        content.forEach(m -> {
-                    if (m.getRecruitmentUserImages() != null) {
-                        m.addUserImage(getUserImageList(m.getRecruitmentUserImages()));
-                    }
-                }
-        );
+        content.forEach(m -> m.addUserImage(getUserImageList(m.getRecruitmentId())));
 
         JPAQuery<Long> total = queryFactory.select(recruitment.id.count())
                 .from(recruitment)
@@ -203,13 +197,18 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
         return ORDERS;
     }
 
-    public List<UserImageListDto> getUserImageList(String recruitmentUserImages) {
-        List<String> splitList = List.of(recruitmentUserImages.split("\\|"));
-        if (splitList.isEmpty()) {
-            return null;
-        } else {
-            List<UserImageListDto> userImageListDtoList = splitList.stream().map(UserImageListDto::new).collect(Collectors.toList());
-            return userImageListDtoList;
-        }
+    public List<UserImageListDto> getUserImageList(Long recruitmentId) {
+
+        return queryFactory.select(Projections.fields(
+                        UserImageListDto.class,
+                        user.userImage,
+                        user.userNickname
+                )).from(userRecruitment)
+                .join(userRecruitment.user, user)
+                .join(userRecruitment.recruitment, recruitment)
+                .where(recruitment.id.eq(recruitmentId))
+                .offset(0)
+                .limit(5)
+                .fetch();
     }
 }

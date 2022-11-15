@@ -1,12 +1,10 @@
 package moska.rebora.Comment.Conroller;
 
 import moska.rebora.Comment.Dto.CommentDto;
-import moska.rebora.Comment.Repository.CommentRepository;
 import moska.rebora.Comment.Service.CommentService;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.context.SecurityContextHolder;

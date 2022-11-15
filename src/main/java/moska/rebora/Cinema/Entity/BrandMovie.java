@@ -6,11 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import moska.rebora.Common.BaseTimeEntity;
 import moska.rebora.Movie.Entity.Movie;
-import moska.rebora.Theater.Entity.Theater;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter

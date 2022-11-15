@@ -39,7 +39,6 @@ public class UserRecruitmentListDto {
     private RecruitmentStatus recruitmentStatus;
     private String recruiterNickname;
     private String recruiterUserImage;
-    private String recruitmentUserImages;
     private List<UserImageListDto> userImageList;
     private Integer recruitmentPeople;
 
@@ -47,7 +46,7 @@ public class UserRecruitmentListDto {
         this.userImageList = userImageList;
     }
 
-    public UserRecruitmentListDto(Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, String movieName, String movieImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, String recruitmentUserImages, Integer recruitmentPeople) {
+    public UserRecruitmentListDto(Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, String movieName, String movieImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople) {
         this.userRecruitmentId = userRecruitmentId;
         this.userRecruitmentWish = userRecruitmentWish;
         this.userRecruitmentYn = userRecruitmentYn;
@@ -69,7 +68,6 @@ public class UserRecruitmentListDto {
         this.recruitmentStatus = recruitmentStatus;
         this.recruiterNickname = recruiterNickname;
         this.recruiterUserImage = recruiterUserImage;
-        this.recruitmentUserImages = recruitmentUserImages;
         this.recruitmentPeople = recruitmentPeople;
     }
 }

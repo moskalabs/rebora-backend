@@ -1,18 +1,12 @@
 package moska.rebora.User.Service;
 
 import moska.rebora.Common.BaseResponse;
-import moska.rebora.Config.PasswordAuthAuthenticationToken;
 import moska.rebora.Enum.EmailAuthKind;
-import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
-import net.minidev.json.JSONObject;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.validation.Valid;
-import java.security.cert.CertificateExpiredException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 public interface UserService {
@@ -36,7 +30,7 @@ public interface UserService {
 
     BaseResponse checkRedundancyNickname(@Param("userNickname") String userNickname);
 
-    UserLoginDto changePassword(@Param("userEmail") String userEmail,
+    BaseResponse changePassword(@Param("userEmail") String userEmail,
                                 @Param("password") String password,
                                 @Param("authKey") String authKey
     );

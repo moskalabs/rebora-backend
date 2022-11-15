@@ -7,21 +7,17 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
-import moska.rebora.Enum.RecruitmentStatus;
-import moska.rebora.Recruitment.Entity.QRecruitment;
 import moska.rebora.User.DTO.QUserImageListDto;
 import moska.rebora.User.DTO.UserImageListDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.QUser;
-import moska.rebora.User.Entity.QUserRecruitment;
+import moska.rebora.User.Entity.User;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -29,9 +25,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import javax.persistence.EntityManager;
 import javax.validation.Valid;
 
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.querydsl.jpa.JPAExpressions.select;
 import static moska.rebora.Movie.Entity.QMovie.movie;
@@ -105,8 +99,7 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                                         .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
                                 ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))
                                         .from(recruiterUser)
-                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname"),
-                                recruitment.recruitmentUserImages
+                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname")
                         ))
                 .from(userRecruitment)
                 .leftJoin(userRecruitment.user, user)
@@ -116,7 +109,8 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .where(user.userUseYn.eq(true),
                         recruitment.recruitmentExposeYn.eq(true),
                         userEmailEq(userEmail),
-                        createByMe(userEmail, userSearchCondition.isCreateByMe())
+                        createByMe(userEmail, userSearchCondition.isCreateByMe()),
+                        isWishes(userSearchCondition.getUserRecruitmentWish())
                 )
                 .orderBy(
                         recruitment.regDate.desc()
@@ -125,12 +119,7 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        content.forEach(m -> {
-                    if (m.getRecruitmentUserImages() != null) {
-                        m.addUserImage(getUserImageList(m.getRecruitmentUserImages()));
-                    }
-                }
-        );
+        content.forEach(m -> m.addUserImage(getUserImageList(m.getRecruitmentId())));
 
         JPAQuery<Long> total = queryFactory.select(userRecruitment.id.count())
                 .from(userRecruitment)
@@ -139,7 +128,8 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .where(user.userUseYn.eq(true),
                         recruitment.recruitmentExposeYn.eq(true),
                         userEmailEq(userEmail),
-                        createByMe(userEmail, userSearchCondition.isCreateByMe())
+                        createByMe(userEmail, userSearchCondition.isCreateByMe()),
+                        isWishes(userSearchCondition.getUserRecruitmentWish())
                 );
 
 
@@ -149,7 +139,7 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
     /**
      * 모집별 이미지 가져오기
      *
-     * @param userEmail 유저 이메일
+     * @param userEmail     유저 이메일
      * @param recruitmentId 모집 아이디
      * @return List<UserImageListDto>
      */
@@ -170,29 +160,41 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
     /**
      * 유저 이미지 변환
      *
-     * @param recruitmentUserImages 유저 섬네일 이미지
+     * @param recruitmentId 유저 썸네일
      * @return List<UserImageListDto>
      */
-    public List<UserImageListDto> getUserImageList(String recruitmentUserImages) {
-        List<String> splitList = List.of(recruitmentUserImages.split("\\|"));
-        if (splitList.isEmpty()) {
-            return null;
-        } else {
-            List<UserImageListDto> userImageListDtoList = splitList.stream().map(UserImageListDto::new).collect(Collectors.toList());
-            return userImageListDtoList;
-        }
+    public List<UserImageListDto> getUserImageList(Long recruitmentId) {
+
+        return queryFactory.select(Projections.fields(
+                        UserImageListDto.class,
+                        user.userImage,
+                        user.userNickname
+                )).from(userRecruitment)
+                .join(userRecruitment.user, user)
+                .join(userRecruitment.recruitment, recruitment)
+                .where(recruitment.id.eq(recruitmentId))
+                .offset(0)
+                .limit(5)
+                .fetch();
     }
 
+    //자신의 프로필 먼저
     private OrderSpecifier<Integer> userEmailOrderBy(String userEmail) {
         NumberExpression<Integer> cases = new CaseBuilder().when(user.userEmail.eq(userEmail)).then(1).otherwise(2);
         return new OrderSpecifier<>(Order.ASC, cases);
     }
 
+    //유저 이메일 일치
     private BooleanExpression userEmailEq(String userEmail) {
         return hasText(userEmail) ? user.userEmail.eq(userEmail) : null;
     }
 
+    //내가 모집한 게시물
     private BooleanExpression createByMe(String userEmail, Boolean createByMe) {
         return hasText(userEmail) && createByMe != null && createByMe ? recruitment.createdBy.eq(userEmail) : null;
+    }
+
+    private BooleanExpression isWishes(Boolean userRecruitmentWish) {
+        return userRecruitmentWish != null && userRecruitmentWish ? userRecruitment.userRecruitmentWish.eq(true) : null;
     }
 }

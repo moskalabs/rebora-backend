@@ -1,6 +1,5 @@
 package moska.rebora.User.Service;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
@@ -19,7 +18,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -107,6 +105,7 @@ public class MypageServiceImpl implements MypageService {
     public void updatePushYn(@Param("userId") Long userId,
                              @Param("userPushYn") Boolean userPushYn,
                              @Param("userEmail") String userEmail) {
+
         Optional<User> userOptional = userRepository.findById(userId);
 
         if (userOptional.isEmpty()) {
@@ -116,6 +115,24 @@ public class MypageServiceImpl implements MypageService {
 
         if (user.getUserEmail().equals(userEmail)) {
             user.changePushYn(userPushYn);
+            userRepository.save(user);
+        } else {
+            throw new JwtException("옳바르지 않은 접근입니다.");
+        }
+    }
+
+    @Override
+    public void updatePushNightYn(Long userId, Boolean userPushNightYn, String userEmail) {
+        Optional<User> userOptional = userRepository.findById(userId);
+
+        if (userOptional.isEmpty()) {
+            throw new JwtException("옳바르지 않은 접근입니다.");
+        }
+
+        User user = userOptional.get();
+
+        if (user.getUserEmail().equals(userEmail)) {
+            user.changePushNightYn(userPushNightYn);
             userRepository.save(user);
         } else {
             throw new JwtException("옳바르지 않은 접근입니다.");

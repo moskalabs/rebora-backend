@@ -1,6 +1,5 @@
 package moska.rebora.User.DTO;
 
-import com.querydsl.core.annotations.QueryProjection;
 import lombok.*;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Recruitment.Entity.Recruitment;

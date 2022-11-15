@@ -49,6 +49,15 @@ public class UserRecruitment extends BaseEntity {
         this.userRecruitmentWish = userRecruitmentWish;
     }
 
+    public void cancelUserRecruitment(Boolean userRecruitmentYn){
+        this.userRecruitmentYn = userRecruitmentYn;
+    }
+
+    public void updateUserRecruitment(Boolean userRecruitmentYn,Integer userRecruitmentPeople){
+        this.userRecruitmentYn = userRecruitmentYn;
+        this.userRecruitmentPeople = userRecruitmentPeople;
+    }
+
     @Builder
     public UserRecruitment(Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, User user, Recruitment recruitment, Payment payment) {
         this.userRecruitmentWish = userRecruitmentWish;

@@ -1,30 +1,19 @@
 package moska.rebora.User.Controller;
 
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
-import moska.rebora.Common.ResponseFormat;
-import moska.rebora.Config.JwtAuthToken;
-import moska.rebora.Config.JwtAuthTokenProvider;
-import moska.rebora.Config.PasswordAuthAuthenticationToken;
 import moska.rebora.Enum.EmailAuthKind;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
-import moska.rebora.User.Repository.UserRepository;
 import moska.rebora.User.Service.UserEmailAuthService;
 import moska.rebora.User.Service.UserService;
-import moska.rebora.User.Service.UserServiceImpl;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.repository.query.Param;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.cert.CertificateExpiredException;
 import java.sql.SQLIntegrityConstraintViolationException;
 
 @RestController
@@ -122,7 +111,7 @@ public class UserController {
      * @return UserLoginDto
      */
     @PostMapping("/changePassword")
-    UserLoginDto changePassword(@RequestParam("userEmail") String userEmail,
+    BaseResponse changePassword(@RequestParam("userEmail") String userEmail,
                                 @RequestParam("password") String password,
                                 @RequestParam("authKey") String authKey
     ) {

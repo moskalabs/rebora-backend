@@ -6,6 +6,7 @@ import moska.rebora.Enum.UserGrade;
 import org.hibernate.annotations.Comment;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
@@ -43,9 +44,13 @@ public class User extends BaseTimeEntity {
     @Comment("유저 푸쉬 키")
     private String userPushKey;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "boolean default false")
     @Comment("유저 푸쉬 여부")
     private Boolean userPushYn;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Comment("유저 푸쉬 야간")
+    private Boolean userPushNightYn;
 
     @Column(nullable = false)
     @Comment("유저 사용 여부")
@@ -65,9 +70,11 @@ public class User extends BaseTimeEntity {
     private String userBillingKey;
 
     @Column(length = 10)
+    @Comment("유저 SNS 종류")
     private String userSnsKind;
 
     @Column
+    @Comment("유저 SNS ID")
     private String userSnsId;
 
     public void changePassword(String password) {
@@ -75,29 +82,39 @@ public class User extends BaseTimeEntity {
     }
 
     public void changePushYn(Boolean userPushYn) {
-        this.userPushYn = userPushYn;
+        if (userPushYn) {
+            this.userPushYn = true;
+        } else {
+            this.userPushYn = false;
+            this.userPushNightYn = false;
+        }
     }
 
-    public void changeUserInfo(String userImage, String password, String userNickname){
-        if(!userImage.equals("")){
+    public void changePushNightYn(Boolean userPushNightYn) {
+        this.userPushNightYn = userPushNightYn;
+    }
+
+    public void changeUserInfo(String userImage, String password, String userNickname) {
+        if (!userImage.equals("")) {
             this.userImage = userImage;
         }
-        if(!password.equals("")){
+        if (!password.equals("")) {
             this.password = password;
         }
-        if(!userNickname.equals("")) {
+        if (!userNickname.equals("")) {
             this.userNickname = userNickname;
         }
     }
 
     @Builder
-    public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userSnsKind, String userSnsId) {
+    public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userSnsKind, String userSnsId) {
         this.userEmail = userEmail;
         this.password = password;
         this.userName = userName;
         this.userNickname = userNickname;
         this.userPushKey = userPushKey;
         this.userPushYn = userPushYn;
+        this.userPushNightYn = userPushNightYn;
         this.userUseYn = userUseYn;
         this.userGrade = userGrade;
         this.userImage = userImage;

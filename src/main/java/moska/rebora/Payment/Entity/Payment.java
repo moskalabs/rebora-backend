@@ -22,32 +22,32 @@ public class Payment extends BaseEntity {
     private Long id;
 
     @Column(length = 50, nullable = false)
-    private String payment_key;
+    private String paymentKey;
 
     @Column(nullable = false)
-    private String payment_content;
+    private String paymentContent;
 
     @Column(nullable = false)
-    private Integer payment_amount;
+    private Integer paymentAmount;
 
     @Enumerated(value = EnumType.STRING)
     @Column(length = 20, nullable = false)
-    private PaymentMethod payment_method;
+    private PaymentMethod paymentMethod;
 
     @Enumerated(value = EnumType.STRING)
     @Column(length = 20, nullable = false)
-    private PaymentStatus payment_status;
+    private PaymentStatus paymentStatus;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "payment")
     private UserRecruitment recruitment;
 
     @Builder
-    public Payment(String payment_key, String payment_content, Integer payment_amount, PaymentMethod payment_method, PaymentStatus payment_status, UserRecruitment recruitment) {
-        this.payment_key = payment_key;
-        this.payment_content = payment_content;
-        this.payment_amount = payment_amount;
-        this.payment_method = payment_method;
-        this.payment_status = payment_status;
+    public Payment(String paymentKey, String paymentContent, Integer paymentAmount, PaymentMethod paymentMethod, PaymentStatus paymentStatus, UserRecruitment recruitment) {
+        this.paymentKey = paymentKey;
+        this.paymentContent = paymentContent;
+        this.paymentAmount = paymentAmount;
+        this.paymentMethod = paymentMethod;
+        this.paymentStatus = paymentStatus;
         this.recruitment = recruitment;
     }
 }

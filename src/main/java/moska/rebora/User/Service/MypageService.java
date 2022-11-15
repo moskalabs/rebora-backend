@@ -7,7 +7,6 @@ import net.minidev.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 
@@ -19,7 +18,13 @@ public interface MypageService {
 
     Page<UserRecruitmentListDto> getMyRecruiter(Pageable pageable);
 
-    void updatePushYn(Long userId, Boolean userPushYn, String userEmail);
+    void updatePushYn(@Param("userId") Long userId,
+                      @Param("userPushYn") Boolean userPushYn,
+                      @Param("userEmail") String userEmail);
 
-    public BaseResponse changeMyInfo(Long userId,String userEmail, MypageUpdateDto mypageUpdateDto) throws SQLIntegrityConstraintViolationException;
+    void updatePushNightYn(@Param("userId") Long userId,
+                           @Param("userPushNightYn") Boolean userPushNightYn,
+                           @Param("userEmail") String userEmail);
+
+    BaseResponse changeMyInfo(Long userId, String userEmail, MypageUpdateDto mypageUpdateDto) throws SQLIntegrityConstraintViolationException;
 }

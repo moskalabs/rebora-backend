@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import moska.rebora.Common.BaseTimeEntity;
+import org.hibernate.annotations.Comment;
 
 import javax.persistence.*;
 
@@ -15,6 +16,7 @@ public class MainBanner extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Comment("메인 베너 PK")
     @Column(name = "main_banner_id", nullable = false)
     private Long id;
 

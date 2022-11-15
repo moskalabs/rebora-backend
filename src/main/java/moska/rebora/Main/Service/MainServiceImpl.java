@@ -4,8 +4,6 @@ import moska.rebora.Banner.Dto.BannerDto;
 import moska.rebora.Banner.Repository.BannerRepository;
 import moska.rebora.Banner.Repository.MainBannerRepository;
 import moska.rebora.Enum.RecruitmentStatus;
-import moska.rebora.Movie.Dto.MovieDto;
-import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.User.DTO.UserSearchCondition;

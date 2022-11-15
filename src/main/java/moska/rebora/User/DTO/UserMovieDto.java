@@ -1,10 +1,7 @@
 package moska.rebora.User.DTO;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import moska.rebora.Movie.Dto.MovieDto;
-import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserMovie;
 
 @Getter

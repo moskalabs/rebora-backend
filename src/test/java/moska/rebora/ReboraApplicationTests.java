@@ -9,12 +9,14 @@ import moska.rebora.Cinema.Entity.Brand;
 import moska.rebora.Cinema.Entity.BrandMovie;
 import moska.rebora.Cinema.Repository.BrandMovieRepository;
 import moska.rebora.Cinema.Repository.BrandRepository;
+import moska.rebora.Common.Entity.Category;
+import moska.rebora.Common.Repository.CategoryRepository;
 import moska.rebora.Enum.MovieRating;
 import moska.rebora.Enum.PolicySubject;
-import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Repository.MovieRepository;
+import moska.rebora.Notification.Service.NotificationService;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.Theater.Entity.Theater;
@@ -35,9 +37,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 
 @Slf4j
@@ -76,6 +78,12 @@ class ReboraApplicationTests {
 
     @Autowired
     BrandMovieRepository brandMovieRepository;
+
+    @Autowired
+    CategoryRepository categoryRepository;
+
+    @Autowired
+    NotificationService notificationService;
 
     @Test
     @Transactional
@@ -144,7 +152,6 @@ class ReboraApplicationTests {
         Movie movie = Movie.builder()
                 .movieName("인셉션2")
                 .movieImage("인셉션이미지2")
-                .movieCategory("스릴러")
                 .movieDetailLink("https://www.naver.com")
                 .movieRating(MovieRating.ALL)
                 .movieDirector("미야자키 하야호")
@@ -244,12 +251,7 @@ class ReboraApplicationTests {
 
     @Test
     public void createBrand(){
-        Brand brand = Brand
-                .builder()
-                .brandName("롯데시네마")
-                .build();
-
-        brandRepository.save(brand);
+        log.info("date={}", LocalDateTime.now().minusDays(3).toLocalDate().atTime(LocalTime.MAX));
     }
 
     @Test
@@ -265,4 +267,25 @@ class ReboraApplicationTests {
         brandMovieRepository.save(brandMovie);
     }
 
+    @Test
+    public void createCategory(){
+        Category category = Category
+                .builder()
+                .categoryName("스릴러")
+                .build();
+
+        categoryRepository.save(category);
+    }
+
+    @Test
+    public void notiTest(){
+        log.info("notification={}", notificationService.createNotificationContent(
+                "이웃집 토토로",
+                LocalDateTime.now(),
+                "수",
+                "메가박스",
+                "영등포점",
+                "2관"
+        ));
+    }
 }

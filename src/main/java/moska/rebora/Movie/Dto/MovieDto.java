@@ -31,7 +31,6 @@ public class MovieDto {
         this.id = movie.getId();
         this.movieName = movie.getMovieName();
         this.movieRating = movie.getMovieRating();
-        this.movieCategory = movie.getMovieCategory();
         this.movieDirector = movie.getMovieDirector();
         this.movieImage = movie.getMovieImage();
         this.movieBannerImage = movie.getMovieBannerImage();

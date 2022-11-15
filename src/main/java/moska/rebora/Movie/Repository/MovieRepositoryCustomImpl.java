@@ -5,24 +5,23 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import moska.rebora.Movie.Dto.MovieDto;
+import moska.rebora.Common.Entity.Category;
 import moska.rebora.Movie.Dto.MoviePageDto;
-import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.User.DTO.UserSearchCondition;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.querydsl.QuerydslUtils;
 import org.springframework.data.repository.query.Param;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import static moska.rebora.Common.Entity.QCategory.category;
 import static moska.rebora.Movie.Entity.QMovie.movie;
+import static moska.rebora.Movie.Entity.QMovieCategory.movieCategory;
 import static moska.rebora.User.Entity.QUserMovie.userMovie;
-import static org.apache.logging.log4j.ThreadContext.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
 public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
@@ -46,7 +45,6 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                         movie.id,
                         movie.movieName,
                         movie.movieRating,
-                        movie.movieCategory,
                         movie.movieDirector,
                         movie.movieImage,
                         movie.movieBannerImage,
@@ -59,6 +57,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 ))
                 .from(movie)
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
+                .join(movie.movieCategoryList, movieCategory)
+                .join(movieCategory.category, category)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .where(getCategory(searchCondition.getCategory()),
@@ -72,16 +72,22 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .from(movie)
                 .where(getCategory(searchCondition.getCategory()),
                         getSearchWord(searchCondition.getSearchWord())
-                        )
+                )
+                .join(movie.movieCategoryList, movieCategory)
+                .join(movieCategory.category, category)
                 .fetchFirst();
 
-        content.forEach(m -> m.setConvertStartRation(convertStarRating(m.getMovieStarRating())));
+        content.forEach(m -> {
+            m.setConvertStartRation(convertStarRating(m.getMovieStarRating()));
+            m.setCategoryList(getCateGory(m.getId()));
+        });
 
         return new PageImpl<>(content, pageable, total);
     }
 
-    public BooleanExpression getCategory(String category) {
-        return hasText(category) && !category.equals("all") ? movie.movieCategory.contains(category) : null;
+
+    public BooleanExpression getCategory(String selectCategory) {
+        return hasText(selectCategory) && !selectCategory.equals("all") ? category.categoryName.eq(selectCategory) : null;
     }
 
     public BooleanExpression getSearchWord(String searchWord) {
@@ -116,5 +122,14 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         int front = movieStartRating / 10;
         int back = movieStartRating % 10;
         return front + "." + back;
+    }
+
+    public List<Category> getCateGory(Long movieId) {
+        return queryFactory.select(category)
+                .from(movieCategory)
+                .join(movieCategory.category, category)
+                .join(movieCategory.movie, movie)
+                .where(movie.id.eq(movieId))
+                .fetch();
     }
 }

@@ -52,12 +52,16 @@ public class Theater extends BaseEntity {
     private Integer theaterTime;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruitment_id")
+    @JoinColumn(name = "recruitment_id", unique = true)
     private Recruitment recruitment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")
     private Brand brand;
+
+    public void addRecruitment(Recruitment recruitment){
+        this.recruitment = recruitment;
+    }
 
     @Builder
     public Theater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterTime, Recruitment recruitment, Brand brand) {
