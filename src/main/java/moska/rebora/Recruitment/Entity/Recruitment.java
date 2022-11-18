@@ -72,6 +72,10 @@ public class Recruitment extends BaseEntity {
         this.recruitmentPeople = recruitmentPeople;
     }
 
+    public void updateRecruitmentStatus(RecruitmentStatus recruitmentStatus){
+        this.recruitmentStatus = recruitmentStatus;
+    }
+
     @Builder
     public Recruitment(String recruitmentIntroduce, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentExposeYn, Theater theater, Movie movie, Integer recruitmentPeople) {
 

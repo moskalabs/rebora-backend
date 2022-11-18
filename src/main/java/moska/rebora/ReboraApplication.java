@@ -26,7 +26,7 @@ public class ReboraApplication {
 
     @Bean
     public AuditorAware<String> auditorProvider() {
-        return () -> Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
+        return () -> Optional.of(SecurityContextHolder.getContext().getAuthentication().getName()).isEmpty() ? Optional.of("kkp02052@5dalant.net") : Optional.of(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
     @Bean
