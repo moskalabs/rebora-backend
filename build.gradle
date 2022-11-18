@@ -30,12 +30,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
-    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
     implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-aws', version: '2.2.6.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+
     implementation 'org.springframework.boot:spring-boot-starter-batch'
+    implementation 'org.springframework.boot:spring-boot-starter-quartz'
+
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation group: 'javax.servlet', name: 'jstl', version: '1.2'
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
@@ -54,21 +59,21 @@ dependencies {
     //이메일
     implementation group: 'javax.mail', name: 'mail', version: '1.4.7'
 
-    //파일업로드
-    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
-    compile group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
-
     // QueryDSL
     implementation "com.querydsl:querydsl-jpa:${queryDslVersion}"
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
-    implementation "com.querydsl:querydsl-core:${queryDslVersion}" // 한개 더 추가!
+    implementation "com.querydsl:querydsl-core:${queryDslVersion}" // 한개 더 추가
 
+    //파일업로드
+    implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
+    compile group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     //JUnit4 추가
     testImplementation("org.junit.vintage:junit-vintage-engine") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
+
     testImplementation 'org.springframework.security:spring-security-test'
 }
 

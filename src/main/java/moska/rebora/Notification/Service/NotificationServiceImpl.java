@@ -1,26 +1,34 @@
 package moska.rebora.Notification.Service;
 
+import moska.rebora.Common.Service.AsyncTaskService;
 import moska.rebora.Enum.NotificationKind;
-import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Notification.Entity.Notification;
+import moska.rebora.Notification.NotificationDto;
 import moska.rebora.Notification.Repository.NotificationRepository;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
     @Autowired
     NotificationRepository notificationRepository;
+
+    @Resource(name= "asyncTaskService")
+    AsyncTaskService asyncTaskService;
 
     @Override
     public void createNotificationRecruitment(
@@ -47,6 +55,17 @@ public class NotificationServiceImpl implements NotificationService {
         });
 
         notificationRepository.saveAll(notificationList);
+    }
+
+    @Override
+    public Page<NotificationDto> getNotificationList(Pageable pageable, String userEmail) {
+        Page<NotificationDto> notificationDtoPage = notificationRepository.getNotificationPage(pageable, userEmail);
+        List<NotificationDto> notificationDtoList = notificationDtoPage.getContent();
+
+        List<Long> readNotificationIdList = notificationDtoList.stream().map(NotificationDto::getNotificationId).collect(Collectors.toList());;
+        notificationRepository.readNotifications(readNotificationIdList);
+
+        return notificationDtoPage;
     }
 
     @Override

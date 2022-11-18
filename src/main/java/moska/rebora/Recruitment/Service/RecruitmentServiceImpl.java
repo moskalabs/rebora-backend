@@ -200,16 +200,14 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 theater.getTheaterName()
         );
         String notificationSubject = "찜한 영화의 모집게시물이 등록되었습니다.";
-        List<User> userList = userMovieRepository.getUserListByMovie(movieId);
 
         asyncTaskService.createNotificationRecruitment(
                 notificationSubject,
                 notificationContent,
                 NotificationKind.RECRUITING,
-                recruitment,
-                userList
+                recruitment.getId(),
+                movieId
         );
-
         return recruitment.getId();
     }
 

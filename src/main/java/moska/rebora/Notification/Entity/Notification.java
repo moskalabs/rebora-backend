@@ -10,14 +10,13 @@ import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.Entity.User;
 import org.hibernate.annotations.Comment;
-import org.springframework.data.domain.Persistable;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notification extends BaseEntity implements Persistable<Long> {
+public class Notification extends BaseEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -50,25 +49,24 @@ public class Notification extends BaseEntity implements Persistable<Long> {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recruitment_id")
     @Comment("모집 PK")
-    private Recruitment Recruitment;
+    private Recruitment recruitment;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Override
-    public boolean isNew() {
-        return true;
+    public void readNotification(){
+        this.notificationReadYn = true;
     }
 
     @Builder
-    public Notification(String notificationSubject, String notificationContent, NotificationKind notificationKind, Boolean notificationReadYn, Payment payment, moska.rebora.Recruitment.Entity.Recruitment recruitment, User user) {
+    public Notification(String notificationSubject, String notificationContent, NotificationKind notificationKind, Boolean notificationReadYn, Payment payment, Recruitment recruitment, User user) {
         this.notificationSubject = notificationSubject;
         this.notificationContent = notificationContent;
         this.notificationKind = notificationKind;
         this.notificationReadYn = notificationReadYn;
         this.payment = payment;
-        Recruitment = recruitment;
+        this.recruitment = recruitment;
         this.user = user;
     }
 }
