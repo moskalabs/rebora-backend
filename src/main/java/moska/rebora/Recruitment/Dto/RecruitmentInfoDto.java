@@ -28,24 +28,29 @@ public class RecruitmentInfoDto {
     private String theaterCinemaBrandName;
     private String theaterRegion;
 
+    private Long userRecruitmentId;
+    private Boolean userRecruitmentWish;
+    private Boolean userRecruitmentYn;
+    private Integer userRecruitmentPeople;
+
     private Long recruitmentId;
     private LocalDateTime recruitmentEndDate;
     private RecruitmentStatus recruitmentStatus;
     private String recruiterNickname;
     private String recruiterUserImage;
     private Integer recruitmentPeople;
-    private String myNickname;
-    private String myImage;
+    private String recruitmentIntroduce;
 
     private Page<CommentDto> pageComment;
     private List<UserImageListDto> userImageList;
+
 
     public void addPageComment(Page<CommentDto> pageComment){
         this.pageComment = pageComment;
     }
     public void addUserImageList(List<UserImageListDto> userImageList){this.userImageList = userImageList; }
 
-    public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople, String myNickname, String myImage) {
+    public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople) {
         this.movieName = movieName;
         this.movieRecruitmentImage = movieRecruitmentImage;
         this.movieId = movieId;
@@ -58,13 +63,15 @@ public class RecruitmentInfoDto {
         this.theaterCinemaName = theaterCinemaName;
         this.theaterCinemaBrandName = theaterCinemaBrandName;
         this.theaterRegion = theaterRegion;
+        this.userRecruitmentId = userRecruitmentId;
+        this.userRecruitmentWish = userRecruitmentWish;
+        this.userRecruitmentYn = userRecruitmentYn;
+        this.userRecruitmentPeople = userRecruitmentPeople;
         this.recruitmentId = recruitmentId;
         this.recruitmentEndDate = recruitmentEndDate;
         this.recruitmentStatus = recruitmentStatus;
         this.recruiterNickname = recruiterNickname;
         this.recruiterUserImage = recruiterUserImage;
         this.recruitmentPeople = recruitmentPeople;
-        this.myNickname = myNickname;
-        this.myImage = myImage;
     }
 }

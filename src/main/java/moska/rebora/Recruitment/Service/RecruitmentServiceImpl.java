@@ -1,7 +1,10 @@
 package moska.rebora.Recruitment.Service;
 
+import com.mchange.util.DuplicateElementException;
 import moska.rebora.Banner.Entity.Banner;
+import moska.rebora.Banner.Entity.MainBanner;
 import moska.rebora.Banner.Repository.BannerRepository;
+import moska.rebora.Banner.Repository.MainBannerRepository;
 import moska.rebora.Comment.Repository.CommentRepository;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
@@ -23,12 +26,14 @@ import moska.rebora.User.Entity.UserRecruitment;
 import moska.rebora.User.Repository.UserMovieRepository;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
+import org.hibernate.DuplicateMappingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -57,6 +62,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     @Autowired
     MovieRepository movieRepository;
+
+    @Autowired
+    MainBannerRepository mainBannerRepository;
 
     @Autowired
     NotificationService notificationService;
@@ -149,6 +157,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         Theater theater = theaterOptional.get();
         Movie movie = movieOptional.get();
+        movie.addMoviePopularCount();
 
         //최소 가능 날짜
         LocalDateTime recruitmentEndDate = theater.getTheaterStartDatetime().minusDays(3).toLocalDate().atTime(LocalTime.MAX);
@@ -177,7 +186,17 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     .recruitment(recruitment)
                     .build();
             bannerRepository.save(banner);
+            List<MainBanner> mainBannerList = mainBannerRepository.findAll();
+            if (mainBannerList.size() < 10) {
+                MainBanner mainBanner = MainBanner
+                        .builder()
+                        .banner(banner)
+                        .build();
+
+                mainBannerRepository.save(mainBanner);
+            }
         }
+
 
         UserRecruitment userRecruitment = UserRecruitment
                 .builder()
@@ -188,8 +207,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .user(user)
                 .build();
 
+
         userRecruitmentRepository.save(userRecruitment);
         theaterRepository.save(theater);
+        movieRepository.save(movie);
 
         String notificationContent = notificationService.createNotificationContent(
                 movie.getMovieName(),
@@ -224,12 +245,21 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                                  Integer userRecruitmentPeople) {
 
         Optional<Recruitment> recruitmentOptional = recruitmentRepository.findById(recruitmentId);
+
+
         User user = userRepository.getUserByUserEmail(userEmail);
+
         if (recruitmentOptional.isEmpty()) {
             throw new NullPointerException("해당 조건의 모집이 없습니다.");
         }
 
         Recruitment recruitment = recruitmentOptional.get();
+        Theater theater = recruitment.getTheater();
+
+        if ((recruitment.getRecruitmentPeople() + userRecruitmentPeople) > theater.getTheaterMaxPeople()) {
+            throw new NullPointerException("모집 최대인원을 넘었습니다.");
+        }
+
         recruitment.plusRecruitmentPeople(userRecruitmentPeople);
 
         UserRecruitment userRecruitment;
@@ -247,7 +277,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                     .build();
         } else {
             userRecruitment = userRecruitmentOptional.get();
-            userRecruitment.updateUserRecruitment(true, userRecruitmentPeople);
+            if (userRecruitment.getUserRecruitmentYn()) {
+                throw new DuplicateElementException("이미 신청한 모집입니다.");
+            } else {
+                userRecruitment.updateUserRecruitment(true, userRecruitmentPeople);
+            }
         }
 
         userRecruitmentRepository.save(userRecruitment);

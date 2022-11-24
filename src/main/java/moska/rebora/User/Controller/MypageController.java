@@ -99,7 +99,7 @@ public class MypageController {
     @GetMapping("/getMyInfo")
     public UserDto getMyInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDto userDto = new UserDto(userService.getUserInfoByUserEmail(authentication.getName()));
+        UserDto userDto = userService.getUserInfoByUserEmail(authentication.getName());
         userDto.setResult(true);
         return userDto;
     }
@@ -120,7 +120,7 @@ public class MypageController {
                                      @RequestParam(defaultValue = "", required = false) String userNickname,
                                      @RequestParam(defaultValue = "", required = false) String currentPassword,
                                      @RequestParam(defaultValue = "", required = false) String changePassword,
-                                     @RequestParam(defaultValue = "", required = false) MultipartFile file
+                                     @RequestParam(required = false) MultipartFile file
     ) throws SQLIntegrityConstraintViolationException {
         MypageUpdateDto mypageUpdateDto = new MypageUpdateDto();
         mypageUpdateDto.setFile(file);

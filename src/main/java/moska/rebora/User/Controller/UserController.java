@@ -1,10 +1,13 @@
 package moska.rebora.User.Controller;
 
+import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.EmailAuthKind;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
+import moska.rebora.User.Entity.User;
+import moska.rebora.User.Repository.UserRepository;
 import moska.rebora.User.Service.UserEmailAuthService;
 import moska.rebora.User.Service.UserService;
 import net.minidev.json.JSONObject;
@@ -27,6 +30,9 @@ public class UserController {
 
     @Autowired
     UserEmailAuthService userEmailAuthService;
+
+    @Autowired
+    UserRepository userRepository;
 
     /**
      * 로그인
@@ -61,16 +67,17 @@ public class UserController {
                         @RequestParam("userName") String userName,
                         @RequestParam("userNickname") String userNickname,
                         @RequestParam(value = "userPushYn", required = false) Boolean userPushYn,
+                        @RequestParam(value = "userPushNightYn", required = false) Boolean userPushNightYn,
                         @RequestParam(value = "userPushKey", required = false) String userPushKey,
                         @RequestParam(value = "authKey") String authKey
     ) throws SQLIntegrityConstraintViolationException {
-        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushKey, authKey) ;
+        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushNightYn, userPushKey, authKey);
     }
 
     /**
      * 유저 인증메일 전송
      *
-     * @param userEmail 유저 이메일
+     * @param userEmail     유저 이메일
      * @param emailAuthKind 유저 이메일 인증 종류
      * @return BaseResponse
      */
@@ -88,7 +95,7 @@ public class UserController {
     @GetMapping("/info")
     UserDto info() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return new UserDto(userService.getUserInfoByUserEmail(authentication.getName()));
+        return userService.getUserInfoByUserEmail(authentication.getName());
     }
 
     /**
@@ -106,8 +113,8 @@ public class UserController {
      * 패스워드 변경
      *
      * @param userEmail 유저 이메일
-     * @param password 패스워드
-     * @param authKey 인증 키
+     * @param password  패스워드
+     * @param authKey   인증 키
      * @return UserLoginDto
      */
     @PostMapping("/changePassword")
@@ -121,8 +128,8 @@ public class UserController {
     /**
      * 인증 이메일 검사
      *
-     * @param userEmail 유저 이메일
-     * @param verifyNumber 인증번호
+     * @param userEmail     유저 이메일
+     * @param verifyNumber  인증번호
      * @param emailAuthKind 유저 인증 종류
      * @return JSONObject
      */
@@ -131,5 +138,25 @@ public class UserController {
                                    @RequestParam("verifyNumber") String verifyNumber,
                                    @Param("emailAuthKind") EmailAuthKind emailAuthKind) {
         return userEmailAuthService.validationEmailCode(userEmail, verifyNumber, emailAuthKind);
+    }
+
+    @PutMapping("/withdrawal/{userId}")
+    BaseResponse withdrawal(@PathVariable Long userId){
+
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+
+        User user = userRepository.getUserById(userId);
+
+
+
+        if(!user.getUserEmail().equals(SecurityContextHolder.getContext().getAuthentication().getName())){
+            throw new JwtException("옳바르지 않은 인증입니다.");
+        }
+
+        user.withdrawalUser();
+        userRepository.save(user);
+
+        return baseResponse;
     }
 }

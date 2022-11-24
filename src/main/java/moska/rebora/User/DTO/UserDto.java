@@ -21,8 +21,10 @@ public class UserDto extends BaseResponse {
     private String userBillingKey;
     private String userSnsKind;
     private String userSnsId;
+    private Integer notificationCount;
 
     public UserDto(User user){
+        setResult(true);
         id = user.getId();
         userEmail = user.getUserEmail();
         userName = user.getUserName();

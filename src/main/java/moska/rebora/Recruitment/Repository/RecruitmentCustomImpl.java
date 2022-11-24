@@ -58,6 +58,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                                 userRecruitment.userRecruitmentPeople,
                                 movie.movieName,
                                 movie.movieImage,
+                                movie.movieDetailLink,
                                 movie.id.as("movieId"),
                                 theater.id.as("theaterId"),
                                 theater.theaterStartDatetime,
@@ -120,8 +121,6 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
     public RecruitmentInfoDto getRecruitmentInfo(Long recruitmentId, String userEmail) {
 
         QUser recruiterUser = new QUser("recruiterUser");
-        QUser myUser = new QUser("myUser");
-        QUserRecruitment myUserRecruitment = new QUserRecruitment("myUserRecruitment");
 
         return queryFactory.select(Projections.fields(
                         RecruitmentInfoDto.class,
@@ -137,29 +136,26 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                         theater.theaterCinemaName,
                         theater.theaterCinemaBrandName,
                         theater.theaterRegion,
+                        userRecruitment.id.as("userRecruitmentId"),
+                        userRecruitment.userRecruitmentWish,
+                        userRecruitment.userRecruitmentYn,
+                        userRecruitment.userRecruitmentPeople,
                         recruitment.id.as("recruitmentId"),
                         recruitment.recruitmentEndDate,
                         recruitment.recruitmentStatus,
-                        recruitment.createdBy.as("recruitmentUsername"),
                         recruitment.recruitmentPeople,
+                        recruitment.recruitmentIntroduce,
                         ExpressionUtils.as(select(recruiterUser.userImage.as("recruiterUserImage"))
                                 .from(recruiterUser)
                                 .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
                         ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))
                                 .from(recruiterUser)
-                                .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname"),
-                        ExpressionUtils.as(select(myUser.userNickname.as("myNickname"))
-                                        .from(myUserRecruitment)
-                                        .leftJoin(myUserRecruitment.user, myUser)
-                                        .leftJoin(myUserRecruitment.recruitment, recruitment)
-                                        .where(
-                                                myUser.userEmail.eq(userEmail),
-                                                recruitment.id.eq(recruitmentId))
-                                , "myNickname")
+                                .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname")
                 ))
                 .from(recruitment)
                 .leftJoin(recruitment.theater, theater)
                 .leftJoin(recruitment.movie, movie)
+                .leftJoin(recruitment.userRecruitmentList, userRecruitment).on(userRecruitment.user.userEmail.eq(userEmail))
                 .where(recruitment.id.eq(recruitmentId))
                 .fetchOne();
     }
@@ -206,7 +202,10 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                 )).from(userRecruitment)
                 .join(userRecruitment.user, user)
                 .join(userRecruitment.recruitment, recruitment)
-                .where(recruitment.id.eq(recruitmentId))
+                .where(
+                        recruitment.id.eq(recruitmentId),
+                        userRecruitment.userRecruitmentYn.eq(true)
+                )
                 .offset(0)
                 .limit(5)
                 .fetch();

@@ -14,6 +14,6 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     Integer countNotificationByNotificationReadYnFalseAndUserUserEmail(String userEmail);
 
     @Modifying
-    @Query("update Notification n set n.notificationReadYn = false where n.id IN (:notificationList)")
+    @Query("update Notification n set n.notificationReadYn = true where n.id IN (:notificationList)")
     void readNotifications(List<Long> notificationList);
 }

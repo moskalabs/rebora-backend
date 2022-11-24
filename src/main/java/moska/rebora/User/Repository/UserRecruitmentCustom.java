@@ -1,5 +1,6 @@
 package moska.rebora.User.Repository;
 
+import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.DTO.UserImageListDto;
 import moska.rebora.User.DTO.UserRecruitmentDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
@@ -24,4 +25,6 @@ public interface UserRecruitmentCustom {
 
     List<UserImageListDto> getUserImageListByRecruitment(@Param("userEmail") @Valid String userEmail,
                                                          @Param("recruitmentId") Long recruitmentId);
+
+    List<UserRecruitment> getUserRecruitmentByRecruitment(Recruitment recruitment);
 }

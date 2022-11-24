@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://rebora.cubzbc1hlyxy.ap-northeast-2.rds.amazonaws.com:3306/rebora_test?enabledTLSProtocols=TLSv1.2&characterEncoding=utf-8&autoReconnect=TRUE&rewriteBatchedStatements=true
+    url: jdbc:mysql://rebora.cubzbc1hlyxy.ap-northeast-2.rds.amazonaws.com:3306/rebora?enabledTLSProtocols=TLSv1.2&characterEncoding=utf-8&autoReconnect=TRUE&rewriteBatchedStatements=true&serverTimezone=Asia/Seoul
     username: moskastudio
     password: moskastudio~!1
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -45,7 +45,12 @@ jwt:
 server:
   error:
     include-exception: true
-
+  ssl:
+    enabled: true
+    key-store: classpath:m.re-bora.com.jks
+    key-store-password: moska~!@1
+    key-store-type: jks
+  port: 443
 mail:
   username: kkp02052@gmail.com
   password: jhbpwkcvougoljlx
@@ -61,3 +66,5 @@ cloud:
       static: ap-northeast-2
     s3:
       bucket: rebora
+
+

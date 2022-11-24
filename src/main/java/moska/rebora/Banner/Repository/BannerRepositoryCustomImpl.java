@@ -3,6 +3,7 @@ package moska.rebora.Banner.Repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import moska.rebora.Banner.Dto.BannerCompareDto;
 import moska.rebora.Banner.Dto.BannerDto;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Recruitment.Entity.QRecruitment;
@@ -83,6 +84,25 @@ public class BannerRepositoryCustomImpl implements BannerRepositoryCustom {
                 .leftJoin(recruitment.userRecruitmentList, userRecruitment).on(userRecruitment.user.userEmail.eq(recruitment.createdBy))
                 .leftJoin(userRecruitment.user, user)
                 .leftJoin(recruitment.movie, movie)
+                .offset(0)
+                .limit(10)
+                .fetch();
+    }
+
+    @Override
+    public List<BannerCompareDto> getCompareBannerList() {
+        return queryFactory.select(
+                        Projections.fields(
+                                BannerCompareDto.class,
+                                banner.id.as("bannerId"),
+                                theater.theaterMinPeople.subtract(recruitment.recruitmentPeople).as("resultCount")
+                        )
+                )
+                .from(banner)
+                .join(banner.recruitment, recruitment)
+                .join(recruitment.theater, theater)
+                .where(banner.id.ne(1L))
+                .orderBy(theater.theaterMinPeople.subtract(recruitment.recruitmentPeople).asc())
                 .offset(0)
                 .limit(10)
                 .fetch();

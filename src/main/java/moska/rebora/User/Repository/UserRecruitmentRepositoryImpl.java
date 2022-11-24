@@ -11,12 +11,14 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.DTO.QUserImageListDto;
 import moska.rebora.User.DTO.UserImageListDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.QUser;
 import moska.rebora.User.Entity.User;
+import moska.rebora.User.Entity.UserRecruitment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
@@ -152,7 +154,10 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .from(userRecruitment)
                 .join(userRecruitment.recruitment, recruitment)
                 .join(userRecruitment.user, user)
-                .where(recruitment.id.eq(recruitmentId))
+                .where(
+                        recruitment.id.eq(recruitmentId),
+                        userRecruitment.userRecruitmentYn.eq(true)
+                )
                 .orderBy(userEmailOrderBy(userEmail))
                 .fetch();
     }
@@ -172,9 +177,22 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 )).from(userRecruitment)
                 .join(userRecruitment.user, user)
                 .join(userRecruitment.recruitment, recruitment)
-                .where(recruitment.id.eq(recruitmentId))
+                .where(
+                        recruitment.id.eq(recruitmentId),
+                        userRecruitment.userRecruitmentYn.eq(true)
+                )
                 .offset(0)
                 .limit(5)
+                .fetch();
+    }
+
+    public List<UserRecruitment> getUserRecruitmentByRecruitment(Recruitment recruitment) {
+        return queryFactory.select(userRecruitment)
+                .from(userRecruitment)
+                .join(userRecruitment.user).fetchJoin()
+                .where(userRecruitment.recruitment.eq(recruitment),
+                        userRecruitment.userRecruitmentYn.eq(true)
+                )
                 .fetch();
     }
 

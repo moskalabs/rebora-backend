@@ -1,6 +1,7 @@
 package moska.rebora.Common;
 
 
+import com.mchange.util.DuplicateElementException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Enum.ErrorCode;
@@ -45,7 +46,12 @@ public class ControllerAdvice{
     @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
     protected ResponseEntity<Object> HandlerIllegalSQLIntegrityConstraintViolationException(SQLIntegrityConstraintViolationException e) {
         return handleExceptionInternal(HttpStatus.CONFLICT, ErrorCode.DUPLICATION.getStatus(), e.getMessage());
+    }
 
+    //중복 예외
+    @ExceptionHandler(DuplicateElementException.class)
+    protected ResponseEntity<Object> HandlerIllegalDuplicateElementException(DuplicateElementException e) {
+        return handleExceptionInternal(HttpStatus.CONFLICT, ErrorCode.DUPLICATION.getStatus(), e.getMessage());
     }
 
     //메일 사용자 에러

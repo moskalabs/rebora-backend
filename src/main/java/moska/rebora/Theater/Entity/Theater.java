@@ -48,6 +48,8 @@ public class Theater extends BaseEntity {
     @Column(length = 50)
     private String theaterRegion;
 
+    private Integer theaterPrice;
+
     @Column
     private Integer theaterTime;
 
@@ -64,7 +66,7 @@ public class Theater extends BaseEntity {
     }
 
     @Builder
-    public Theater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterTime, Recruitment recruitment, Brand brand) {
+    public Theater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Recruitment recruitment, Brand brand) {
         this.theaterName = theaterName;
         this.theaterStartDatetime = theaterStartDatetime;
         this.theaterEndDatetime = theaterEndDatetime;
@@ -74,6 +76,7 @@ public class Theater extends BaseEntity {
         this.theaterCinemaName = theaterCinemaName;
         this.theaterCinemaBrandName = theaterCinemaBrandName;
         this.theaterRegion = theaterRegion;
+        this.theaterPrice = theaterPrice;
         this.theaterTime = theaterTime;
         this.recruitment = recruitment;
         this.brand = brand;

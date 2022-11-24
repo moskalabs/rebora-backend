@@ -58,6 +58,4 @@ public class MainBannerCustomImpl implements MainBannerCustom {
                 .limit(10)
                 .fetch();
     }
-
-
 }

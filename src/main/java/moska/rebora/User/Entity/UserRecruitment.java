@@ -42,7 +42,7 @@ public class UserRecruitment extends BaseEntity {
     private Recruitment recruitment;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
+    @JoinColumn(name = "payment_id", unique = true)
     private Payment payment;
 
     public void changeWish(Boolean userRecruitmentWish) {
@@ -56,6 +56,10 @@ public class UserRecruitment extends BaseEntity {
     public void updateUserRecruitment(Boolean userRecruitmentYn,Integer userRecruitmentPeople){
         this.userRecruitmentYn = userRecruitmentYn;
         this.userRecruitmentPeople = userRecruitmentPeople;
+    }
+
+    public void updatePayment(Payment payment){
+        this.payment = payment;
     }
 
     @Builder

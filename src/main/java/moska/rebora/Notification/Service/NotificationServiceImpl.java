@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
@@ -58,6 +59,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional
     public Page<NotificationDto> getNotificationList(Pageable pageable, String userEmail) {
         Page<NotificationDto> notificationDtoPage = notificationRepository.getNotificationPage(pageable, userEmail);
         List<NotificationDto> notificationDtoList = notificationDtoPage.getContent();

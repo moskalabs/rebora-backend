@@ -7,4 +7,5 @@ import org.springframework.data.domain.Pageable;
 public interface NotificationCustom {
 
     Page<NotificationDto> getNotificationPage(Pageable pageable, String userEmail);
+
 }

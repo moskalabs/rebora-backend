@@ -2,6 +2,7 @@ package moska.rebora.User.Service;
 
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.EmailAuthKind;
+import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +20,7 @@ public interface UserService {
                         @Param("userName") String userName,
                         @Param("userNickname") String userNickname,
                         @Param("userPushYn") Boolean userPushYn,
+                        @Param("userPushNightYn") Boolean userPushNightYn,
                         @Param("userPushKey") String userPushKey,
                         @Param("authKey") String authKey
     ) throws SQLIntegrityConstraintViolationException;
@@ -26,7 +28,7 @@ public interface UserService {
     BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail,
                                        @Param("emailAuthKind") EmailAuthKind emailAuthKind);
 
-    User getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail);
+    UserDto getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail);
 
     BaseResponse checkRedundancyNickname(@Param("userNickname") String userNickname);
 

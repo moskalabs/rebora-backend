@@ -9,6 +9,8 @@ import moska.rebora.Config.PasswordAuthAuthenticationManager;
 import moska.rebora.Config.PasswordAuthAuthenticationToken;
 import moska.rebora.Enum.EmailAuthKind;
 import moska.rebora.Enum.UserGrade;
+import moska.rebora.Notification.Repository.NotificationRepository;
+import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserEmailAuth;
@@ -53,6 +55,9 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
 
     @Autowired
+    NotificationRepository notificationRepository;
+
+    @Autowired
     Util util;
 
 
@@ -67,7 +72,19 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserLoginDto login(@Param("userEmail") String userEmail, @Param("password") String password) {
-        return UserLoginDto.builder().token(createToken(userEmail, password)).result(true).errorCode(null).build();
+        User user = userRepository.getUserByUserEmail(userEmail);
+
+        if(!user.getUserUseYn()){
+            throw new NullPointerException("탈퇴된 회원입니다.");
+        }
+
+        return UserLoginDto.builder()
+                .token(createToken(userEmail, password))
+                .result(true)
+                .errorCode(null)
+                .user(user)
+                .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(userEmail))
+                .build();
     }
 
     /**
@@ -87,6 +104,7 @@ public class UserServiceImpl implements UserService {
                                @Param("userName") String userName,
                                @Param("userNickname") String userNickname,
                                @Param("userPushYn") Boolean userPushYn,
+                               @Param("userPushYn") Boolean userPushNightYn,
                                @Param("userPushKey") String userPushKey,
                                @Param("authKey") String authKey
 
@@ -106,6 +124,7 @@ public class UserServiceImpl implements UserService {
                     .userPushYn(userPushYn)
                     .userGrade(UserGrade.NORMAL)
                     .userNickname(userNickname)
+                    .userPushNightYn(userPushNightYn)
                     .userName(userName)
                     .userPushKey(userPushKey)
                     .build();
@@ -114,14 +133,23 @@ public class UserServiceImpl implements UserService {
 
             userEmailAuth.expireAuth();
             userEmailAuthRepository.save(userEmailAuth);
-            return UserLoginDto.builder().token(createToken(userEmail, password)).result(true).build();
+            return UserLoginDto.builder()
+                    .token(createToken(userEmail, password))
+                    .result(true)
+                    .user(user)
+                    .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(userEmail))
+                    .build();
+
         } catch (DataIntegrityViolationException e) {
             throw new SQLIntegrityConstraintViolationException("중복된 이메일 또는 닉네임입니다.");
         }
     }
 
-    public User getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail) {
-        return userRepository.getUserByUserEmail(userEmail);
+    public UserDto getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail) {
+
+        UserDto userDto = new UserDto(userRepository.getUserByUserEmail(userEmail));
+        userDto.setNotificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(userEmail));
+        return userDto;
     }
 
     /**
@@ -189,7 +217,7 @@ public class UserServiceImpl implements UserService {
      * @param userEmail 유저이메일
      * @param password  비밀번호
      * @param authKey   인증키
-     * @return UserLoginDto
+     * @return BaseResponse
      */
     @Override
     public BaseResponse changePassword(String userEmail, String password, @Param("authKey") String authKey) {

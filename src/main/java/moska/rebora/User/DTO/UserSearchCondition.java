@@ -3,6 +3,8 @@ package moska.rebora.User.DTO;
 import lombok.Data;
 import moska.rebora.Enum.RecruitmentStatus;
 
+import java.time.LocalDateTime;
+
 @Data
 public class UserSearchCondition {
 
@@ -16,4 +18,5 @@ public class UserSearchCondition {
     private Long movieId;
     private Boolean userRecruitmentWish;
     private Boolean userMovieWish;
+    private LocalDateTime finishTime;
 }
