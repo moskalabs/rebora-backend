@@ -64,6 +64,8 @@ dependencies {
     implementation "com.querydsl:querydsl-apt:${queryDslVersion}"
     implementation "com.querydsl:querydsl-core:${queryDslVersion}" // 한개 더 추가
 
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
     //파일업로드
     implementation group: 'commons-io', name: 'commons-io', version: '2.11.0'
     compile group: 'commons-fileupload', name: 'commons-fileupload', version: '1.4'

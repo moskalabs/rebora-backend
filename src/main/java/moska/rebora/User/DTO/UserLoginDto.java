@@ -1,5 +1,6 @@
 package moska.rebora.User.DTO;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import moska.rebora.Common.BaseResponse;
@@ -7,21 +8,36 @@ import moska.rebora.Enum.UserGrade;
 import moska.rebora.User.Entity.User;
 
 @Getter
+@Schema(description = "유저 로그인 DTO")
 public class UserLoginDto extends BaseResponse {
 
+    @Schema(description = "토큰")
     private String token;
+    @Schema(description = "유저 아이디")
     private Long userId;
+    @Schema(description = "유저 이메일")
     private String userEmail;
+    @Schema(description = "유저 이름")
     private String userName;
+    @Schema(description = "유저 닉네임")
     private String userNickname;
+    @Schema(description = "유저 푸쉬 키")
     private String userPushKey;
+    @Schema(description = "유저 푸쉬 여부")
     private Boolean userPushYn;
+    @Schema(description = "유저 사용 여부")
     private Boolean userUseYn;
+    @Schema(description = "유저 등급 NORMAL - 일반, ADMIN - 관리자")
     private UserGrade userGrade;
+    @Schema(description = "유저 이미지")
     private String userImage;
+    @Schema(description = "유저 빌링 키")
     private String userBillingKey;
+    @Schema(description = "유저 SNS 종류")
     private String userSnsKind;
+    @Schema(description = "유저 SNS 아이디")
     private String userSnsId;
+    @Schema(description = "알림 개수")
     private Integer notificationCount;
 
     @Builder

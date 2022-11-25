@@ -106,6 +106,10 @@ public class User extends BaseTimeEntity {
         }
     }
 
+    public void withdrawalUser(){
+        this.userUseYn = false;
+    }
+
     @Builder
     public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userSnsKind, String userSnsId) {
         this.userEmail = userEmail;

@@ -1,9 +1,18 @@
 package moska.rebora.User.Controller;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.User.DTO.MypageUpdateDto;
 import moska.rebora.User.DTO.UserDto;
+import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.DTO.UserRecruitmentDtoListResponse;
 import moska.rebora.User.Service.MypageService;
 import moska.rebora.User.Service.UserService;
@@ -17,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 
+@Tag(name = "마이페이지")
 @RestController
 @RequestMapping("/api/user/mypage")
 @Slf4j
@@ -33,6 +43,8 @@ public class MypageController {
      *
      * @return JSONObject
      */
+    @Tag(name = "마이페이지", description = "마이페이지 정보 가져오기")
+    @Operation(summary = "마이페이지 정보 가져오기")
     @GetMapping("/info")
     public JSONObject info() {
         return mypageService.info(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -44,6 +56,7 @@ public class MypageController {
      * @param pageable 페이징
      * @return UserRecruitmentDtoListResponse
      */
+    @Tag(name = "마이페이지")
     @GetMapping("/getParticipationHistory")
     public UserRecruitmentDtoListResponse getParticipationHistory(Pageable pageable) {
 
@@ -59,8 +72,11 @@ public class MypageController {
      * @param pageable 페이징
      * @return UserRecruitmentDtoListResponse
      */
+    @Tag(name = "마이페이지")
     @GetMapping("/getMyRecruiter")
-    public UserRecruitmentDtoListResponse getMyRecruiter(Pageable pageable) {
+    public UserRecruitmentDtoListResponse getMyRecruiter(
+            Pageable pageable
+    ) {
 
         UserRecruitmentDtoListResponse userRecruitmentDtoListResponse = new UserRecruitmentDtoListResponse();
         userRecruitmentDtoListResponse.setResult(true);
@@ -75,16 +91,28 @@ public class MypageController {
      * @param userPushYn 유저 푸쉬 여부
      * @return BaseResponse
      */
+    @Tag(name = "마이페이지")
     @PutMapping("/updatePushYn/{userId}")
-    public BaseResponse updatePushYn(@PathVariable Long userId, @RequestParam("userPushYn") Boolean userPushYn) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true),
+            @ApiImplicitParam(name = "userPushYn", value = "유저 푸쉬 여부", required = true),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "푸쉬 여부 변경 성공", content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
+            @ApiResponse(responseCode = "401", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
+    public BaseResponse updatePushYn(
+            @PathVariable Long userId,
+            @RequestParam("userPushYn") Boolean userPushYn) {
         BaseResponse baseResponse = new BaseResponse();
         mypageService.updatePushYn(userId, userPushYn, SecurityContextHolder.getContext().getAuthentication().getName());
         baseResponse.setResult(true);
         return baseResponse;
     }
 
+    @Tag(name = "마이페이지")
     @PutMapping("/updatePushNightYn/{userId}")
-    public BaseResponse updatePushNightYn(@PathVariable Long userId, @RequestParam("userPushYn") Boolean userPushNightYn){
+    public BaseResponse updatePushNightYn(@PathVariable Long userId, @RequestParam("userPushYn") Boolean userPushNightYn) {
         BaseResponse baseResponse = new BaseResponse();
         mypageService.updatePushNightYn(userId, userPushNightYn, SecurityContextHolder.getContext().getAuthentication().getName());
         baseResponse.setResult(true);
@@ -96,6 +124,7 @@ public class MypageController {
      *
      * @return getMyInfo
      */
+    @Tag(name = "마이페이지")
     @GetMapping("/getMyInfo")
     public UserDto getMyInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -115,6 +144,7 @@ public class MypageController {
      * @return BaseResponse
      * @throws SQLIntegrityConstraintViolationException 중복일 경우 Exception
      */
+    @Tag(name = "마이페이지")
     @PutMapping("/changeMyInfo/{userId}")
     public BaseResponse changeMyInfo(@PathVariable Long userId,
                                      @RequestParam(defaultValue = "", required = false) String userNickname,

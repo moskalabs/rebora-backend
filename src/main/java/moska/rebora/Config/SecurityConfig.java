@@ -52,6 +52,7 @@ public class SecurityConfig {
                 .antMatchers("/api/theater/**").authenticated()
                 .antMatchers("/api/wish/**").authenticated()
                 .antMatchers("/api/main").authenticated()
+                .antMatchers("/swagger-ui/**").permitAll()
                 .anyRequest().permitAll().and()
                 .addFilterBefore(new JwtFilter(jwtAuthTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();

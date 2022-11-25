@@ -23,7 +23,7 @@ public class MovieRepositoryMainImpl implements MovieRepositoryMain {
 
     @Override
     public List<MoviePageDto> getMovieMainList(String userEmail) {
-         List<MoviePageDto> moviePageDtoList = queryFactory.select(Projections.fields(
+        List<MoviePageDto> moviePageDtoList = queryFactory.select(Projections.fields(
                         MoviePageDto.class,
                         movie.id,
                         movie.movieName,
@@ -35,10 +35,11 @@ public class MovieRepositoryMainImpl implements MovieRepositoryMain {
                         movie.movieRunningTime,
                         movie.moviePopularCount,
                         movie.movieStarRating,
-                        userMovie.userMovieWish
+                        userMovie.userMovieWish,
+                        userMovie.id.as("userMovieId")
                 ))
                 .from(movie)
-                .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq("userEmail"))
+                .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .orderBy(movie.moviePopularCount.desc())
                 .offset(0)
                 .limit(10)
@@ -49,7 +50,7 @@ public class MovieRepositoryMainImpl implements MovieRepositoryMain {
             m.setCategoryList(getCateGory(m.getId()));
         });
 
-         return moviePageDtoList;
+        return moviePageDtoList;
     }
 
     public String convertStarRating(Integer movieStartRating) {

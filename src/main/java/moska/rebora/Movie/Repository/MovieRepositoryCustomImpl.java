@@ -54,11 +54,11 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                         movie.movieStarRating,
                         userMovie.userMovieWish,
                         userMovie.id.as("userMovieId")
-                ))
+                )).distinct()
                 .from(movie)
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
-                .join(movie.movieCategoryList, movieCategory)
-                .join(movieCategory.category, category)
+                .leftJoin(movie.movieCategoryList, movieCategory)
+                .leftJoin(movieCategory.category, category)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .where(getCategory(searchCondition.getCategory()),

@@ -57,6 +57,10 @@ public class Movie extends BaseEntity {
     @Column
     private Integer movieStarRating;
 
+    public void addMoviePopularCount(){
+        this.moviePopularCount += 1;
+    }
+
     @OneToMany(mappedBy = "movie")
     List<Recruitment> recruitmentList = new ArrayList<>();
 

@@ -19,7 +19,7 @@ public class MoviePageDto{
     private Integer moviePopularCount;
     private Integer movieStarRating;
     private String convertStartRation;
-    private Boolean userMovieWish;
     private Long userMovieId;
+    private Boolean userMovieWish;
     private List<Category> categoryList;
 }

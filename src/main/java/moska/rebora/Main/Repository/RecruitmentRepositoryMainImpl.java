@@ -92,7 +92,10 @@ public class RecruitmentRepositoryMainImpl implements RecruitmentRepositoryMain 
                 )).from(userRecruitment)
                 .join(userRecruitment.user, user)
                 .join(userRecruitment.recruitment, recruitment)
-                .where(recruitment.id.eq(recruitmentId))
+                .where(
+                        recruitment.id.eq(recruitmentId),
+                        userRecruitment.userRecruitmentYn.eq(true)
+                )
                 .offset(0)
                 .limit(5)
                 .fetch();

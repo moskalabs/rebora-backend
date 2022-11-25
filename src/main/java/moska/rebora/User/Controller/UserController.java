@@ -1,9 +1,18 @@
 package moska.rebora.User.Controller;
 
 import io.jsonwebtoken.JwtException;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.EmailAuthKind;
+import moska.rebora.Main.Dto.MainDto;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
@@ -22,6 +31,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RestController
 @RequestMapping("/api/user")
 @Slf4j
+@Tag(name = "유저" , description = "유저 정보")
 public class UserController {
 
 
@@ -41,7 +51,17 @@ public class UserController {
      * @param password  패스워드
      * @return UserLoginDto
      */
+    @Tag(name = "유저")
+    @Operation(summary = "로그인")
     @PostMapping("/login")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userEmail", value = "유저 이메일", required = true),
+            @ApiImplicitParam(name = "password", value = "패스워드", required = true),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "메인 정보 가져오기 성공", content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
+            @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     UserLoginDto login(@RequestParam("userEmail") String userEmail,
                        @RequestParam("password") String password) {
         log.info("user login userEmail={}, password={}", userEmail, password);
@@ -61,7 +81,19 @@ public class UserController {
      * @param authKey      유저 인증 키
      * @return UserLoginDto
      */
+    @Tag(name = "유저")
+    @Operation(summary = "회원가입", description = "인증 후 30분 이내에만 회원가입 가능합니다.")
     @PostMapping("/signUp")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userEmail", value = "유저 이메일", required = true),
+            @ApiImplicitParam(name = "password", value = "패스워드", required = true),
+            @ApiImplicitParam(name = "userName", value = "유저 이름", required = true),
+            @ApiImplicitParam(name = "userNickname", value = "유저 닉네임", required = true),
+            @ApiImplicitParam(name = "userPushYn", value = "유저 푸쉬 여부", required = false),
+            @ApiImplicitParam(name = "userPushNightYn", value = "유저 푸쉬 야간 여부", required = false),
+            @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
+            @ApiImplicitParam(name = "authKey", value = "이메일 인증 키", required = true),
+    })
     UserLoginDto signUp(@RequestParam("userEmail") String userEmail,
                         @RequestParam("password") String password,
                         @RequestParam("userName") String userName,
@@ -81,6 +113,12 @@ public class UserController {
      * @param emailAuthKind 유저 이메일 인증 종류
      * @return BaseResponse
      */
+    @Tag(name = "유저")
+    @Operation(summary = "인증이메일 전송", description = "해당 이메일론 6자리 랜덤 문자를 보냅니다.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userEmail", value = "유저 이메일", required = true),
+            @ApiImplicitParam(name = "emailAuthKind", value = "이메일 권한 종류", required = true),
+    })
     @PostMapping("/sendVerificationEmail")
     BaseResponse sendVerificationEmail(@RequestParam("userEmail") String userEmail,
                                        @RequestParam("emailAuthKind") EmailAuthKind emailAuthKind) {
@@ -92,6 +130,8 @@ public class UserController {
      *
      * @return UserDto
      */
+    @Tag(name = "유저", description = "정보 가져오기")
+    @Operation(summary = "유저 정보")
     @GetMapping("/info")
     UserDto info() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -104,6 +144,8 @@ public class UserController {
      * @param userNickname 유저 닉네임
      * @return BaseResponse
      */
+    @Tag(name = "유저")
+    @Operation(summary = "닉네임 체크")
     @GetMapping("/checkRedundancyNickname")
     BaseResponse checkRedundancyNickname(@RequestParam("userNickname") String userNickname) {
         return userService.checkRedundancyNickname(userNickname);
@@ -117,6 +159,8 @@ public class UserController {
      * @param authKey   인증 키
      * @return UserLoginDto
      */
+    @Tag(name = "유저")
+    @Operation(summary = "비밀번호 변경")
     @PostMapping("/changePassword")
     BaseResponse changePassword(@RequestParam("userEmail") String userEmail,
                                 @RequestParam("password") String password,
@@ -133,6 +177,8 @@ public class UserController {
      * @param emailAuthKind 유저 인증 종류
      * @return JSONObject
      */
+    @Tag(name = "유저")
+    @Operation(summary = "인증이메일 검사")
     @PostMapping("/validationEmailCode")
     JSONObject validationEmailCode(@RequestParam("userEmail") String userEmail,
                                    @RequestParam("verifyNumber") String verifyNumber,
@@ -140,6 +186,8 @@ public class UserController {
         return userEmailAuthService.validationEmailCode(userEmail, verifyNumber, emailAuthKind);
     }
 
+    @Tag(name = "유저", description = "회원 탈퇴")
+    @Operation(summary = "회원 탈퇴")
     @PutMapping("/withdrawal/{userId}")
     BaseResponse withdrawal(@PathVariable Long userId){
 

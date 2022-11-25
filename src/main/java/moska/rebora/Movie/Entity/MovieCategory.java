@@ -1,6 +1,7 @@
 package moska.rebora.Movie.Entity;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import moska.rebora.Common.BaseTimeEntity;
@@ -29,4 +30,10 @@ public class MovieCategory extends BaseTimeEntity {
     @JoinColumn(name = "category_id")
     @Comment("카테고리 PK")
     private Category category;
+
+    @Builder
+    public MovieCategory(Movie movie, Category category) {
+        this.movie = movie;
+        this.category = category;
+    }
 }

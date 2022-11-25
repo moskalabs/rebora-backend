@@ -161,7 +161,8 @@ public class MypageServiceImpl implements MypageService {
                 throw new JwtException("옳바르지 않은 접근입니다.");
             }
 
-            MultipartFile file = mypageUpdateDto.getFile();
+            String fileUrl = user.getUserImage();
+
             String password = ""; //패스워드
             if (!mypageUpdateDto.getChangePassword().isEmpty()) {
                 if (!passwordEncoder.matches(mypageUpdateDto.getCurrentPassword(), user.getPassword())) {
@@ -170,13 +171,20 @@ public class MypageServiceImpl implements MypageService {
                 password = passwordEncoder.encode(mypageUpdateDto.getChangePassword());
             }
 
-            String originalFileName = file.getOriginalFilename(); //원본 파일 이름
-            String ext = FilenameUtils.getExtension(originalFileName); //확장자
+            if(mypageUpdateDto.getFile() != null){
+                MultipartFile file = mypageUpdateDto.getFile();
+                String originalFileName = file.getOriginalFilename(); //원본 파일 이름
+                String ext = FilenameUtils.getExtension(originalFileName); //확장자
+                String newFileName = "user/" + userId + "/" + userId + "_" + util.createRandomString(8) + "." + ext; //새로운 파일 이름
+                fileUrl = fileUploadService.uploadImage(file, newFileName); //파일 Url
+            }
 
-            String newFileName = "user/" + userId + "/" + userId + "_" + util.createRandomString(8) + "." + ext; //새로운 파일 이름
-            String fileUrl = fileUploadService.uploadImage(file, newFileName); //파일 Url
+            if(fileUrl == null){
+                fileUrl = "";
+            }
 
             user.changeUserInfo(fileUrl, password, mypageUpdateDto.getUserNickname());
+
             log.info("userNickname={}", user.getUserNickname());
             log.info("password={}", user.getPassword());
             log.info("userImage={}", user.getUserImage());
@@ -184,7 +192,6 @@ public class MypageServiceImpl implements MypageService {
 
             BaseResponse baseResponse = new BaseResponse();
             baseResponse.setResult(true);
-
 
             return baseResponse;
         } catch (DataIntegrityViolationException e) {

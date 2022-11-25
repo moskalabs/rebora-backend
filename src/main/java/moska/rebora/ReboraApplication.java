@@ -31,8 +31,6 @@ public class ReboraApplication {
     @PostConstruct
     public void started(){
         TimeZone.setDefault(TimeZone.getTimeZone("Asia/Seoul"));
-        log.info("timezone={}", TimeZone.getTimeZone("Asia/Seoul"));
-        log.info("nowTime={}", LocalDateTime.now());
     }
 
     public static void main(String[] args) {

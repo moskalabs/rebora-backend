@@ -53,7 +53,10 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .from(userRecruitment)
                 .leftJoin(userRecruitment.user, user)
                 .leftJoin(userRecruitment.recruitment, recruitment)
-                .where(user.userEmail.eq(userEmail))
+                .where(
+                        user.userEmail.eq(userEmail),
+                        userRecruitment.userRecruitmentWish.eq(true)
+                )
                 .fetchOne();
     }
 

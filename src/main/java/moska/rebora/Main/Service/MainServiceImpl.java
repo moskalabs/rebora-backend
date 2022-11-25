@@ -1,9 +1,11 @@
 package moska.rebora.Main.Service;
 
 import moska.rebora.Banner.Dto.BannerDto;
+import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Repository.BannerRepository;
 import moska.rebora.Banner.Repository.MainBannerRepository;
 import moska.rebora.Enum.RecruitmentStatus;
+import moska.rebora.Main.Dto.MainDto;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -36,7 +38,10 @@ public class MainServiceImpl implements MainService {
     MainBannerRepository mainBannerRepository;
 
     @Override
-    public JSONObject getMain() {
+    public MainDto getMain() {
+
+        MainDto mainDto = new MainDto();
+
         UserSearchCondition userSearchCondition = new UserSearchCondition(); //검색 조건
         Pageable pageable = PageRequest.of(0, 10);
         userSearchCondition.setRecruitmentStatus(RecruitmentStatus.CONFIRMATION); //확정 된 경우에만
@@ -45,13 +50,20 @@ public class MainServiceImpl implements MainService {
         JSONObject jsonObject = new JSONObject();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        jsonObject.put("result", true);
-        jsonObject.put("recruitmentList", recruitmentRepository.getRecruitmentMainList(userEmail));
-        jsonObject.put("movieList", movieRepository.getMovieMainList(userEmail));
+        mainDto.setResult(true);
+        mainDto.setRecruitmentList(recruitmentRepository.getRecruitmentMainList(userEmail));
+        mainDto.setMovieList(movieRepository.getMovieMainList(userEmail));
+
         List<BannerDto> bannerRecentlyDtoList = mainBannerRepository.getMainBanner();
         List<BannerDto> bannerDtoList = new ArrayList<>();
         if (bannerRecentlyDtoList.isEmpty()) {
-
+            Banner banner = bannerRepository.findById(1L).get();
+            BannerDto bannerDto = new BannerDto();
+            bannerDto.setBannerExposeYn(banner.getBannerExposeYn());
+            bannerDto.setBannerImage(banner.getBannerImage());
+            bannerDto.setBannerMainText(banner.getBannerMainText());
+            bannerDto.setBannerSubText(banner.getBannerSubText());
+            bannerDtoList.add(bannerDto);
         } else {
             Collections.shuffle(bannerRecentlyDtoList);
             for (int i = 0; i < bannerRecentlyDtoList.size(); i++) {
@@ -61,8 +73,8 @@ public class MainServiceImpl implements MainService {
                 bannerDtoList.add(bannerRecentlyDtoList.get(i));
             }
         }
-        jsonObject.put("bannerList", bannerDtoList);
+        mainDto.setBannerList(bannerDtoList);
 
-        return jsonObject;
+        return mainDto;
     }
 }
