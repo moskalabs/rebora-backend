@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "메인" , description = "메인 화면")
-@RequestMapping("/api/main")
 @RestController
 public class MainController {
 
@@ -28,7 +27,7 @@ public class MainController {
 
     @Tag(name = "메인")
     @Operation(summary = "메인 페이지 가져오기")
-    @GetMapping("/")
+    @GetMapping("/api/main")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "메인 정보 가져오기 성공", content = @Content(schema = @Schema(implementation = MainDto.class))),
             @ApiResponse(responseCode = "401", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))

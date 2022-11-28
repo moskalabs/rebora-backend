@@ -1,5 +1,6 @@
 package moska.rebora.Theater.Controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import moska.rebora.Common.BaseListResponse;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Theater.Dto.TheaterPageDto;
@@ -14,11 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/theater")
+@Tag(name = "상영관")
 public class TheaterController {
 
     @Autowired
     TheaterService theaterService;
 
+    @Tag(name = "상영관")
     @GetMapping("/getAvailableDate")
     public BaseListResponse<String> getAvailableDate(
             @RequestParam String theaterRegion,
@@ -32,6 +35,7 @@ public class TheaterController {
         return baseListResponse;
     }
 
+    @Tag(name = "상영관")
     @GetMapping("/getPageTheater")
     public BasePageResponse<TheaterPageDto> getPageTheater(
             @RequestParam String theaterRegion,

@@ -38,7 +38,10 @@ public class CommentCustomImpl implements CommentCustom {
                 )).from(comment)
                 .leftJoin(comment.user, user)
                 .leftJoin(comment.recruitment, recruitment)
-                .where(recruitment.id.eq(recruitmentId))
+                .where(
+                        recruitment.id.eq(recruitmentId),
+                        comment.commentUseYn.eq(true)
+                )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();

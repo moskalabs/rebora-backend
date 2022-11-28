@@ -1,5 +1,6 @@
 package moska.rebora.Common.Controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import moska.rebora.Common.BaseListResponse;
 import moska.rebora.Common.Entity.Category;
@@ -20,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/common")
 @AllArgsConstructor
+@Tag(name = "공통")
 public class CommonController {
 
 
@@ -27,6 +29,7 @@ public class CommonController {
 
     private CommonService commonService;
 
+    @Tag(name = "공통")
     @GetMapping("/getCategory")
     public BaseListResponse<Category> getCategory(){
         BaseListResponse<Category> baseListResponse = new BaseListResponse<>();
@@ -36,6 +39,7 @@ public class CommonController {
         return baseListResponse;
     }
 
+    @Tag(name = "공통")
     @GetMapping("/getRegion")
     public BaseListResponse<String> getRegion(){
         BaseListResponse<String> baseListResponse = new BaseListResponse<>();
@@ -45,6 +49,7 @@ public class CommonController {
         return baseListResponse;
     }
 
+    @Tag(name = "공통")
     @PostMapping("/createNotification")
     public void test(
             @Param("notificationSubject") String notificationSubject,

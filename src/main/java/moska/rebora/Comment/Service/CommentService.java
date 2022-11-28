@@ -13,4 +13,6 @@ public interface CommentService {
                        @Param("commentContent") String commentContent,
                        @Param("userEmail") String userEmail
                        );
+
+    void deleteComment(@Param("commentId") Long commentId, @Param("userEmail") String userEmail);
 }

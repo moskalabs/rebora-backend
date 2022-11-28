@@ -1,8 +1,11 @@
 package moska.rebora.User.Service;
 
+import com.mchange.util.DuplicateElementException;
 import lombok.NoArgsConstructor;
 import moska.rebora.Common.Util;
 import moska.rebora.Enum.EmailAuthKind;
+import moska.rebora.User.DTO.UserEmailDto;
+import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserEmailAuth;
 import moska.rebora.User.Repository.UserEmailAuthRepository;
 import moska.rebora.User.Repository.UserRepository;
@@ -67,6 +70,7 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
      */
     @Transactional
     public void sendSignUpEmail(@Param("userEmail") String userEmail, @Param("verifyNumber") String verifyNumber) {
+
         userEmailAuthRepository.updateExposeFalse(userEmail, EmailAuthKind.SIGNUP);
         String subject = "리보라 인증 메일입니다.";
         StringBuilder stringBuilder = new StringBuilder();
@@ -88,7 +92,7 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
         userEmailAuthRepository.updateExposeFalse(userEmail, EmailAuthKind.PASSWORD);
         int userCount = userRepository.countUSerByUserEmail(userEmail);
         if (userCount == 0) {
-            throw new NullPointerException("가입이 되지 않은 이메일입니다.");
+            throw new NullPointerException("입력하신 이메일을 찾을 수가 없습니다.");
         }
 
         String subject = "리보라 비밀번호 변경 인증 메일입니다.";
@@ -133,39 +137,34 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
      * @return JSONObject
      */
     @Override
-    public JSONObject validationEmailCode(@Param("userEmail") String userEmail,
-                                          @Param("verifyNumber") String verifyNumber,
-                                          @Param("emailAuthKind") EmailAuthKind emailAuthKind
+    public UserEmailDto validationEmailCode(@Param("userEmail") String userEmail,
+                                            @Param("verifyNumber") String verifyNumber,
+                                            @Param("emailAuthKind") EmailAuthKind emailAuthKind
 
     ) {
-        JSONObject jsonObject = new JSONObject();
+
+        UserEmailDto userEmailDto = new UserEmailDto();
         Optional<UserEmailAuth> userEmailAuthOptional = userEmailAuthRepository.getUserEmailAuthByEmailAndExpireYnAndEmailAuthKind(userEmail, true, emailAuthKind);
-        try {
-            if (userEmailAuthOptional.isEmpty()) {
-                throw new NullPointerException("인증 도중 오류가 발생하였습니다. 메일 인증을 다시 시도해주세요.");
-            }
 
-            UserEmailAuth userEmailAuth = userEmailAuthOptional.get();
-            if (passwordEncoder.matches(verifyNumber, userEmailAuth.getVerifyNumber())) {
-
-                String authKey = passwordEncoder.encode(userEmail);
-                userEmailAuth.updateAuthKey(authKey);
-                userEmailAuthRepository.save(userEmailAuth);
-                jsonObject.put("result", true);
-                jsonObject.put("errorCode", null);
-                jsonObject.put("message", null);
-                jsonObject.put("authKey", authKey);
-
-            } else {
-                throw new NullPointerException("인증 번호가 일치하지 않습니다. 다시 시도해주세요");
-            }
-        } catch (NullPointerException e) {
-            jsonObject.put("result", false);
-            jsonObject.put("errorCode", "500");
-            jsonObject.put("message", e.getMessage());
+        if (userEmailAuthOptional.isEmpty()) {
+            throw new NullPointerException("인증 도중 오류가 발생하였습니다. 메일 인증을 다시 시도해주세요.");
         }
 
-        return jsonObject;
+        UserEmailAuth userEmailAuth = userEmailAuthOptional.get();
+        if (passwordEncoder.matches(verifyNumber, userEmailAuth.getVerifyNumber())) {
+
+            String authKey = passwordEncoder.encode(userEmail);
+            userEmailAuth.updateAuthKey(authKey);
+            userEmailAuthRepository.save(userEmailAuth);
+            userEmailDto.setResult(true);
+            userEmailDto.setAuthKey(authKey);
+
+        } else {
+            throw new NullPointerException("인증 번호가 일치하지 않습니다. 다시 시도해주세요");
+        }
+
+
+        return userEmailDto;
     }
 
 

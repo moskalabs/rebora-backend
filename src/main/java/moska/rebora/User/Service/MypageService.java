@@ -1,6 +1,7 @@
 package moska.rebora.User.Service;
 
 import moska.rebora.Common.BaseResponse;
+import moska.rebora.User.DTO.MypageInfoDto;
 import moska.rebora.User.DTO.MypageUpdateDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import net.minidev.json.JSONObject;
@@ -12,7 +13,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 
 public interface MypageService {
 
-    JSONObject info(@Param("userEmail") String userEmail);
+    MypageInfoDto info(@Param("userEmail") String userEmail);
 
     Page<UserRecruitmentListDto> getParticipationHistory(Pageable pageable);
 

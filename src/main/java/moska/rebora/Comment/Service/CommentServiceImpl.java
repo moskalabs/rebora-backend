@@ -12,6 +12,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+import java.util.Optional;
+
 @Service
 public class CommentServiceImpl implements CommentService {
 
@@ -27,7 +30,7 @@ public class CommentServiceImpl implements CommentService {
     /**
      * 코멘트 리스트 가져오기
      *
-     * @param pageable 페이징
+     * @param pageable      페이징
      * @param recruitmentId 모집 아이디
      * @return Page<CommentDto>
      */
@@ -39,9 +42,9 @@ public class CommentServiceImpl implements CommentService {
     /**
      * 코멘트 생성
      *
-     * @param recruitmentId 모집 아이디
+     * @param recruitmentId  모집 아이디
      * @param commentContent 코멘트 내용
-     * @param userEmail 유저 이메일
+     * @param userEmail      유저 이메일
      */
     @Override
     public void createComment(Long recruitmentId, String commentContent, String userEmail) {
@@ -49,11 +52,39 @@ public class CommentServiceImpl implements CommentService {
         User user = userRepository.getUserByUserEmail(userEmail);
         Recruitment recruitment = recruitmentRepository.getRecruitmentById(recruitmentId);
 
+        if(user == null){
+            throw new NullPointerException("존재하지 않는 유저입니다 \n다시 시도해주세요");
+        }
+
+        if(recruitment == null){
+            throw new NullPointerException("존재하지 않는 모집입니다 \n다시 시도해주세요");
+        }
+
         Comment comment = Comment.builder()
                 .user(user)
                 .recruitment(recruitment)
                 .commentContent(commentContent)
                 .build();
+
+        commentRepository.save(comment);
+    }
+
+    @Override
+    public void deleteComment(Long commentId, String userEmail) {
+        Optional<Comment> commentOptional = commentRepository.findById(commentId);
+        User user = userRepository.getUserByUserEmail(userEmail);
+        if (commentOptional.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 댓글입니다.");
+        }
+
+        Comment comment = commentOptional.get();
+        User commentUser = comment.getUser();
+
+        if (!Objects.equals(user.getId(), commentUser.getId())) {
+            throw new NullPointerException("작성자가 일치하지 않습니다.");
+        }
+
+        comment.deleteComment();
 
         commentRepository.save(comment);
     }

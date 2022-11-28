@@ -1,5 +1,6 @@
 package moska.rebora.Movie.Controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.Movie.Service.MovieService;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/movie")
+@Tag(name = "영화")
 public class MovieController {
 
     @Autowired
@@ -28,6 +30,7 @@ public class MovieController {
      * @param category 카테고리
      * @return BasePageResponse
      */
+    @Tag(name = "영화")
     @GetMapping("/getList")
     public BasePageResponse<MoviePageDto> getList(
             @PageableDefault(size = 9,page = 0, sort = "moviePopularCount", direction = Sort.Direction.ASC) Pageable pageable,
@@ -47,6 +50,7 @@ public class MovieController {
      * @param searchWord 검색어
      * @return BasePageResponse
      */
+    @Tag(name = "영화")
     @GetMapping("/getSearchList")
     public BasePageResponse<MoviePageDto> getSearchList(
             @PageableDefault(size = 10, page = 0) Pageable pageable,

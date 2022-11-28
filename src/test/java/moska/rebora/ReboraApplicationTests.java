@@ -33,9 +33,11 @@ import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -463,5 +465,11 @@ class ReboraApplicationTests {
         }
 
         brandMovieRepository.saveAll(brandMovieList);
+    }
+
+    @Test
+    void seeKey(){
+
+
     }
 }

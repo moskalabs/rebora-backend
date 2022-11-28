@@ -1,5 +1,6 @@
 package moska.rebora.Payment.Controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import moska.rebora.Enum.PaymentMethod;
 import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Payment.Entity.Payment;
@@ -14,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @RestController
+@Tag(name = "결제")
 public class PaymentController {
 
     @Autowired
@@ -22,6 +24,7 @@ public class PaymentController {
     @Autowired
     PaymentRepository paymentRepository;
 
+    @Tag(name = "결제")
     @PostMapping("/api/payment/test")
     public void test(){
         UserRecruitment userRecruitment = userRecruitmentRepository.findById(3000004L).get();

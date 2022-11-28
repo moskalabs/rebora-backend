@@ -1,5 +1,6 @@
 package moska.rebora.User.Service;
 
+import com.mchange.util.DuplicateElementException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Common.Util;
@@ -74,7 +75,11 @@ public class UserServiceImpl implements UserService {
     public UserLoginDto login(@Param("userEmail") String userEmail, @Param("password") String password) {
         User user = userRepository.getUserByUserEmail(userEmail);
 
-        if(!user.getUserUseYn()){
+        if (user == null) {
+            throw new NullPointerException("아이디가 일치하지 않습니다. \n입력하신 내용을 다시 확인해 주세요.");
+        }
+
+        if (!user.getUserUseYn()) {
             throw new NullPointerException("탈퇴된 회원입니다.");
         }
 
@@ -170,9 +175,7 @@ public class UserServiceImpl implements UserService {
                 baseResponse.setResult(true);
             } else {
                 if (userRepository.countUSerByUserEmail(userEmail) >= 1) {
-                    baseResponse.setResult(false);
-                    baseResponse.setErrorCode("409");
-                    baseResponse.setMessage("이미 존재하는 이메일입니다.");
+                    throw new DuplicateElementException("이미 가입된 아이디 입니다. \n로그인을 진행해주세요.");
                 } else {
                     userEmailAuthService.sendSignUpEmail(userEmail, verifyNumber);
                     baseResponse.setResult(true);
@@ -234,7 +237,7 @@ public class UserServiceImpl implements UserService {
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
-        return  baseResponse;
+        return baseResponse;
     }
 
     /**

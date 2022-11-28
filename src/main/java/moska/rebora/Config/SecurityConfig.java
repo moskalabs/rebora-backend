@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .antMatchers("/api/user/checkRedundancyNickname").permitAll()
                 .antMatchers("/api/user/changePassword").permitAll()
                 .antMatchers("/api/user/validationEmailCode").permitAll()
+                .antMatchers("/api/user/oath/test").permitAll()
                 .antMatchers("/api/common/**").permitAll()
                 .antMatchers("/api/user/**").authenticated()
                 .antMatchers("/api/movie/**").authenticated()

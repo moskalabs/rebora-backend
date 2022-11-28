@@ -8,12 +8,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
-import moska.rebora.User.DTO.MypageUpdateDto;
-import moska.rebora.User.DTO.UserDto;
-import moska.rebora.User.DTO.UserLoginDto;
-import moska.rebora.User.DTO.UserRecruitmentDtoListResponse;
+import moska.rebora.User.DTO.*;
 import moska.rebora.User.Service.MypageService;
 import moska.rebora.User.Service.UserService;
 import net.minidev.json.JSONObject;
@@ -44,9 +43,9 @@ public class MypageController {
      * @return JSONObject
      */
     @Tag(name = "마이페이지", description = "마이페이지 정보 가져오기")
-    @Operation(summary = "마이페이지 정보 가져오기")
+    @Operation(summary = "마이페이지 정보 가져오기", description = "참여 내역 횟수 및 내가 모집한 모집 개수 가져오기")
     @GetMapping("/info")
-    public JSONObject info() {
+    public MypageInfoDto info() {
         return mypageService.info(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
@@ -57,6 +56,7 @@ public class MypageController {
      * @return UserRecruitmentDtoListResponse
      */
     @Tag(name = "마이페이지")
+    @Operation(summary = "내가 참여한 모집 가져오기  ", description = "내가 참여한 모집 가져오기 모든 상태의 모집 가져오기")
     @GetMapping("/getParticipationHistory")
     public UserRecruitmentDtoListResponse getParticipationHistory(Pageable pageable) {
 
@@ -73,6 +73,7 @@ public class MypageController {
      * @return UserRecruitmentDtoListResponse
      */
     @Tag(name = "마이페이지")
+    @Operation(summary = "내가 모집한 모집 가져오기")
     @GetMapping("/getMyRecruiter")
     public UserRecruitmentDtoListResponse getMyRecruiter(
             Pageable pageable
@@ -93,6 +94,7 @@ public class MypageController {
      */
     @Tag(name = "마이페이지")
     @PutMapping("/updatePushYn/{userId}")
+    @Operation(summary = "푸쉬 여부 업데이트")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true),
             @ApiImplicitParam(name = "userPushYn", value = "유저 푸쉬 여부", required = true),
@@ -111,8 +113,15 @@ public class MypageController {
     }
 
     @Tag(name = "마이페이지")
+    @Operation(summary = "야간 푸쉬 여부 업데이트")
     @PutMapping("/updatePushNightYn/{userId}")
-    public BaseResponse updatePushNightYn(@PathVariable Long userId, @RequestParam("userPushYn") Boolean userPushNightYn) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "유저 아이디", required = false),
+            @ApiImplicitParam(name = "userPushNightYn", value = "야간 푸쉬 여부", required = false),
+    })
+    public BaseResponse updatePushNightYn(
+            @PathVariable Long userId,
+            @RequestParam("userPushYn") Boolean userPushNightYn) {
         BaseResponse baseResponse = new BaseResponse();
         mypageService.updatePushNightYn(userId, userPushNightYn, SecurityContextHolder.getContext().getAuthentication().getName());
         baseResponse.setResult(true);
@@ -125,6 +134,7 @@ public class MypageController {
      * @return getMyInfo
      */
     @Tag(name = "마이페이지")
+    @Operation(summary = "마이페이지 내 정보 가져오기")
     @GetMapping("/getMyInfo")
     public UserDto getMyInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -145,6 +155,13 @@ public class MypageController {
      * @throws SQLIntegrityConstraintViolationException 중복일 경우 Exception
      */
     @Tag(name = "마이페이지")
+    @Operation(summary = "유저 정보 업데이트")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userNickname", value = "유저 닉네임", required = false),
+            @ApiImplicitParam(name = "currentPassword", value = "현재 비밀번호", required = false),
+            @ApiImplicitParam(name = "changePassword", value = "비밀번호 변경", required = false),
+            @ApiImplicitParam(name = "file", value = "유저 이미지", required = false)
+    })
     @PutMapping("/changeMyInfo/{userId}")
     public BaseResponse changeMyInfo(@PathVariable Long userId,
                                      @RequestParam(defaultValue = "", required = false) String userNickname,

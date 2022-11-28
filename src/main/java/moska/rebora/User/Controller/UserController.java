@@ -14,6 +14,7 @@ import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.EmailAuthKind;
 import moska.rebora.Main.Dto.MainDto;
 import moska.rebora.User.DTO.UserDto;
+import moska.rebora.User.DTO.UserEmailDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Repository.UserRepository;
@@ -146,6 +147,7 @@ public class UserController {
      */
     @Tag(name = "유저")
     @Operation(summary = "닉네임 체크")
+    @ApiImplicitParam(name = "userNickname", value = "유저 닉네임", required = true)
     @GetMapping("/checkRedundancyNickname")
     BaseResponse checkRedundancyNickname(@RequestParam("userNickname") String userNickname) {
         return userService.checkRedundancyNickname(userNickname);
@@ -160,7 +162,12 @@ public class UserController {
      * @return UserLoginDto
      */
     @Tag(name = "유저")
-    @Operation(summary = "비밀번호 변경")
+    @Operation(summary = "비밀번호 변경", description = "30분 내로 인증키로 인증해야 가능합니다.")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userEmail", value = "유저 이메일", required = true),
+            @ApiImplicitParam(name = "password", value = "비밀번호", required = true),
+            @ApiImplicitParam(name = "authKey", value = "인증키", required = true)
+    })
     @PostMapping("/changePassword")
     BaseResponse changePassword(@RequestParam("userEmail") String userEmail,
                                 @RequestParam("password") String password,
@@ -177,17 +184,24 @@ public class UserController {
      * @param emailAuthKind 유저 인증 종류
      * @return JSONObject
      */
+
     @Tag(name = "유저")
     @Operation(summary = "인증이메일 검사")
     @PostMapping("/validationEmailCode")
-    JSONObject validationEmailCode(@RequestParam("userEmail") String userEmail,
-                                   @RequestParam("verifyNumber") String verifyNumber,
-                                   @Param("emailAuthKind") EmailAuthKind emailAuthKind) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userEmail", value = "유저 이메일", required = true),
+            @ApiImplicitParam(name = "verifyNumber", value = "인증 번호", required = true),
+            @ApiImplicitParam(name = "emailAuthKind", value = "인증 종류", required = true)
+    })
+    UserEmailDto validationEmailCode(@RequestParam("userEmail") String userEmail,
+                                     @RequestParam("verifyNumber") String verifyNumber,
+                                     @RequestParam("emailAuthKind") EmailAuthKind emailAuthKind) {
         return userEmailAuthService.validationEmailCode(userEmail, verifyNumber, emailAuthKind);
     }
 
     @Tag(name = "유저", description = "회원 탈퇴")
     @Operation(summary = "회원 탈퇴")
+    @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true)
     @PutMapping("/withdrawal/{userId}")
     BaseResponse withdrawal(@PathVariable Long userId){
 

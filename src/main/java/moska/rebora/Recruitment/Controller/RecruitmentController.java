@@ -1,5 +1,6 @@
 package moska.rebora.Recruitment.Controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
@@ -22,6 +23,7 @@ import static org.springframework.util.StringUtils.hasText;
 @RestController
 @RequestMapping("/api/recruitment")
 @Slf4j
+@Tag(name = "모집")
 public class RecruitmentController {
 
     @Autowired
@@ -35,6 +37,7 @@ public class RecruitmentController {
      * @param recruitmentStatus 모집 상태
      * @return BasePageResponse<UserRecruitmentListDto>
      */
+    @Tag(name = "모집")
     @GetMapping("/getList")
     public BasePageResponse<UserRecruitmentListDto> getList(
             @PageableDefault(page = 0, size = 10) Pageable pageable,
@@ -65,6 +68,7 @@ public class RecruitmentController {
      * @param pageable 페이징
      * @return BasePageResponse<UserRecruitmentListDto>
      */
+    @Tag(name = "모집")
     @GetMapping("/getListByMovie/{movieId}")
     public BasePageResponse<UserRecruitmentListDto> getListByMovie(
             @PathVariable Long movieId,
@@ -85,6 +89,7 @@ public class RecruitmentController {
      * @param pageable   페이징
      * @return BasePageResponse<UserRecruitmentListDto>
      */
+    @Tag(name = "모집")
     @GetMapping("/searchList")
     public BasePageResponse<UserRecruitmentListDto> searchList(
             @RequestParam(required = false, defaultValue = "") String searchWord,
@@ -108,6 +113,7 @@ public class RecruitmentController {
      * @param recruitmentId 모집 아이디
      * @return BaseInfoResponse<RecruitmentInfoDto>
      */
+    @Tag(name = "모집")
     @GetMapping("/info/{recruitmentId}")
     public BaseInfoResponse<RecruitmentInfoDto> info(@PathVariable Long recruitmentId) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -127,6 +133,7 @@ public class RecruitmentController {
      * @param bannerMainText        배너 메인 텍스트
      * @return JSONObject
      */
+    @Tag(name = "모집")
     @PostMapping("/createRecruitment")
     public JSONObject createRecruitment(
             @RequestParam Long movieId,
@@ -153,6 +160,7 @@ public class RecruitmentController {
      * @param userRecruitmentPeople 모집 신청 인원
      * @return BaseResponse
      */
+    @Tag(name = "모집")
     @PostMapping("/applyRecruitment/{recruitmentId}")
     public BaseResponse applyRecruitment(
             @PathVariable Long recruitmentId,
@@ -174,6 +182,7 @@ public class RecruitmentController {
      * @param recruitmentId 모집 PK
      * @return BaseResponse
      */
+    @Tag(name = "모집")
     @PutMapping("/cancelRecruitment/{recruitmentId}")
     public BaseResponse cancelRecruitment(@PathVariable Long recruitmentId) {
         BaseResponse baseResponse = new BaseResponse();

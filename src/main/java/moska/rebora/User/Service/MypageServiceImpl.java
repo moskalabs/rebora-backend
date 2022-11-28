@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Common.Service.FileUploadService;
 import moska.rebora.Common.Util;
+import moska.rebora.User.DTO.MypageInfoDto;
 import moska.rebora.User.DTO.MypageUpdateDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -53,14 +54,13 @@ public class MypageServiceImpl implements MypageService {
      * @return JSONObject
      */
     @Override
-    public JSONObject info(@Param("userEmail") String userEmail) {
+    public MypageInfoDto info(@Param("userEmail") String userEmail) {
+        MypageInfoDto mypageInfoDto = new MypageInfoDto();
 
-        JSONObject jsonObject = new JSONObject();
-
-        jsonObject.put("result", true);
-        jsonObject.put("countParticipationHistory", userRecruitmentRepository.countParticipationHistory(userEmail));
-        jsonObject.put("countMyRecruiter", userRecruitmentRepository.countMyRecruiter(userEmail));
-        return jsonObject;
+        mypageInfoDto.setResult(true);
+        mypageInfoDto.setCountParticipationHistory(userRecruitmentRepository.countParticipationHistory(userEmail));
+        mypageInfoDto.setCountMyRecruiter(userRecruitmentRepository.countMyRecruiter(userEmail));
+        return mypageInfoDto;
     }
 
     /**

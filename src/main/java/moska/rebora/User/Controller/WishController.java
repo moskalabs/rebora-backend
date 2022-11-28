@@ -1,5 +1,9 @@
 package moska.rebora.User.Controller;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Movie.Dto.MoviePageDto;
@@ -13,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/wish")
+@Tag(name = "찜하기", description = "모집 및 영화 찜하기")
 public class WishController {
 
     @Autowired
@@ -26,7 +31,14 @@ public class WishController {
      * @param userRecruitmentWish 모집 찜하기
      * @return BaseResponse
      */
+    @Tag(name = "찜하기")
+    @Operation(summary = "모집 찜하기")
     @PostMapping("/wishRecruitment")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userRecruitmentId", value = "유저_모집 아이디", required = true),
+            @ApiImplicitParam(name = "recruitmentId", value = "모집 아이디", required = true),
+            @ApiImplicitParam(name = "userRecruitmentWish", value = "찜 여부", required = true),
+    })
     public BaseResponse wishRecruitment(
             @RequestParam(required = false) Long userRecruitmentId,
             @RequestParam Long recruitmentId,
@@ -50,6 +62,13 @@ public class WishController {
      * @return BaseResponse
      */
     @PostMapping("/wishMovie")
+    @Tag(name = "찜하기")
+    @Operation(summary = "영화 찜하기")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userMovieId", value = "유저_영화 아이디", required = true),
+            @ApiImplicitParam(name = "movieId", value = "영화 아이디", required = true),
+            @ApiImplicitParam(name = "userMovieWish", value = "찜 여부", required = true),
+    })
     public BaseResponse wishMovie(
             @RequestParam(required = false) Long userMovieId,
             @RequestParam Long movieId,
@@ -70,6 +89,8 @@ public class WishController {
      * @param pageable 페이징
      * @return BasePageResponse<UserRecruitmentListDto>
      */
+    @Tag(name = "찜하기")
+    @Operation(summary = "찜한 모집 리스트 가져오기")
     @GetMapping("/getRecruitmentList")
     public BasePageResponse<UserRecruitmentListDto> getRecruitmentList(@PageableDefault Pageable pageable) {
 
@@ -80,6 +101,8 @@ public class WishController {
         return basePageResponse;
     }
 
+    @Tag(name = "찜하기")
+    @Operation(summary = "찜한 영화 리스트 가져오기")
     @GetMapping("/getMovieList")
     public BasePageResponse<MoviePageDto> getMovieList(@PageableDefault Pageable pageable){
 

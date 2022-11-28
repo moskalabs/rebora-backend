@@ -34,6 +34,10 @@ public class Comment extends BaseEntity {
     @JoinColumn(name = "recruitment_id")
     private Recruitment recruitment;
 
+    public void deleteComment(){
+        commentUseYn = false;
+    }
+
     @Builder
     public Comment(String commentContent, User user, Recruitment recruitment) {
         this.commentContent = commentContent;

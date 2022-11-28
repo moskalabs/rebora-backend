@@ -1,5 +1,6 @@
 package moska.rebora.Comment.Conroller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import moska.rebora.Comment.Dto.CommentDto;
 import moska.rebora.Comment.Service.CommentService;
 import moska.rebora.Common.BasePageResponse;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/comment")
+@Tag(name = "댓글")
 public class CommentController {
 
     @Autowired
@@ -24,6 +26,7 @@ public class CommentController {
      * @param recruitmentId 모집 아이디
      * @return BasePageResponse<CommentDto>
      */
+    @Tag(name = "댓글")
     @GetMapping("/getCommentList/{recruitmentId}")
     public BasePageResponse<CommentDto> getCommentList(@PageableDefault(size = 10, page = 0) Pageable pageable,
                                                        @PathVariable Long recruitmentId) {
@@ -42,6 +45,7 @@ public class CommentController {
      * @param commentContent 코멘트 내용
      * @return BaseResponse
      */
+    @Tag(name = "댓글")
     @PostMapping("/createComment/{recruitmentId}")
     public BaseResponse createComment(
             @PathVariable Long recruitmentId,
@@ -52,6 +56,20 @@ public class CommentController {
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
+
+        return baseResponse;
+    }
+
+    @Tag(name = "댓글")
+    @DeleteMapping("/deleteComment/{commentId}")
+    public BaseResponse deleteComment(
+            @PathVariable Long commentId
+    ) {
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+        commentService.deleteComment(commentId, userEmail);
 
         return baseResponse;
     }
