@@ -20,6 +20,8 @@ public class TheaterPageDto{
     private String theaterDay;
     private String theaterCinemaBrandName;
     private String theaterCinemaName;
+    private String theaterRegion;
+    private Integer theaterPrice;
     private Integer theaterMaxPeople;
     private Integer theaterMinPeople;
     private Integer theaterTime;
@@ -28,13 +30,29 @@ public class TheaterPageDto{
     private RecruitmentStatus recruitmentStatus;
 
     @QueryProjection
-    public TheaterPageDto(Long theaterId, String theaterName, LocalDateTime theaterStartTime, LocalDateTime theaterEndTime, String theaterDay, String theaterCinemaBrandName, String theaterCinemaName, Integer theaterMaxPeople, Integer theaterMinPeople, Integer theaterTime, Long recruitmentId, RecruitmentStatus recruitmentStatus) {
+    public TheaterPageDto(Long theaterId,
+                          String theaterName,
+                          LocalDateTime theaterStartTime,
+                          LocalDateTime theaterEndTime,
+                          String theaterDay,
+                          String theaterRegion,
+                          Integer theaterPrice,
+                          String theaterCinemaBrandName,
+                          String theaterCinemaName,
+                          Integer theaterMaxPeople,
+                          Integer theaterMinPeople,
+                          Integer theaterTime,
+                          Long recruitmentId,
+                          RecruitmentStatus recruitmentStatus
+    ) {
         this.theaterId = theaterId;
         this.theaterName = theaterName;
         this.theaterStartTime = theaterStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         this.theaterEndTime = theaterEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
         this.theaterDay = theaterDay;
         this.theaterCinemaBrandName = theaterCinemaBrandName;
+        this.theaterRegion = theaterRegion;
+        this.theaterPrice = theaterPrice;
         this.theaterCinemaName = theaterCinemaName;
         this.theaterMaxPeople = theaterMaxPeople;
         this.theaterMinPeople = theaterMinPeople;

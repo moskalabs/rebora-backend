@@ -1,6 +1,9 @@
 package moska.rebora;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Admin.Dto.AdminRegionDto;
 import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Entity.MainBanner;
 import moska.rebora.Banner.Repository.BannerRepository;
@@ -31,6 +34,9 @@ import moska.rebora.User.Repository.PolicyRepository;
 import moska.rebora.User.Repository.UserMovieRepository;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,11 +46,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 @Slf4j
@@ -365,10 +378,8 @@ class ReboraApplicationTests {
 
         Payment payment = Payment.builder()
                 .id(stringBuilder.toString())
-                .paymentKey("paymentKey")
                 .paymentContent("예약 결제")
                 .paymentAmount(7000)
-                .paymentMethod(PaymentMethod.CARD)
                 .paymentStatus(PaymentStatus.COMPLETE)
                 .userRecruitment(userRecruitment)
                 .build();
@@ -468,8 +479,119 @@ class ReboraApplicationTests {
     }
 
     @Test
-    void seeKey(){
+    void seeKey() {
+        Movie movie = movieRepository.getMovieById(1L);
+        Category category = categoryRepository.getReferenceById(15L);
+        MovieCategory movieCategory = MovieCategory
+                .builder()
+                .movie(movie)
+                .category(category)
+                .build();
 
+        movieCategoryRepository.save(movieCategory);
+    }
 
+    @Test
+    void seeTheaterRegion() {
+        String date = "2022-12-08T10:29:43+09:00";
+        String[] dateList = date.split("\\+");
+        LocalDateTime dateTime = LocalDateTime.parse(dateList[0]);
+        log.info("dateTime={}", dateTime);
+    }
+
+    @Test
+    @Transactional
+    void testPay() throws IOException, InterruptedException {
+
+        User user = userTestRepository.getUserById(1L);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> params = new HashMap<>();
+        params.put("customerKey", user.getUserCustomerId());
+        params.put("amount", "1000");
+        params.put("orderId", "recruitment_1_2");
+        params.put("orderName", "모집_1_2명");
+        String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
+        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.tosspayments.com/v1/billing/" + user.getUserBillingKey()))
+                .header("Authorization", "Basic dGVzdF9za196WExrS0V5cE5BcldtbzUwblgzbG1lYXhZRzVSOg==")
+                .header("Content-Type", "application/json")
+                .method("POST", body)
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        log.info(String.valueOf(response.statusCode()));
+        log.info(response.body());
+    }
+
+    @Test
+    @Transactional
+    void testImport() throws IOException, InterruptedException, ParseException {
+
+        String auth = getAuth();
+        log.info("auto={}", auth);
+        User user = userTestRepository.getUserById(1L);
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> schedules = new HashMap<>();
+        schedules.put("schedule_at", "1670488500000");
+        schedules.put("amount", "1000");
+        schedules.put("merchant_uid", "recruitment_1_2");
+        schedules.put("name", "테스트1");
+        schedules.put("currency", "KRW");
+        params.put("customer_uid", user.getUserBillingKey());
+        params.put("schedules", schedules);
+        String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
+        log.info("requestBody={}", requestBody);
+        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.iamport.kr/subscribe/payments/schedule"))
+                .header("Authorization", "Bearer "+auth)
+                .header("Content-Type", "application/json")
+                .method("POST", body)
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        log.info(String.valueOf(response.statusCode()));
+        log.info(response.body());
+    }
+
+    String getAuth() throws IOException, ParseException, InterruptedException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, String> params = new HashMap<>();
+        params.put("imp_key", "1552251027035377");
+        params.put("imp_secret", "FBVSWCbJTmWqda0ZpZbPZTuhFhLOWyIvTnybuyAmQWACvdZeszaUY7Pp4uLgbNy1RTo3BviNFmAb54f4");
+        String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
+        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("https://api.iamport.kr/users/getToken"))
+                .header("Authorization", "Bearer dGVzdF9za196WExrS0V5cE5BcldtbzUwblgzbG1lYXhZRzVSOg==")
+                .header("Content-Type", "application/json")
+                .method("POST", body)
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        JSONParser jsonParser = new JSONParser();
+        JSONObject jsonObj = (JSONObject) jsonParser.parse(response.body());
+        JSONObject responseJson = (JSONObject) jsonObj.get("response");
+        return String.valueOf(responseJson.get("access_token"));
+    }
+
+    @Test
+    void testTimeStamp(){
+        long inserted = 1670566562L;
+        LocalDateTime authenticatedAt =
+                LocalDateTime.ofInstant(Instant.ofEpochSecond(inserted), TimeZone
+                        .getDefault().toZoneId());
+        log.info("authenticatedAt={}", authenticatedAt);
+    }
+
+    @Test
+    void testRecruitment(){
+        Recruitment recruitment = recruitmentRepository.getRecruitmentById(6L);
+        List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getUserRecruitmentByRecruitment(recruitment);
+        log.info("size={}", userRecruitmentList.size());
     }
 }

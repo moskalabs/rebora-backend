@@ -32,7 +32,7 @@ public class PasswordAuthAuthenticationManager implements AuthenticationProvider
                 throw new BadCredentialsException("비밀번호가 일치하지 않습니다. \n입력하신 내용을 다시 확인해 주세요.");
             }
             PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(user.getUserEmail(), user.getPassword(),
-                    Collections.singleton(new SimpleGrantedAuthority("NORMAL")));
+                    Collections.singleton(new SimpleGrantedAuthority(user.getUserGrade().name())));
 
             token.setId(user.getId());
             token.setRole(user.getUserGrade().name());

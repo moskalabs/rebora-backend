@@ -16,6 +16,7 @@ import java.util.List;
 public class RecruitmentInfoDto {
     private String movieName;
     private String movieRecruitmentImage;
+    private Integer movieRunningTime;
     private Long movieId;
 
     private Long theaterId;
@@ -24,6 +25,7 @@ public class RecruitmentInfoDto {
     private String theaterDay;
     private Integer theaterMaxPeople;
     private Integer theaterMinPeople;
+    private String theaterName;
     private String theaterCinemaName;
     private String theaterCinemaBrandName;
     private String theaterRegion;
@@ -36,6 +38,7 @@ public class RecruitmentInfoDto {
     private Long recruitmentId;
     private LocalDateTime recruitmentEndDate;
     private RecruitmentStatus recruitmentStatus;
+    private Boolean recruitmentExposeYn;
     private String recruiterNickname;
     private String recruiterUserImage;
     private Integer recruitmentPeople;

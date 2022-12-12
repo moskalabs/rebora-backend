@@ -55,7 +55,7 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .leftJoin(userRecruitment.recruitment, recruitment)
                 .where(
                         user.userEmail.eq(userEmail),
-                        userRecruitment.userRecruitmentWish.eq(true)
+                        userRecruitment.userRecruitmentYn.eq(true)
                 )
                 .fetchOne();
     }
@@ -192,9 +192,10 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
     public List<UserRecruitment> getUserRecruitmentByRecruitment(Recruitment recruitment) {
         return queryFactory.select(userRecruitment)
                 .from(userRecruitment)
-                .join(userRecruitment.user).fetchJoin()
+                .join(userRecruitment.user, user).fetchJoin()
                 .where(userRecruitment.recruitment.eq(recruitment),
-                        userRecruitment.userRecruitmentYn.eq(true)
+                        userRecruitment.userRecruitmentYn.eq(true),
+                        user.userEmail.ne(recruitment.getCreatedBy())
                 )
                 .fetch();
     }

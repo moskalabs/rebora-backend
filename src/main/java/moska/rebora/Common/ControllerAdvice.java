@@ -1,10 +1,12 @@
 package moska.rebora.Common;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.mchange.util.DuplicateElementException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Enum.ErrorCode;
+import org.json.simple.parser.ParseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -68,6 +70,11 @@ public class ControllerAdvice{
         return handleExceptionInternal(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTER_SERVER_ERROR.getStatus() , initMessage);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    protected ResponseEntity<Object> handlerRuntimeException(RuntimeException e) {
+        return handleExceptionInternal(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTER_SERVER_ERROR.getStatus() , e.getMessage());
+    }
+
     @ExceptionHandler(NullPointerException.class)
     protected ResponseEntity<Object> handlerNullPointerException(NullPointerException e) {
         return handleExceptionInternal(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTER_SERVER_ERROR.getStatus(), e.getMessage());
@@ -84,6 +91,16 @@ public class ControllerAdvice{
     protected ResponseEntity<Object> handlerBadCredentialsException(BadCredentialsException e) {
         initMessage = e.getMessage();
         return handleExceptionInternal(HttpStatus.UNAUTHORIZED, ErrorCode.JWT_UNAUTHORIZED.getStatus(), initMessage);
+    }
+
+    @ExceptionHandler(JsonProcessingException.class)
+    protected ResponseEntity<Object> handlerJsonProcessingException(JsonProcessingException e) {
+        return handleExceptionInternal(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTER_SERVER_ERROR.getStatus(), e.getMessage());
+    }
+
+    @ExceptionHandler(ParseException.class)
+    protected ResponseEntity<Object> handlerJParseException(ParseException e) {
+        return handleExceptionInternal(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.INTER_SERVER_ERROR.getStatus(), e.getMessage());
     }
 
     //예외 처리

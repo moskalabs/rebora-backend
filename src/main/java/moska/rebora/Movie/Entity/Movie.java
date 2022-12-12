@@ -9,6 +9,7 @@ import moska.rebora.Common.BaseEntity;
 import moska.rebora.Enum.MovieRating;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.Entity.UserMovie;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -57,7 +58,7 @@ public class Movie extends BaseEntity {
     @Column
     private Integer movieStarRating;
 
-    public void addMoviePopularCount(){
+    public void addMoviePopularCount() {
         this.moviePopularCount += 1;
     }
 
@@ -73,8 +74,42 @@ public class Movie extends BaseEntity {
     @OneToMany(mappedBy = "movie")
     List<BrandMovie> cinemaBrandMovieList = new ArrayList<>();
 
+    public void changeMoviePopularCount(int moviePopularCount) {
+        this.moviePopularCount = moviePopularCount / 10;
+    }
+
+    public void changeMovieImage(String movieImage){
+        this.movieImage = movieImage;
+    }
+
+    public void changeMovieBannerImage(String movieBannerImage){
+        this.movieBannerImage = movieBannerImage;
+    }
+
+    public void changeMovieRecruitmentImage(String movieRecruitmentImage){
+        this.movieRecruitmentImage = movieRecruitmentImage;
+    }
+
+    public void updateMovie(
+            String movieName,
+            String movieRating,
+            String movieDirector,
+            Integer movieStarRating,
+            String movieDetailLink,
+            Integer moviePopularCount,
+            Integer movieRunningTime
+    ) {
+        this.movieName = movieName;
+        this.movieRating = MovieRating.valueOf(movieRating);
+        this.movieDirector = movieDirector;
+        this.movieStarRating = movieStarRating;
+        this.movieDetailLink = movieDetailLink;
+        this.moviePopularCount = moviePopularCount;
+        this.movieRunningTime = movieRunningTime;
+    }
+
     @Builder
-    public Movie(String movieName, MovieRating movieRating, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList,String movieRecruitmentImage) {
+    public Movie(String movieName, MovieRating movieRating, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList, String movieRecruitmentImage) {
         this.movieName = movieName;
         this.movieRating = movieRating;
         this.movieDirector = movieDirector;

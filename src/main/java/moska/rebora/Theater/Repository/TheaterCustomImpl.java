@@ -10,7 +10,6 @@ import moska.rebora.Theater.Dto.QTheaterPageDto;
 import moska.rebora.Theater.Dto.TheaterPageDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import javax.persistence.EntityManager;
@@ -76,6 +75,8 @@ public class TheaterCustomImpl implements TheaterCustom {
                         theater.theaterStartDatetime.as("theaterStartTime"),
                         theater.theaterEndDatetime.as("theaterEndTime"),
                         theater.theaterDay,
+                        theater.theaterRegion,
+                        theater.theaterPrice,
                         theater.theaterCinemaBrandName,
                         theater.theaterCinemaName,
                         theater.theaterMaxPeople,

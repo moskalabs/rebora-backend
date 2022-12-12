@@ -23,6 +23,8 @@ public class MoviePageDto{
     private String movieImage;
     @Schema(description = "영화 배너 이미지 경로")
     private String movieBannerImage;
+    @Schema(description = "영화 모집 이미지")
+    private String movieRecruitmentImage;
     @Schema(description = "영화 상세 경로")
     private String movieDetailLink;
     @Schema(description = "영화 상영시간")

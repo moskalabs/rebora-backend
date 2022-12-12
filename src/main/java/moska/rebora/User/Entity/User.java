@@ -3,7 +3,9 @@ package moska.rebora.User.Entity;
 import lombok.*;
 import moska.rebora.Common.BaseTimeEntity;
 import moska.rebora.Enum.UserGrade;
+import moska.rebora.Enum.UserSnsKind;
 import org.hibernate.annotations.Comment;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -69,9 +71,14 @@ public class User extends BaseTimeEntity {
     @Comment("유저 빌링 키")
     private String userBillingKey;
 
+    @Column
+    @Comment("유저 고객 아이디")
+    private String userCustomerId;
+
+    @Enumerated(value = EnumType.STRING)
     @Column(length = 10)
     @Comment("유저 SNS 종류")
-    private String userSnsKind;
+    private UserSnsKind userSnsKind;
 
     @Column
     @Comment("유저 SNS ID")
@@ -79,6 +86,10 @@ public class User extends BaseTimeEntity {
 
     public void changePassword(String password) {
         this.password = password;
+    }
+
+    public void changeUseYn(Boolean userUseYn) {
+        this.userUseYn = userUseYn;
     }
 
     public void changePushYn(Boolean userPushYn) {
@@ -106,12 +117,35 @@ public class User extends BaseTimeEntity {
         }
     }
 
-    public void withdrawalUser(){
+    public void changeUserBillingKey(String userBillingKey, String userCustomerId) {
+        this.userBillingKey = userBillingKey;
+        this.userCustomerId = userCustomerId;
+    }
+
+    public void changeAdminUserInfo(
+            String userEmail,
+            String userName,
+            String userImage,
+            Boolean userPushYn,
+            Boolean userPushNightYn,
+            Boolean userUseYn,
+            String userGrade
+    ) {
+        this.userEmail = userEmail;
+        this.userName = userName;
+        this.userImage = userImage;
+        this.userPushYn = userPushYn;
+        this.userPushNightYn = userPushNightYn;
+        this.userUseYn = userUseYn;
+        this.userGrade = UserGrade.valueOf(userGrade);
+    }
+
+    public void withdrawalUser() {
         this.userUseYn = false;
     }
 
     @Builder
-    public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userSnsKind, String userSnsId) {
+    public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, UserSnsKind userSnsKind, String userSnsId) {
         this.userEmail = userEmail;
         this.password = password;
         this.userName = userName;

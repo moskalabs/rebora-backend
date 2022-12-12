@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.UserGrade;
+import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.User.Entity.User;
 
 @EqualsAndHashCode(callSuper = true)
@@ -32,7 +33,7 @@ public class UserDto extends BaseResponse {
     @Schema(description = "유저 빌링 키")
     private String userBillingKey;
     @Schema(description = "유저 SNS 종류")
-    private String userSnsKind;
+    private UserSnsKind userSnsKind;
     @Schema(description = "유저 SNS 아이디")
     private String userSnsId;
     @Schema(description = "알림 횟수")

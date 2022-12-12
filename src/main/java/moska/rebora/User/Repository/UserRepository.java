@@ -1,5 +1,6 @@
 package moska.rebora.User.Repository;
 
+import moska.rebora.Admin.Repository.UserAdmin;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,8 +10,9 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
+import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long>, UserCustom {
+public interface UserRepository extends JpaRepository<User, Long>, UserCustom , UserAdmin {
 
     User getUserById(Long id);
 

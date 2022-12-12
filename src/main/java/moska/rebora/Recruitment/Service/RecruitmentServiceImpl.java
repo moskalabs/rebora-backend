@@ -14,6 +14,8 @@ import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Notification.Service.NotificationService;
+import moska.rebora.Payment.Repository.PaymentRepository;
+import moska.rebora.Payment.Service.PaymentService;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
@@ -74,6 +76,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     @Autowired
     AsyncTaskService asyncTaskService;
+
+    @Autowired
+    PaymentService paymentService;
 
     /**
      * 리스트 가져오기
@@ -197,18 +202,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             }
         }
 
-
-        UserRecruitment userRecruitment = UserRecruitment
-                .builder()
-                .recruitment(recruitment)
-                .userRecruitmentYn(true)
-                .userRecruitmentPeople(userRecruitmentPeople)
-                .userRecruitmentWish(false)
-                .user(user)
-                .build();
-
-
-        userRecruitmentRepository.save(userRecruitment);
+        Boolean result = paymentService.paymentConfirmMovie(user, recruitment, userRecruitmentPeople);
+        if(!result){
+            throw new RuntimeException("결제 도중 오류가 발생 했습니다 다시 시도해주세요.");
+        }
         theaterRepository.save(theater);
         movieRepository.save(movie);
 

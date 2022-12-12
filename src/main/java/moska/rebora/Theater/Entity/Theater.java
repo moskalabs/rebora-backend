@@ -65,6 +65,21 @@ public class Theater extends BaseEntity {
         this.recruitment = recruitment;
     }
 
+    public void updateTheater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Brand brand) {
+        this.theaterName = theaterName;
+        this.theaterStartDatetime = theaterStartDatetime;
+        this.theaterEndDatetime = theaterEndDatetime;
+        this.theaterDay = theaterDay;
+        this.theaterMaxPeople = theaterMaxPeople;
+        this.theaterMinPeople = theaterMinPeople;
+        this.theaterCinemaName = theaterCinemaName;
+        this.theaterCinemaBrandName = theaterCinemaBrandName;
+        this.theaterRegion = theaterRegion;
+        this.theaterPrice = theaterPrice;
+        this.theaterTime = theaterTime;
+        this.brand = brand;
+    }
+
     @Builder
     public Theater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Recruitment recruitment, Brand brand) {
         this.theaterName = theaterName;

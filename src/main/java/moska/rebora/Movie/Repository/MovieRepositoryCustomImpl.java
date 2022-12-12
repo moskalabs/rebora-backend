@@ -68,7 +68,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .fetch();
 
         long total = queryFactory
-                .select(movie.count())
+                .select(movie.count().countDistinct())
                 .from(movie)
                 .where(getCategory(searchCondition.getCategory()),
                         getSearchWord(searchCondition.getSearchWord())

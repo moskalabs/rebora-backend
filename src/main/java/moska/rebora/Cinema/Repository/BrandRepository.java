@@ -4,4 +4,6 @@ import moska.rebora.Cinema.Entity.Brand;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BrandRepository extends JpaRepository<Brand, Long> {
+
+    Brand getBrandByBrandName(String brandName);
 }

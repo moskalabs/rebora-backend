@@ -43,7 +43,7 @@ public class CommonController {
     @GetMapping("/getRegion")
     public BaseListResponse<String> getRegion(){
         BaseListResponse<String> baseListResponse = new BaseListResponse<>();
-        List<String> regionList = new ArrayList<>(Arrays.asList("전국", "서울", "경기", "인천", "대전/충청", "대구", "부산/울산", "경상", "광주/전라/제주"));
+        List<String> regionList = new ArrayList<>(Arrays.asList("전국", "서울", "경기", "인천", "강원" ,"대전/충청", "대구", "부산/울산" ,"경상", "광주/전라/제주"));
         baseListResponse.setList(regionList);
         baseListResponse.setResult(true);
         return baseListResponse;

@@ -7,6 +7,7 @@ import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Repository.PaymentRepository;
+import moska.rebora.Payment.Service.PaymentService;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+//모집 확인
 @Slf4j
 @AllArgsConstructor
 @Configuration
@@ -38,6 +40,8 @@ public class ConfirmRecruitmentConfig {
     private UserRecruitmentRepository userRecruitmentRepository;
 
     private PaymentRepository paymentRepository;
+
+    private PaymentService paymentService;
 
     @Bean
     public Job confirmRecruitmentJob(
@@ -79,35 +83,14 @@ public class ConfirmRecruitmentConfig {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
                 log.info("********** This is confirmRecruitmentProcessor");
-                List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getUserRecruitmentByRecruitment(recruitment);
-                for (UserRecruitment userRecruitment : userRecruitmentList) {
-                    log.info("userEmail = {}", userRecruitment.getUser().getUserEmail());
-                    String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-
-                    StringBuilder stringBuilder = new StringBuilder();
-                    stringBuilder.append(userRecruitment.getRecruitment().getId());
-                    stringBuilder.append("_");
-                    stringBuilder.append(userRecruitment.getUser().getId());
-                    stringBuilder.append("_");
-                    stringBuilder.append(now);
-
-                    Payment payment = Payment.builder()
-                            .id(stringBuilder.toString())
-                            .paymentKey("paymentKey")
-                            .paymentContent("예약 결제")
-                            .paymentAmount(7000)
-                            .paymentMethod(PaymentMethod.CARD)
-                            .paymentStatus(PaymentStatus.COMPLETE)
-                            .userRecruitment(userRecruitment)
-                            .build();
-
-                    paymentRepository.save(payment);
-                }
+                paymentService.paymentByRecruitment(recruitment);
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
                 return recruitment;
             }
         };
     }
+
+
 
     public ItemWriter<Recruitment> confirmRecruitmentWriter() {
         log.info("********** This is confirmRecruitmentWriter");
