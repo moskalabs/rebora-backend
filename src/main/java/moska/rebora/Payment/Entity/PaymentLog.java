@@ -23,14 +23,12 @@ public class PaymentLog extends BaseEntity {
 
     @Column(nullable = false)
     private String paymentLogContent;
-
-    @Column(nullable = false)
     private Integer paymentLogAmount;
-    @Column(length = 20, nullable = false)
+    @Column(length = 20)
     private String paymentMethod;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(length = 20, nullable = false)
+    @Column(length = 20)
     private PaymentStatus paymentLogStatus;
 
     @Column(length = 50)
@@ -48,8 +46,11 @@ public class PaymentLog extends BaseEntity {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    @Builder
+    public void updatePaymentLogStatus(PaymentStatus paymentStatus){
+        this.paymentLogStatus = paymentStatus;
+    }
 
+    @Builder
     public PaymentLog(String paymentLogContent, Integer paymentLogAmount, String paymentMethod, PaymentStatus paymentLogStatus, String paymentLogCardCode, String pgProvider, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, Payment payment) {
         this.paymentLogContent = paymentLogContent;
         this.paymentLogAmount = paymentLogAmount;

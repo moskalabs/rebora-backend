@@ -72,7 +72,7 @@ public class ConfirmRecruitmentConfig {
     public ListItemReader<Recruitment> confirmRecruitmentReader() {
         log.info("********** This is confirmRecruitmentReader");
         UserSearchCondition condition = new UserSearchCondition();
-        condition.setRecruitmentStatus(RecruitmentStatus.CANCEL);
+        condition.setRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
         log.info("recruitmentList = {}", recruitmentList.size());
         return new ListItemReader<>(recruitmentList);

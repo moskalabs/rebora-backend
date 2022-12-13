@@ -75,6 +75,10 @@ public class Payment extends BaseEntity {
         this.userRecruitment = userRecruitment;
     }
 
+    public void updatePaymentStatus(PaymentStatus paymentStatus){
+        this.paymentStatus = paymentStatus;
+    }
+
     @Builder
     public Payment(String id, String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, UserRecruitment userRecruitment, List<PaymentLog> paymentLogList) {
         this.id = id;

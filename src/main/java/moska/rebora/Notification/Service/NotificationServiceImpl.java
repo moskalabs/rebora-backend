@@ -2,11 +2,13 @@ package moska.rebora.Notification.Service;
 
 import moska.rebora.Common.Service.AsyncTaskService;
 import moska.rebora.Enum.NotificationKind;
+import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Notification.Entity.Notification;
 import moska.rebora.Notification.NotificationDto;
 import moska.rebora.Notification.Repository.NotificationRepository;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Recruitment.Entity.Recruitment;
+import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.User.Entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,7 +30,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     NotificationRepository notificationRepository;
 
-    @Resource(name= "asyncTaskService")
+    @Resource(name = "asyncTaskService")
     AsyncTaskService asyncTaskService;
 
     @Override
@@ -64,7 +66,8 @@ public class NotificationServiceImpl implements NotificationService {
         Page<NotificationDto> notificationDtoPage = notificationRepository.getNotificationPage(pageable, userEmail);
         List<NotificationDto> notificationDtoList = notificationDtoPage.getContent();
 
-        List<Long> readNotificationIdList = notificationDtoList.stream().map(NotificationDto::getNotificationId).collect(Collectors.toList());;
+        List<Long> readNotificationIdList = notificationDtoList.stream().map(NotificationDto::getNotificationId).collect(Collectors.toList());
+        ;
         notificationRepository.readNotifications(readNotificationIdList);
 
         return notificationDtoPage;
@@ -105,5 +108,28 @@ public class NotificationServiceImpl implements NotificationService {
                 .append(theaterName);
 
         return stringBuilder.toString();
+    }
+
+    @Override
+    public void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie, Boolean paymentEndYn) {
+        String content = createNotificationContent(
+                movie.getMovieName(),
+                theater.getTheaterStartDatetime(),
+                theater.getTheaterDay(),
+                theater.getTheaterCinemaBrandName(),
+                theater.getTheaterCinemaName(),
+                theater.getTheaterName()
+        );
+        String subject = "모집 신청한 " + movie.getMovieName() + "의 결재가" + (paymentEndYn ? "완료되었습니다." : "실패했습니다");
+        Notification notification = Notification
+                .builder()
+                .notificationSubject(subject)
+                .notificationContent(content)
+                .notificationKind(NotificationKind.CONFORMATION)
+                .recruitment(recruitment)
+                .user(user)
+                .build();
+
+        notificationRepository.save(notification);
     }
 }

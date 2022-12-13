@@ -8,6 +8,7 @@ import moska.rebora.Banner.Repository.MainBannerRepository;
 import moska.rebora.Comment.Repository.CommentRepository;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
+import moska.rebora.Common.BaseResponse;
 import moska.rebora.Common.Service.AsyncTaskService;
 import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Enum.RecruitmentStatus;
@@ -165,11 +166,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         movie.addMoviePopularCount();
 
         //최소 가능 날짜
-        LocalDateTime recruitmentEndDate = theater.getTheaterStartDatetime().minusDays(3).toLocalDate().atTime(LocalTime.MAX);
+        LocalDateTime recruitmentEndDate = theater.getTheaterStartDatetime().minusDays(3).toLocalDate().atStartOfDay().plusSeconds(1L);
 
         //모집
         Recruitment recruitment = Recruitment.builder()
-                .recruitmentPeople(userRecruitmentPeople)
+                .recruitmentPeople(0)
                 .recruitmentStatus(RecruitmentStatus.RECRUITING)
                 .recruitmentExposeYn(true)
                 .recruitmentIntroduce(recruitmentIntroduce)
@@ -202,8 +203,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             }
         }
 
-        Boolean result = paymentService.paymentConfirmMovie(user, recruitment, userRecruitmentPeople);
-        if(!result){
+        BaseResponse baseResponse = paymentService.paymentConfirmMovie(user, recruitment, userRecruitmentPeople);
+
+        if(!baseResponse.getResult()){
             throw new RuntimeException("결제 도중 오류가 발생 했습니다 다시 시도해주세요.");
         }
         theaterRepository.save(theater);

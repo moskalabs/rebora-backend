@@ -7,7 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Common.Util;
 import moska.rebora.Enum.PaymentStatus;
+import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Movie.Entity.Movie;
+import moska.rebora.Movie.Repository.MovieRepository;
+import moska.rebora.Notification.Service.NotificationService;
+import moska.rebora.Payment.Dto.CardDto;
 import moska.rebora.Payment.Entity.Card;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Entity.PaymentLog;
@@ -21,6 +25,7 @@ import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserRecruitment;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -67,6 +72,12 @@ public class PaymentServiceImpl implements PaymentService {
     RecruitmentRepository recruitmentRepository;
 
     @Autowired
+    MovieRepository movieRepository;
+
+    @Autowired
+    NotificationService notificationService;
+
+    @Autowired
     Util util;
 
     @Override
@@ -82,13 +93,11 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
 
         cardRepository.save(card);
-
         return customerUid;
     }
 
     @Override
     public void applyCard(User user, String customerUid) {
-
 
         try {
             String paymentAuth = getPaymentAuth();
@@ -141,13 +150,14 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
+    @Transactional
     public void paymentByRecruitment(Recruitment recruitment) {
 
         Theater theater = recruitment.getTheater();
         Movie movie = recruitment.getMovie();
         List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getUserRecruitmentByRecruitment(recruitment);
         for (UserRecruitment userRecruitment : userRecruitmentList) {
-
+            BaseResponse baseResponse = new BaseResponse();
             User user = userRecruitment.getUser();
             Optional<Card> cardOptional = cardRepository.getCardByCardUseYnAndUser(true, user);
 
@@ -159,10 +169,10 @@ public class PaymentServiceImpl implements PaymentService {
             }
 
             Card card = cardOptional.get();
-
             log.info(user.getUserNickname() + "님의 예약 카드 결제 시작");
             log.info("customerUid={}, amount={} paymentId={} paymentName={}", card.getCustomerUid(), theater.getTheaterPrice() * userRecruitment.getUserRecruitmentPeople(), paymentId, paymentName);
-            payProducts(card.getCustomerUid(), paymentId, theater.getTheaterPrice() * userRecruitment.getUserRecruitmentPeople(), paymentName, userRecruitment, recruitment, userRecruitment.getUserRecruitmentPeople());
+            baseResponse = payProducts(card.getCustomerUid(), paymentId, theater.getTheaterPrice() * userRecruitment.getUserRecruitmentPeople(), paymentName, userRecruitment);
+            notificationService.createPaymentEndNotification(recruitment, theater, user, movie, baseResponse.getResult());
             log.info(user.getUserNickname() + "님의 예약 카드 결제 종료");
         }
     }
@@ -171,6 +181,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public BaseResponse paymentConfirmMovie(User user, Recruitment recruitment, Integer userRecruitmentPeople) {
 
+        BaseResponse baseResponse = new BaseResponse();
         Theater theater = recruitment.getTheater();
         Movie movie = recruitment.getMovie();
         Optional<Card> cardOptional = cardRepository.getCardByCardUseYnAndUser(true, user);
@@ -188,13 +199,17 @@ public class PaymentServiceImpl implements PaymentService {
             throw new RuntimeException("카드 정보가 없습니다. 카드를 등록해주세요");
         }
 
+//        if (recruitment.getRecruitmentStatus() == RecruitmentStatus.CANCEL || recruitment.getRecruitmentStatus() == RecruitmentStatus.RECRUITING || recruitment.getRecruitmentStatus() == RecruitmentStatus.COMPLETED) {
+//            throw new RuntimeException("상영 확정된 모집만 추후 참여 가능합니다.");
+//        }
+
         Card card = cardOptional.get();
 
         if (userRecruitmentOptional.isPresent()) {
             UserRecruitment userRecruitment = userRecruitmentOptional.get();
             log.info("확정된 영화 카드 결제 시작");
             log.info("customerUid={}, amount={} paymentId={} paymentName={}", card.getCustomerUid(), theater.getTheaterPrice() * userRecruitmentPeople, paymentId, paymentName);
-            return payProducts(card.getCustomerUid(), paymentId, theater.getTheaterPrice() * userRecruitmentPeople, paymentName, userRecruitment, recruitment, userRecruitmentPeople);
+            baseResponse = payProducts(card.getCustomerUid(), paymentId, theater.getTheaterPrice() * userRecruitmentPeople, paymentName, userRecruitment);
         } else {
             UserRecruitment userRecruitment = UserRecruitment
                     .builder()
@@ -208,8 +223,15 @@ public class PaymentServiceImpl implements PaymentService {
             userRecruitmentRepository.save(userRecruitment);
             log.info("확정된 영화 카드 결제 시작");
             log.info("customerUid={}, amount={} paymentId={} paymentName={}", card.getCustomerUid(), theater.getTheaterPrice() * userRecruitmentPeople, paymentId, paymentName);
-            return payProducts(card.getCustomerUid(), paymentId, theater.getTheaterPrice() * userRecruitmentPeople, paymentName, userRecruitment, recruitment, userRecruitmentPeople);
+            baseResponse = payProducts(card.getCustomerUid(), paymentId, theater.getTheaterPrice() * userRecruitmentPeople, paymentName, userRecruitment);
         }
+
+        if (baseResponse.getResult()) {
+            recruitment.plusRecruitmentPeople(userRecruitmentPeople);
+            recruitmentRepository.save(recruitment);
+        }
+
+        return baseResponse;
     }
 
     public String getPaymentAuth() {
@@ -242,9 +264,7 @@ public class PaymentServiceImpl implements PaymentService {
             @Param("paymentId") String paymentId,
             @Param("amount") Integer amount,
             @Param("paymentName") String paymentName,
-            @Param("userRecruitment") UserRecruitment userRecruitment,
-            @Param("recruitment") Recruitment recruitment,
-            @Param("userRecruitmentPeople") Integer userRecruitmentPeople
+            @Param("userRecruitment") UserRecruitment userRecruitment
     ) {
         try {
             BaseResponse baseResponse = new BaseResponse();
@@ -267,19 +287,17 @@ public class PaymentServiceImpl implements PaymentService {
                     .build();
 
             HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-            log.info(String.valueOf(response.statusCode()));
-            log.info(response.body());
             JSONParser jsonParser = new JSONParser();
             JSONObject result = (JSONObject) jsonParser.parse(response.body());
             Long code = (Long) result.get("code");
             if (code == 0L) {
                 log.info(paymentName + "의 결제성공");
-                createPayment(userRecruitment, recruitment, result, userRecruitmentPeople, paymentName, true);
+                createPayment(userRecruitment, result, paymentId, paymentName, true);
                 log.info("message={}", result.get("message"));
                 baseResponse.setResult(true);
             } else {
                 log.info(paymentName + "의 결제실패");
-                createPayment(userRecruitment, recruitment, result, userRecruitmentPeople, paymentName, true);
+                createPayment(userRecruitment, result, paymentId, paymentName, false);
                 baseResponse.setResult(false);
                 baseResponse.setMessage((String) result.get("message"));
             }
@@ -290,7 +308,8 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
-    void createPayment(UserRecruitment userRecruitment, Recruitment recruitment, JSONObject result, Integer userRecruitmentPeople, String paymentName, Boolean payResultSuccess) throws JsonProcessingException {
+
+    void createPayment(UserRecruitment userRecruitment, JSONObject result, String paymentId, String paymentName, Boolean payResultSuccess) throws JsonProcessingException {
 
         JSONObject response = (JSONObject) result.get("response"); //카드 결과 응답 값
         Long amount = (Long) response.get("amount"); //결제금액
@@ -311,8 +330,6 @@ public class PaymentServiceImpl implements PaymentService {
         User user = userRecruitment.getUser();
 
         if (!payResultSuccess) {
-            recruitment.minusRecruitmentPeople(userRecruitmentPeople);
-            recruitmentRepository.save(recruitment);
             userRecruitment.cancelUserRecruitment(false);
         } else {
             userRecruitment.cancelUserRecruitment(true);
@@ -343,7 +360,7 @@ public class PaymentServiceImpl implements PaymentService {
         } else {
             Payment payment = Payment
                     .builder()
-                    .id(createPaymentId(user.getId(), recruitment.getId()))
+                    .id(paymentId)
                     .paymentAmount(Math.toIntExact(amount))
                     .paymentCardNumber(cardNumber)
                     .paymentContent(content)
@@ -377,6 +394,105 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+    @Override
+    @Transactional
+    public BaseResponse paymentCancel(Payment payment) {
+
+        try {
+            BaseResponse baseResponse = new BaseResponse();
+            String paymentAuth = getPaymentAuth();
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> params = new HashMap<>();
+            params.put("merchant_uid", payment.getId());
+            params.put("amount", payment.getPaymentAmount());
+            params.put("checksum", payment.getPaymentAmount());
+            String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
+            HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.iamport.kr/payments/cancel"))
+                    .header("Authorization", "Bearer " + paymentAuth)
+                    .header("Content-Type", "application/json")
+                    .method("POST", body)
+                    .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            JSONParser jsonParser = new JSONParser();
+            JSONObject result = (JSONObject) jsonParser.parse(response.body());
+            log.info("result={}", result);
+            Long code = (Long) result.get("code");
+            if (code == 0L) {
+                log.info("환불 성공");
+                baseResponse.setResult(true);
+                createRefund(payment, result, true);
+                log.info("환불 종료");
+            } else {
+                log.info("환불 실패");
+                baseResponse.setResult(false);
+                baseResponse.setMessage((String) result.get("message"));
+                createRefund(payment, result, false);
+                log.info("환불 종료");
+            }
+
+            return baseResponse;
+
+        } catch (IOException | InterruptedException | ParseException e) {
+            throw new RuntimeException("결제 도중 오류가 발생했습니다. 다시 시도해주세요");
+
+        }
+    }
+
+    public void createRefund(Payment payment, JSONObject result, Boolean refundResultSuccess) {
+
+        JSONObject response = (JSONObject) result.get("response"); //카드 결과 응답 값
+        if (refundResultSuccess) {
+            Long cancelAmount = (Long) response.get("cancel_amount"); //결제금액
+            String name = (String) response.get("name"); //결제 이름
+            String cardNumber = (String) response.get("card_number"); //카드번호
+            String payMethod = (String) response.get("pay_method"); //결제 방법
+            String cardCode = (String) response.get("card_code"); //카드 코드
+            Long paidAt = (Long) response.get("paid_at"); //결제 시각
+            String pgProvider = (String) response.get("pg_provider"); //PG사
+            JSONArray jsonArray = (JSONArray) response.get("cancel_receipt_urls");
+
+            LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
+
+            PaymentLog paymentLog = PaymentLog
+                    .builder()
+                    .paymentLogAmount(Math.toIntExact(cancelAmount))
+                    .paymentLogContent(name + "의 취소요청")
+                    .paymentCardNumber(cardNumber)
+                    .paymentMethod(payMethod)
+                    .paymentLogCardCode(cardCode)
+                    .pgProvider(pgProvider)
+                    .payment(payment)
+                    .receiptUrl((String) jsonArray.get(0))
+                    .paidAt(authenticatedAt)
+                    .build();
+
+            paymentLog.updatePaymentLogStatus(PaymentStatus.CANCEL);
+            payment.updatePaymentStatus(PaymentStatus.CANCEL);
+            paymentRepository.save(payment);
+            paymentLogRepository.save(paymentLog);
+
+        } else {
+            PaymentLog paymentLog = PaymentLog
+                    .builder()
+                    .paymentLogContent((String) result.get("message"))
+                    .payment(payment)
+                    .build();
+
+            paymentLogRepository.save(paymentLog);
+        }
+    }
+
+    @Override
+    public Integer CardUseCount(Long userId) {
+        User user = checkUser(userId);
+
+        return cardRepository.countByCardUseYnAndAndUser(true, user);
+    }
+
     public String createPaymentId(Long userId, Long recruitmentId) {
 
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
@@ -389,5 +505,35 @@ public class PaymentServiceImpl implements PaymentService {
         stringBuilder.append(now);
 
         return stringBuilder.toString();
+    }
+
+    @Override
+    public CardDto getCard(Long userId) {
+        CardDto cardDto = new CardDto();
+        User user = checkUser(userId);
+
+        if (cardRepository.countByCardUseYnAndAndUser(true, user) > 0) {
+            Optional<Card> cardOptional = cardRepository.getCardByCardUseYnAndUser(true, user);
+            cardDto = new CardDto(cardOptional.get());
+        }
+
+        return cardDto;
+    }
+
+    @Override
+    public void deleteCard(Long userId) {
+        User user = checkUser(userId);
+        List<Card> cardList = cardRepository.getCardsByUser(user);
+        cardList.forEach(card -> card.changeBeforeCardYn(false));
+        cardRepository.saveAll(cardList);
+    }
+
+    public User checkUser(Long userId) {
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 유저입니다.");
+        }
+
+        return userOptional.get();
     }
 }

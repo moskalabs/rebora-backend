@@ -14,4 +14,8 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     Optional<Card> getCardByCardUseYnAndUser(Boolean cardUseYn, User user);
 
     Card getCardByCustomerUid(String customerUid);
+
+    Integer countByCardUseYnAndAndUser(Boolean cardUseYn, User user);
+
+    List<Card> getCardsByUser(User user);
 }

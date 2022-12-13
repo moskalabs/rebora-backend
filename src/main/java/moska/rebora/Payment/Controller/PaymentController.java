@@ -3,9 +3,12 @@ package moska.rebora.Payment.Controller;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BaseResponse;
+import moska.rebora.Common.Service.BaseCountResponse;
 import moska.rebora.Enum.PaymentMethod;
 import moska.rebora.Enum.PaymentStatus;
+import moska.rebora.Payment.Dto.CardDto;
 import moska.rebora.Payment.Entity.Card;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Repository.PaymentRepository;
@@ -21,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
@@ -44,34 +48,6 @@ public class PaymentController {
 
     @Autowired
     RecruitmentRepository recruitmentRepository;
-
-    @Tag(name = "결제")
-    @PostMapping("/test")
-    public void test() {
-        UserRecruitment userRecruitment = userRecruitmentRepository.findById(3000004L).get();
-
-        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append(1L);
-        stringBuilder.append("_");
-        stringBuilder.append(3L);
-        stringBuilder.append("_");
-        stringBuilder.append(now);
-
-        Payment payment = Payment.builder()
-                .id(stringBuilder.toString())
-                .paymentContent("예약 결제")
-                .paymentAmount(7000)
-                .paymentMethod("카드")
-                .paymentStatus(PaymentStatus.COMPLETE)
-                .userRecruitment(userRecruitment)
-                .build();
-
-        userRecruitment.updatePayment(payment);
-        paymentRepository.save(payment);
-        userRecruitmentRepository.save(userRecruitment);
-    }
 
     @GetMapping("/applyCard")
     public ModelAndView applyCard(
@@ -151,5 +127,64 @@ public class PaymentController {
 
 
         return paymentService.paymentConfirmMovie(optionalUser.get(), optionalRecruitment.get(), userRecruitmentPeople);
+    }
+
+    @PostMapping("/refundPayment/{userRecruitmentId}")
+    @Transactional
+    public BaseResponse refundPayment(
+            @PathVariable Long userRecruitmentId
+    ) {
+        Optional<UserRecruitment> userRecruitmentOptional = userRecruitmentRepository.findById(userRecruitmentId);
+
+        if (userRecruitmentOptional.isEmpty()) {
+            throw new NullPointerException("존재 하지 않는 정보입니다. 다시 시도해주세요");
+        }
+        UserRecruitment userRecruitment = userRecruitmentOptional.get();
+        Payment payment = userRecruitment.getPayment();
+
+        if (payment == null) {
+            throw new NullPointerException("결재내역이 존재하지 않습니다. 다시 시도해주세요");
+        }
+
+        BaseResponse baseResponse = paymentService.paymentCancel(payment);
+        if (baseResponse.getResult()) {
+            Recruitment recruitment = userRecruitment.getRecruitment();
+            recruitment.minusRecruitmentPeople(userRecruitment.getUserRecruitmentPeople());
+            recruitmentRepository.save(recruitment);
+        }
+
+        return baseResponse;
+    }
+
+    @GetMapping("/getCardUseCount/{userId}")
+    public BaseCountResponse getCardUseCount(
+            @PathVariable Long userId
+    ) {
+        BaseCountResponse baseCountResponse = new BaseCountResponse();
+        baseCountResponse.setCount(paymentService.CardUseCount(userId));
+        baseCountResponse.setResult(true);
+        return baseCountResponse;
+    }
+
+    @GetMapping("/getCard/{userId}")
+    public BaseInfoResponse<CardDto> getCard(
+            @PathVariable Long userId
+    ) {
+        BaseInfoResponse<CardDto> baseInfoResponse = new BaseInfoResponse<>();
+        baseInfoResponse.setResult(true);
+        baseInfoResponse.setContent(paymentService.getCard(userId));
+
+        return baseInfoResponse;
+    }
+
+    @PostMapping("/deleteCard/{userId}")
+    public BaseResponse deleteCard(
+            @PathVariable Long userId
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+        paymentService.deleteCard(userId);
+        baseResponse.setResult(true);
+
+        return baseResponse;
     }
 }

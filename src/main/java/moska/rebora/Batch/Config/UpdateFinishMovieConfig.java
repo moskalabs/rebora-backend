@@ -62,7 +62,7 @@ public class UpdateFinishMovieConfig {
         log.info("********** This is updateFinishMovieReader");
         UserSearchCondition condition = new UserSearchCondition();
         condition.setFinishTime(LocalDateTime.now());
-        List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.CONFIRMATION, condition);
+        List<Recruitment> recruitmentList = recruitmentRepository.getBatchFinishMovie();
         log.info("recruitmentList = {}", recruitmentList.size());
         return new ListItemReader<>(recruitmentList);
     }

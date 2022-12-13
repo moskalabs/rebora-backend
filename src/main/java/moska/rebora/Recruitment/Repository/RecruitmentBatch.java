@@ -12,4 +12,6 @@ public interface RecruitmentBatch {
     List<Recruitment> getBatchRecruitmentList(
             @Param("recruitmentStatus") RecruitmentStatus recruitmentStatus,
             @Param("condition") UserSearchCondition condition);
+
+    List<Recruitment> getBatchFinishMovie();
 }

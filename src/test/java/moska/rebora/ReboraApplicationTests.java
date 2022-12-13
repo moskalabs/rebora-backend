@@ -2,6 +2,7 @@ package moska.rebora;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Admin.Dto.AdminRegionDto;
 import moska.rebora.Banner.Entity.Banner;
@@ -22,10 +23,12 @@ import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Notification.Service.NotificationService;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Repository.PaymentRepository;
+import moska.rebora.Payment.Service.PaymentService;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.Theater.Repository.TheaterRepository;
+import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.Policy;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserMovie;
@@ -108,6 +111,9 @@ class ReboraApplicationTests {
 
     @Autowired
     PaymentRepository paymentRepository;
+
+    @Autowired
+    PaymentService paymentService;
 
     @Test
     @Transactional
@@ -593,5 +599,25 @@ class ReboraApplicationTests {
         Recruitment recruitment = recruitmentRepository.getRecruitmentById(6L);
         List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getUserRecruitmentByRecruitment(recruitment);
         log.info("size={}", userRecruitmentList.size());
+    }
+
+    @Test
+    void testJob(){
+        UserSearchCondition condition = new UserSearchCondition();
+        condition.setRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
+        List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
+        log.info("size={}", recruitmentList.size());
+        for (Recruitment recruitment : recruitmentList) {
+            log.info("id={}", recruitment.getId());
+            paymentService.paymentByRecruitment(recruitment);
+            recruitment.updateRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
+        }
+        recruitmentRepository.saveAll(recruitmentList);
+    }
+
+    @Test
+    void updateRecruitmentComplete(){
+
+        log.info("now={}",LocalDateTime.now().minusDays(3).toLocalDate().atStartOfDay().plusSeconds(1L));
     }
 }
