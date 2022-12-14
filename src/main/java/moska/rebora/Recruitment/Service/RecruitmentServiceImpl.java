@@ -5,6 +5,7 @@ import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Entity.MainBanner;
 import moska.rebora.Banner.Repository.BannerRepository;
 import moska.rebora.Banner.Repository.MainBannerRepository;
+import moska.rebora.Banner.Service.BannerService;
 import moska.rebora.Comment.Repository.CommentRepository;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
@@ -77,6 +78,9 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
     @Autowired
     AsyncTaskService asyncTaskService;
+
+    @Autowired
+    BannerService bannerService;
 
     @Autowired
     PaymentService paymentService;
@@ -258,13 +262,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         Recruitment recruitment = recruitmentOptional.get();
         Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+        bannerService.bannerDelete(banner);
 
-        banner.deleteBanner();
-        ;
         Theater theater = recruitment.getTheater();
         theater.addRecruitment(null);
 
-        bannerRepository.save(banner);
         theaterRepository.save(theater);
         recruitmentRepository.delete(recruitment);
     }

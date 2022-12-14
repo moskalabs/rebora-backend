@@ -14,4 +14,6 @@ public interface RecruitmentBatch {
             @Param("condition") UserSearchCondition condition);
 
     List<Recruitment> getBatchFinishMovie();
+
+    List<Recruitment> getBatchWaitRecruitmentList();
 }

@@ -1,5 +1,6 @@
 package moska.rebora.Recruitment.Service;
 
+import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;

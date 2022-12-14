@@ -42,6 +42,22 @@ public class RecruitmentBatchImpl implements RecruitmentBatch {
     }
 
     @Override
+    public List<Recruitment> getBatchWaitRecruitmentList() {
+
+        LocalDateTime baseTime = LocalDateTime.now().minusMinutes(15L);
+
+
+        return queryFactory.select(recruitment)
+                .from(recruitment)
+                .join(recruitment.theater, theater).fetchJoin()
+                .where(
+                        recruitment.recruitmentStatus.eq(RecruitmentStatus.WAIT),
+                        recruitment.regDate.lt(baseTime)
+                )
+                .fetch();
+    }
+
+    @Override
     public List<Recruitment> getBatchFinishMovie() {
 
         return queryFactory.select(recruitment)

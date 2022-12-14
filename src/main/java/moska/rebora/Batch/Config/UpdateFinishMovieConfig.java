@@ -2,6 +2,9 @@ package moska.rebora.Batch.Config;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Banner.Entity.Banner;
+import moska.rebora.Banner.Repository.BannerRepository;
+import moska.rebora.Banner.Service.BannerService;
 import moska.rebora.Enum.PaymentMethod;
 import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
@@ -31,13 +34,17 @@ import java.util.List;
 public class UpdateFinishMovieConfig {
 
     private RecruitmentRepository recruitmentRepository;
+    private BannerRepository bannerRepository;
+    private BannerService bannerService;
+    private JobBuilderFactory jobBuilderFactory;
+    private StepBuilderFactory stepBuilderFactory;
+
 
     @Bean
     public Job updateFinishMovieJob(
-            JobBuilderFactory jobBuilderFactory,
             Step updateFinishMovieJobStep
     ) {
-        log.info("********** This is updateFinishMovieJob");
+        log.info("********** 영화 상영 완료 배치 updateFinishMovieJob **********");
         return jobBuilderFactory.get("updateFinishMovieJob")  // 1_1
                 .start(updateFinishMovieJobStep)  // 1_3
                 .build();  // 1_4
@@ -45,9 +52,8 @@ public class UpdateFinishMovieConfig {
 
     @Bean
     public Step updateFinishMovieJobStep(
-            StepBuilderFactory stepBuilderFactory
     ) {
-        log.info("********** This is updateFinishMovieJobStep");
+        log.info("********** 영화 상영 완료 배치 updateFinishMovieJobStep **********");
         return stepBuilderFactory.get("updateFinishMovieJobStep")
                 .<Recruitment, Recruitment>chunk(10)
                 .reader(updateFinishMovieReader())// 2_2
@@ -59,7 +65,7 @@ public class UpdateFinishMovieConfig {
     @Bean
     @StepScope
     public ListItemReader<Recruitment> updateFinishMovieReader() {
-        log.info("********** This is updateFinishMovieReader");
+        log.info("********** 영화 상영 완료 배치 updateFinishMovieReader **********");
         UserSearchCondition condition = new UserSearchCondition();
         condition.setFinishTime(LocalDateTime.now());
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchFinishMovie();
@@ -68,18 +74,21 @@ public class UpdateFinishMovieConfig {
     }
 
     public ItemProcessor<Recruitment, Recruitment> updateFinishMovieProcessor() {
-        log.info("********** This is updateFinishMovieProcessor");
+        log.info("********** 영화 상영 완료 배치 updateFinishMovieProcessor **********");
         return new ItemProcessor<Recruitment, Recruitment>() {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.COMPLETED);
+                Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+                bannerService.bannerDelete(banner);
+
                 return recruitment;
             }
         };
     }
 
     public ItemWriter<Recruitment> updateFinishMovieWriter() {
-        log.info("********** This is updateFinishMovieWriter");
+        log.info("********** 영화 상영 완료 배치 updateFinishMovieWriter **********");
         return ((List<? extends Recruitment> recruitmentList) ->
                 recruitmentRepository.saveAll(recruitmentList));  // 1
     }

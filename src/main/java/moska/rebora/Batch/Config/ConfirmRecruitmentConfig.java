@@ -50,12 +50,15 @@ public class ConfirmRecruitmentConfig {
 
     NotificationService notificationService;
 
+    JobBuilderFactory jobBuilderFactory;
+
+    StepBuilderFactory stepBuilderFactory;
+
     @Bean
     public Job confirmRecruitmentJob(
-            JobBuilderFactory jobBuilderFactory,
             Step confirmRecruitmentJobStep
     ) {
-        log.info("********** This is confirmRecruitmentConfig");
+        log.info("********** 상영 확정 confirmRecruitmentConfig **********");
         return jobBuilderFactory.get("confirmRecruitmentJob")  // 1_1
                 .start(confirmRecruitmentJobStep)  // 1_3
                 .build();  // 1_4
@@ -63,9 +66,8 @@ public class ConfirmRecruitmentConfig {
 
     @Bean
     public Step confirmRecruitmentJobStep(
-            StepBuilderFactory stepBuilderFactory
     ) {
-        log.info("********** This is confirmRecruitmentJobStep");
+        log.info("********** 상영 확정 배치 confirmRecruitmentJobStep **********");
         return stepBuilderFactory.get("confirmRecruitmentJobStep")  // 2_1
                 .<Recruitment, Recruitment>chunk(10)
                 .reader(confirmRecruitmentReader())// 2_2
@@ -77,7 +79,7 @@ public class ConfirmRecruitmentConfig {
     @Bean
     @StepScope
     public ListItemReader<Recruitment> confirmRecruitmentReader() {
-        log.info("********** This is confirmRecruitmentReader");
+        log.info("********** 상영 확정 배치 confirmRecruitmentReader **********");
         UserSearchCondition condition = new UserSearchCondition();
         condition.setRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
@@ -89,7 +91,7 @@ public class ConfirmRecruitmentConfig {
         return new ItemProcessor<Recruitment, Recruitment>() {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
-                log.info("********** This is confirmRecruitmentProcessor");
+                log.info("********** 상영 확정 배치 confirmRecruitmentProcessor **********");
 
                 Movie movie = recruitment.getMovie();
                 Theater theater = recruitment.getTheater();
@@ -119,9 +121,8 @@ public class ConfirmRecruitmentConfig {
         };
     }
 
-
     public ItemWriter<Recruitment> confirmRecruitmentWriter() {
-        log.info("********** This is confirmRecruitmentWriter");
+        log.info("********** 상영 확정 배치 confirmRecruitmentWriter **********");
         return ((List<? extends Recruitment> recruitmentList) ->
                 recruitmentRepository.saveAll(recruitmentList));  // 1
     }

@@ -35,9 +35,12 @@ public class CreateMainBannerConfig {
 
     private MainBannerRepository mainBannerRepository;
 
+    JobBuilderFactory jobBuilderFactory;
+
+    StepBuilderFactory stepBuilderFactory;
+
     @Bean
     public Job createMainBannerJob(
-            JobBuilderFactory jobBuilderFactory,
             Step createMainBannerJobStep
     ) {
         log.info("********** This is createMainBannerConfig");
@@ -48,10 +51,9 @@ public class CreateMainBannerConfig {
 
     @Bean
     public Step createMainBannerJobStep(
-            StepBuilderFactory stepBuilderFactory
     ) {
-        log.info("********** This is confirmRecruitmentJobStep");
-        return stepBuilderFactory.get("confirmRecruitmentJobStep")  // 2_1
+        log.info("********** 메인 배너 생성 배치 confirmRecruitmentJobStep **********");
+        return stepBuilderFactory.get("createMainBannerJobStep")  // 2_1
                 .<BannerCompareDto, MainBanner>chunk(10)
                 .reader(createMainBannerReader())// 2_2
                 .processor(createMainBannerProcessor())
@@ -62,7 +64,7 @@ public class CreateMainBannerConfig {
     @Bean
     @StepScope
     public ListItemReader<BannerCompareDto> createMainBannerReader() {
-        log.info("********** This is createMainBannerReader");
+        log.info("********** 메인 배너 생성 배치 createMainBannerReader **********");
         List<BannerCompareDto> bannerCompareDtoList = bannerRepository.getCompareBannerList();
         log.info("recruitmentList = {}", bannerCompareDtoList.size());
         return new ListItemReader<>(bannerCompareDtoList);
@@ -72,7 +74,7 @@ public class CreateMainBannerConfig {
         return new ItemProcessor<BannerCompareDto, MainBanner>() {
             @Override
             public MainBanner process(BannerCompareDto bannerCompareDto) throws Exception {
-                log.info("********** This is createMainBannerProcessor");
+                log.info("********** 메인 배너 생성 배치 createMainBannerProcessor **********");
                 mainBannerRepository.deleteAll();
                 return MainBanner
                         .builder()
@@ -83,8 +85,7 @@ public class CreateMainBannerConfig {
     }
 
     public ItemWriter<MainBanner> createMainBannerWriter() {
-        log.info("********** This is createMainBannerWriter");
+        log.info("********** 메인 배너 생성 배치 createMainBannerWriter **********");
         return ((List<? extends MainBanner> mainBannerList) -> mainBannerRepository.saveAll(mainBannerList));  // 1
     }
-
 }

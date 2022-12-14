@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Repository.BannerRepository;
+import moska.rebora.Banner.Service.BannerService;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Enum.PaymentStatus;
@@ -46,16 +47,21 @@ public class CancelRecruitmentConfig {
 
     BannerRepository bannerRepository;
 
+    BannerService bannerService;
+
     NotificationService notificationService;
 
     private PaymentService paymentService;
 
+    JobBuilderFactory jobBuilderFactory;
+
+    StepBuilderFactory stepBuilderFactory;
+
     @Bean
     public Job cancelRecruitmentJob(
-            JobBuilderFactory jobBuilderFactory,
             Step cancelRecruitmentJobStep
     ) {
-        log.info("********** This is cancelRecruitmentConfig");
+        log.info("********** 모집 취소 배치 cancelRecruitmentConfig **********");
         return jobBuilderFactory.get("cancelRecruitmentJob")  // 1_1
                 .start(cancelRecruitmentJobStep)  // 1_3
                 .build();  // 1_4
@@ -63,9 +69,8 @@ public class CancelRecruitmentConfig {
 
     @Bean
     public Step cancelRecruitmentJobStep(
-            StepBuilderFactory stepBuilderFactory
     ) {
-        log.info("********** This is cancelRecruitmentJobStep");
+        log.info("********** 모집 취소 배치 cancelRecruitmentJobStep **********");
         return stepBuilderFactory.get("cancelRecruitmentJobStep")  // 2_1
                 .<Recruitment, Recruitment>chunk(10)
                 .reader(cancelRecruitmentReader())// 2_2
@@ -77,7 +82,7 @@ public class CancelRecruitmentConfig {
     @Bean
     @StepScope
     public ListItemReader<Recruitment> cancelRecruitmentReader() {
-        log.info("********** This is cancelRecruitmentReader");
+        log.info("********** 모집 취소 배치 cancelRecruitmentReader **********");
         UserSearchCondition condition = new UserSearchCondition();
         condition.setRecruitmentStatus(RecruitmentStatus.CANCEL);
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
@@ -89,6 +94,7 @@ public class CancelRecruitmentConfig {
         return new ItemProcessor<Recruitment, Recruitment>() {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
+                log.info("********** 모집 취소 배치 cancelRecruitmentProcessor **********");
 
                 List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getBatchRefundUserRecruitment(recruitment.getId());
                 List<UserRecruitment> userWishRecruitmentList = userRecruitmentRepository.getBatchUserWishRecruitment(recruitment.getId());
@@ -119,10 +125,7 @@ public class CancelRecruitmentConfig {
 
                 Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
 
-                if (banner != null) {
-                    banner.deleteBanner();
-                    bannerRepository.save(banner);
-                }
+                bannerService.bannerDelete(banner);
 
                 for (UserRecruitment userRecruitment : userWishRecruitmentList) {
                     User user = userRecruitment.getUser();
@@ -138,8 +141,6 @@ public class CancelRecruitmentConfig {
                     notificationSubject = "찜한 모집의 상영이 취소되었습니다.";
                     notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, user);
                 }
-
-                log.info("********** This is cancelRecruitmentProcessor");
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CANCEL);
 
                 return recruitment;
@@ -148,7 +149,7 @@ public class CancelRecruitmentConfig {
     }
 
     public ItemWriter<Recruitment> cancelRecruitmentWriter() {
-        log.info("********** This is cancelRecruitmentWriter");
+        log.info("********** 모집 취소 배치 cancelRecruitmentWriter **********");
         return ((List<? extends Recruitment> recruitmentList) -> recruitmentRepository.saveAll(recruitmentList));  // 1
     }
 }
