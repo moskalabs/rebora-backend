@@ -617,7 +617,45 @@ class ReboraApplicationTests {
 
     @Test
     void updateRecruitmentComplete(){
-
         log.info("now={}",LocalDateTime.now().minusDays(3).toLocalDate().atStartOfDay().plusSeconds(1L));
+    }
+
+    @Test
+    @Transactional
+    void testCancelJob(){
+        UserSearchCondition condition = new UserSearchCondition();
+        condition.setRecruitmentStatus(RecruitmentStatus.CANCEL);
+        List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
+        Recruitment recruitment = recruitmentList.get(0);
+        List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getBatchRefundUserRecruitment(recruitment.getId());
+        List<UserRecruitment> userWishRecruitmentList = userRecruitmentRepository.getBatchUserWishRecruitment(recruitment.getId());
+
+        Movie movie = recruitment.getMovie();
+        Theater theater = recruitment.getTheater();
+        String notificationSubject = "참여한 모집이 취소되었습니다.";
+
+        for (UserRecruitment userRecruitment : userRecruitmentList) {
+            Payment payment = userRecruitment.getPayment();
+            User user = userRecruitment.getUser();
+
+            log.info("userRecruitmentId={}", userRecruitment.getId());
+            log.info("paymentId={}", payment.getId());
+            log.info("user={}", user.getId());
+
+            String notificationContent = notificationService.createNotificationContent(
+                    movie.getMovieName(),
+                    theater.getTheaterStartDatetime(),
+                    theater.getTheaterDay(),
+                    theater.getTheaterCinemaBrandName(),
+                    theater.getTheaterCinemaName(),
+                    theater.getTheaterName()
+            );
+
+            log.info("notificationContent={}", notificationContent);
+
+            Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+
+            log.info("bannerId={}", banner.getId());
+        }
     }
 }

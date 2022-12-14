@@ -30,7 +30,7 @@ public class RecruitmentBatchImpl implements RecruitmentBatch {
     public List<Recruitment> getBatchRecruitmentList(RecruitmentStatus recruitmentStatus, UserSearchCondition condition) {
         return queryFactory.select(recruitment)
                 .from(recruitment)
-                .join(recruitment.theater, theater)
+                .join(recruitment.theater, theater).fetchJoin()
                 .join(recruitment.movie).fetchJoin()
                 .where(
                         recruitment.recruitmentExposeYn.eq(true),

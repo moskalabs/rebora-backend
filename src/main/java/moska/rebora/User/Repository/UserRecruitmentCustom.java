@@ -27,4 +27,8 @@ public interface UserRecruitmentCustom {
                                                          @Param("recruitmentId") Long recruitmentId);
 
     List<UserRecruitment> getUserRecruitmentByRecruitment(Recruitment recruitment);
+
+    List<UserRecruitment> getBatchRefundUserRecruitment(Long recruitmentId);
+
+    List<UserRecruitment> getBatchUserWishRecruitment(Long recruitmentId);
 }

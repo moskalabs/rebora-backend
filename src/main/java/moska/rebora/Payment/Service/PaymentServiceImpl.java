@@ -479,6 +479,7 @@ public class PaymentServiceImpl implements PaymentService {
             PaymentLog paymentLog = PaymentLog
                     .builder()
                     .paymentLogContent((String) result.get("message"))
+                    .paymentLogStatus(PaymentStatus.FAILURE)
                     .payment(payment)
                     .build();
 

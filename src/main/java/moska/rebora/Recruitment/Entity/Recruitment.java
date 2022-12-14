@@ -49,7 +49,7 @@ public class Recruitment extends BaseEntity {
     @OneToMany(mappedBy = "recruitment")
     List<UserRecruitment> userRecruitmentList = new ArrayList<UserRecruitment>();
 
-    @OneToOne(mappedBy = "recruitment", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "recruitment", fetch = FetchType.LAZY)
     private Theater theater;
 
     @ManyToOne(fetch = FetchType.LAZY)

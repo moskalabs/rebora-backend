@@ -122,35 +122,67 @@ public class RecruitmentController {
     }
 
     /**
-     * 모집 개시
+     * 모집 신청
      *
-     * @param movieId               영화 PK
-     * @param theaterId             상영관 PK
-     * @param recruitmentIntroduce  모집 소개글
-     * @param userRecruitmentPeople 모집 신청 인원
-     * @param bannerYn              배너 유무
-     * @param bannerSubText         배너 서브 텍스트
-     * @param bannerMainText        배너 메인 텍스트
-     * @return JSONObject
+     * @param recruitmentId         모집 아이디
+     * @param userRecruitmentPeople 신청 인원
+     * @return BaseResponse
      */
     @Tag(name = "모집")
-    @PostMapping("/createRecruitment")
-    public JSONObject createRecruitment(
+    @PostMapping("/createRecruitment/{recruitmentId}")
+    public BaseResponse createRecruitment(
+            @PathVariable Long recruitmentId,
+            @RequestParam Integer userRecruitmentPeople
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        recruitmentService.createRecruitment(recruitmentId, userRecruitmentPeople, userEmail);
+        baseResponse.setResult(true);
+
+
+        return baseResponse;
+    }
+
+    /**
+     * 모집 예약
+     *
+     * @param movieId              영화 아이디
+     * @param theaterId            상영관 아이디
+     * @param recruitmentIntroduce 모집 소개
+     * @param bannerYn             배너 유무
+     * @param bannerSubText        배너 서브 텍스트
+     * @param bannerMainText       배너 메인 텍스트
+     * @return JSONObject
+     */
+    @PostMapping("/reserveRecruitment")
+    public JSONObject reserveRecruitment(
             @RequestParam Long movieId,
             @RequestParam Long theaterId,
             @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
-            @RequestParam("userRecruitmentPeople") Integer userRecruitmentPeople,
             @RequestParam("bannerYn") Boolean bannerYn,
             @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
             @RequestParam(value = "bannerMainText", required = false) String bannerMainText
     ) {
+
         JSONObject jsonObject = new JSONObject();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         jsonObject.put("result", true);
-        jsonObject.put("recruitmentId", recruitmentService.createRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, userRecruitmentPeople, bannerYn, bannerSubText, bannerMainText));
+        jsonObject.put("recruitmentId", recruitmentService.reserveRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText));
 
         return jsonObject;
+    }
+
+    @PostMapping("/cancelReserve/{recruitmentId}")
+    public BaseResponse cancelReserve(
+            @PathVariable Long recruitmentId
+    ){
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+
+        recruitmentService.cancelReserve(recruitmentId);
+        return baseResponse;
     }
 
     /**
@@ -175,6 +207,7 @@ public class RecruitmentController {
 
         return baseResponse;
     }
+
 
     /**
      * 모집 신청 취소

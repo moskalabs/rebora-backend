@@ -24,10 +24,20 @@ public interface NotificationService {
             @Param("userList") List<User> userList
     );
 
+    void createNotificationRecruitment(
+            @Param("notificationSubject") String notificationSubject,
+            @Param("notificationContent") String notificationContent,
+            @Param("notificationKind") NotificationKind notificationKind,
+            @Param("recruitment") Recruitment recruitment,
+            @Param("user") User user
+    );
+
     void createNotificationPayment(
             @Param("notificationSubject") String notificationSubject,
             @Param("notificationContent") String notificationContent,
             @Param("notificationKind") NotificationKind notificationKind,
+            @Param("user") User user,
+            @Param("recruitment") Recruitment recruitment,
             @Param("payment") Payment payment
     );
 
@@ -45,5 +55,5 @@ public interface NotificationService {
             @Param("userEmail") String userEmail
     );
 
-    void createPaymentEndNotification(Recruitment recruitment,Theater theater, User user, Movie movie, Boolean paymentEndYn);
+    void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie, Boolean paymentEndYn);
 }

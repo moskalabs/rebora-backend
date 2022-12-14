@@ -11,6 +11,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.DTO.QUserImageListDto;
 import moska.rebora.User.DTO.UserImageListDto;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import static com.querydsl.jpa.JPAExpressions.select;
 import static moska.rebora.Movie.Entity.QMovie.movie;
+import static moska.rebora.Payment.Entity.QPayment.payment;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
 import static moska.rebora.User.Entity.QUser.user;
@@ -196,6 +198,31 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .where(userRecruitment.recruitment.eq(recruitment),
                         userRecruitment.userRecruitmentYn.eq(true),
                         user.userEmail.ne(recruitment.getCreatedBy())
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<UserRecruitment> getBatchRefundUserRecruitment(Long recruitmentId) {
+        return queryFactory.select(userRecruitment)
+                .from(userRecruitment)
+                .join(userRecruitment.recruitment, recruitment).on(recruitment.id.eq(recruitmentId))
+                .join(userRecruitment.payment, payment).fetchJoin()
+                .join(userRecruitment.user, user).fetchJoin()
+                .where(
+                        payment.paymentStatus.eq(PaymentStatus.COMPLETE)
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<UserRecruitment> getBatchUserWishRecruitment(Long recruitmentId) {
+        return queryFactory.select(userRecruitment)
+                .from(userRecruitment)
+                .join(userRecruitment.recruitment, recruitment).on(recruitment.id.eq(recruitmentId))
+                .join(userRecruitment.user, user).fetchJoin()
+                .where(
+                        userRecruitment.userRecruitmentWish.eq(true)
                 )
                 .fetch();
     }

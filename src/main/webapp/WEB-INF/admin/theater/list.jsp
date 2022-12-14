@@ -225,8 +225,11 @@
                             <c:when test="${theater.recruitmentStatus == 'CONFIRMATION'}">
                                 <td>상영 확정</td>
                             </c:when>
-                            <c:otherwise>
+                            <c:when test="${theater.recruitmentStatus == 'COMPLETED'}">
                                 <td>상영 완료</td>
+                            </c:when>
+                            <c:otherwise>
+                                <td>아직 미정</td>
                             </c:otherwise>
                         </c:choose>
                         <td>${theater.theaterMinPeople}</td>

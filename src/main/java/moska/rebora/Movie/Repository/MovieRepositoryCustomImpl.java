@@ -54,11 +54,12 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                         movie.movieStarRating,
                         userMovie.userMovieWish,
                         userMovie.id.as("userMovieId")
-                )).distinct()
+                ))
                 .from(movie)
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .leftJoin(movie.movieCategoryList, movieCategory)
                 .leftJoin(movieCategory.category, category)
+                .groupBy(movie.movieName)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .where(getCategory(searchCondition.getCategory()),
@@ -68,13 +69,14 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .fetch();
 
         long total = queryFactory
-                .select(movie.count().countDistinct())
+                .select(movie.count())
                 .from(movie)
                 .where(getCategory(searchCondition.getCategory()),
                         getSearchWord(searchCondition.getSearchWord())
                 )
                 .join(movie.movieCategoryList, movieCategory)
                 .join(movieCategory.category, category)
+                .groupBy(movie.movieName)
                 .fetchFirst();
 
         content.forEach(m -> {

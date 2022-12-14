@@ -3,12 +3,23 @@ package moska.rebora.Batch.Config;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Banner.Entity.Banner;
+import moska.rebora.Banner.Repository.BannerRepository;
+import moska.rebora.Common.BaseResponse;
+import moska.rebora.Enum.NotificationKind;
+import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
+import moska.rebora.Movie.Entity.Movie;
+import moska.rebora.Notification.Service.NotificationService;
 import moska.rebora.Payment.Entity.Payment;
+import moska.rebora.Payment.Service.PaymentService;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
+import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.User.DTO.UserSearchCondition;
+import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserRecruitment;
+import moska.rebora.User.Repository.UserRecruitmentRepository;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
@@ -30,6 +41,14 @@ import java.util.List;
 public class CancelRecruitmentConfig {
 
     private RecruitmentRepository recruitmentRepository;
+
+    private UserRecruitmentRepository userRecruitmentRepository;
+
+    BannerRepository bannerRepository;
+
+    NotificationService notificationService;
+
+    private PaymentService paymentService;
 
     @Bean
     public Job cancelRecruitmentJob(
@@ -70,8 +89,60 @@ public class CancelRecruitmentConfig {
         return new ItemProcessor<Recruitment, Recruitment>() {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
+
+                List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getBatchRefundUserRecruitment(recruitment.getId());
+                List<UserRecruitment> userWishRecruitmentList = userRecruitmentRepository.getBatchUserWishRecruitment(recruitment.getId());
+
+                Movie movie = recruitment.getMovie();
+                Theater theater = recruitment.getTheater();
+                String notificationSubject = "참여한 모집이 취소되었습니다.";
+
+                for (UserRecruitment userRecruitment : userRecruitmentList) {
+
+                    Payment payment = userRecruitment.getPayment();
+                    BaseResponse baseResponse = paymentService.paymentCancel(payment);
+                    User user = userRecruitment.getUser();
+
+                    String notificationContent = notificationService.createNotificationContent(
+                            movie.getMovieName(),
+                            theater.getTheaterStartDatetime(),
+                            theater.getTheaterDay(),
+                            theater.getTheaterCinemaBrandName(),
+                            theater.getTheaterCinemaName(),
+                            theater.getTheaterName()
+                    );
+
+                    if (baseResponse.getResult()) {
+                        notificationService.createNotificationPayment(notificationSubject, notificationContent, NotificationKind.CANCEL, user, recruitment, payment);
+                    }
+
+                }
+
+                Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+
+                if (banner != null) {
+                    banner.deleteBanner();
+                    bannerRepository.save(banner);
+                }
+
+                for (UserRecruitment userRecruitment : userWishRecruitmentList) {
+                    User user = userRecruitment.getUser();
+
+                    String notificationContent = notificationService.createNotificationContent(
+                            movie.getMovieName(),
+                            theater.getTheaterStartDatetime(),
+                            theater.getTheaterDay(),
+                            theater.getTheaterCinemaBrandName(),
+                            theater.getTheaterCinemaName(),
+                            theater.getTheaterName()
+                    );
+                    notificationSubject = "찜한 모집의 상영이 취소되었습니다.";
+                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, user);
+                }
+
                 log.info("********** This is cancelRecruitmentProcessor");
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CANCEL);
+
                 return recruitment;
             }
         };

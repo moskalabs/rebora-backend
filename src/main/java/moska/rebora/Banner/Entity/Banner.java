@@ -38,6 +38,14 @@ public class Banner extends BaseEntity {
     @JoinColumn(name = "recruitment_id")
     private Recruitment recruitment;
 
+    public void changeExpose(Boolean bannerExposeYn) {
+        this.bannerExposeYn = bannerExposeYn;
+    }
+
+    public void deleteBanner(){
+        this.recruitment = null;
+    }
+
     @Builder
     public Banner(Boolean bannerExposeYn, String bannerMainText, String bannerSubText, String bannerImage, String bannerUrl, Recruitment recruitment) {
         this.bannerExposeYn = bannerExposeYn;

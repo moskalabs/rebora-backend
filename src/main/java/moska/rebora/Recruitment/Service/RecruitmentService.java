@@ -20,16 +20,21 @@ public interface RecruitmentService {
             @Param("commentPageable") Pageable commentPageable
     );
 
-    Long createRecruitment(
-            @Param("movieId") Long movieId,
-            @Param("theaterId") Long theaterId,
-            @Param("userEmail") String userEmail,
-            @Param("recruitmentIntroduce") String recruitmentIntroduce,
+    void createRecruitment(
+            @Param("recruitmentId") Long recruitmentId,
             @Param("userRecruitmentPeople") Integer userRecruitmentPeople,
-            @Param("bannerYn") Boolean bannerYn,
-            @Param("bannerSubText") String bannerSubText,
-            @Param("bannerMainText") String bannerMainText
+            @Param("userEmail") String userEmail
     );
+
+    Long reserveRecruitment(@Param("movieId") Long movieId,
+                            @Param("theaterId") Long theaterId,
+                            @Param("userEmail") String userEmail,
+                            @Param("recruitmentIntroduce") String recruitmentIntroduce,
+                            @Param("bannerYn") Boolean bannerYn,
+                            @Param("bannerSubText") String bannerSubText,
+                            @Param("bannerMainText") String bannerMainText);
+
+    void cancelReserve(@Param("recruitmentId") Long recruitmentId);
 
     void applyRecruitment(@Param("recruitmentId") Long recruitmentId,
                           @Param("userEmail") String userEmail,

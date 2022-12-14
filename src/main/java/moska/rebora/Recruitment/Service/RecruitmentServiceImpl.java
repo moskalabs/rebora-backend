@@ -127,88 +127,43 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     /**
      * 모집 생성
      *
-     * @param movieId               영화 아이디
-     * @param theaterId             극장 아이디
+     * @param recruitmentId         모집 아이디
      * @param userEmail             유저 이메일
-     * @param recruitmentIntroduce  모집 소개
      * @param userRecruitmentPeople 모집 신청 인원
-     * @param bannerYn              배너 여부
-     * @param bannerSubText         배너 서브 텍스트
-     * @param bannerMainText        배너 메인 텍스트
-     * @return Long 모집 아이디
      */
     @Override
     @Transactional
-    public Long createRecruitment(Long movieId,
-                                  Long theaterId,
-                                  String userEmail,
-                                  String recruitmentIntroduce,
-                                  Integer userRecruitmentPeople,
-                                  Boolean bannerYn,
-                                  String bannerSubText,
-                                  String bannerMainText) {
+    public void createRecruitment(@Param("recruitmentId") Long recruitmentId,
+                                  @Param("userRecruitmentPeople") Integer userRecruitmentPeople,
+                                  @Param("userEmail") String userEmail) {
 
-        Optional<Theater> theaterOptional = theaterRepository.findById(theaterId);
-        Optional<Movie> movieOptional = movieRepository.findById(movieId);
-
+        Optional<Recruitment> recruitmentOptional = recruitmentRepository.findById(recruitmentId);
         User user = userRepository.getUserByUserEmail(userEmail);
 
-        if (theaterOptional.isEmpty()) {
-            throw new NullPointerException("존재하지 않는 상영관입니다.");
+        if (recruitmentOptional.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 모집입니다. 다시 시도해주세요");
         }
 
-        if (movieOptional.isEmpty()) {
-            throw new NullPointerException("존재하지 않는 영화입니다.");
-        }
-
-        Theater theater = theaterOptional.get();
-        Movie movie = movieOptional.get();
+        Recruitment recruitment = recruitmentOptional.get();
+        Theater theater = recruitment.getTheater();
+        Movie movie = recruitment.getMovie();
+        Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
         movie.addMoviePopularCount();
-
-        //최소 가능 날짜
-        LocalDateTime recruitmentEndDate = theater.getTheaterStartDatetime().minusDays(3).toLocalDate().atStartOfDay().plusSeconds(1L);
-
-        //모집
-        Recruitment recruitment = Recruitment.builder()
-                .recruitmentPeople(0)
-                .recruitmentStatus(RecruitmentStatus.RECRUITING)
-                .recruitmentExposeYn(true)
-                .recruitmentIntroduce(recruitmentIntroduce)
-                .recruitmentEndDate(recruitmentEndDate)
-                .theater(theater)
-                .movie(movie)
-                .build();
-
-        recruitmentRepository.save(recruitment);
-        theater.addRecruitment(recruitment);
-
-        //배너 유무 있을시에만 추가
-        if (bannerYn) {
-            Banner banner = Banner.builder()
-                    .bannerSubText(bannerSubText)
-                    .bannerMainText(bannerMainText)
-                    .bannerExposeYn(true)
-                    .bannerImage(movie.getMovieBannerImage())
-                    .recruitment(recruitment)
-                    .build();
-            bannerRepository.save(banner);
-            List<MainBanner> mainBannerList = mainBannerRepository.findAll();
-            if (mainBannerList.size() < 10) {
-                MainBanner mainBanner = MainBanner
-                        .builder()
-                        .banner(banner)
-                        .build();
-
-                mainBannerRepository.save(mainBanner);
-            }
-        }
 
         BaseResponse baseResponse = paymentService.paymentConfirmMovie(user, recruitment, userRecruitmentPeople);
 
-        if(!baseResponse.getResult()){
+        if (!baseResponse.getResult()) {
             throw new RuntimeException("결제 도중 오류가 발생 했습니다 다시 시도해주세요.");
         }
-        theaterRepository.save(theater);
+
+        recruitment.updateRecruitmentStatus(RecruitmentStatus.RECRUITING);
+        recruitment.changeExpose(true);
+        recruitmentRepository.save(recruitment);
+
+        if (banner != null) {
+            banner.changeExpose(true);
+            bannerRepository.save(banner);
+        }
         movieRepository.save(movie);
 
         String notificationContent = notificationService.createNotificationContent(
@@ -226,9 +181,92 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 notificationContent,
                 NotificationKind.RECRUITING,
                 recruitment.getId(),
-                movieId
+                movie.getId()
         );
+    }
+
+    @Override
+    public Long reserveRecruitment(Long movieId, Long theaterId, String userEmail, String recruitmentIntroduce, Boolean bannerYn, String bannerSubText, String bannerMainText) {
+
+        Optional<Theater> theaterOptional = theaterRepository.findById(theaterId);
+        Optional<Movie> movieOptional = movieRepository.findById(movieId);
+
+        if (theaterOptional.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 상영관입니다.");
+        }
+
+        if (movieOptional.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 영화입니다.");
+        }
+
+        Theater theater = theaterOptional.get();
+        Movie movie = movieOptional.get();
+
+        if (theater.getRecruitment() != null) {
+            throw new RuntimeException("이미 예약되어 있거나 모집중인 영화 입니다.");
+        }
+
+        //모집 종료 날짜
+        LocalDateTime recruitmentEndDate = theater.getTheaterStartDatetime().minusDays(3).toLocalDate().atStartOfDay().plusSeconds(1L);
+
+        //모집
+        Recruitment recruitment = Recruitment.builder()
+                .recruitmentPeople(0)
+                .recruitmentStatus(RecruitmentStatus.WAIT)
+                .recruitmentExposeYn(false)
+                .recruitmentIntroduce(recruitmentIntroduce)
+                .recruitmentEndDate(recruitmentEndDate)
+                .theater(theater)
+                .movie(movie)
+                .build();
+
+        recruitmentRepository.save(recruitment);
+
+        //배너 유무 있을시에만 추가
+        if (bannerYn) {
+            Banner banner = Banner.builder()
+                    .bannerSubText(bannerSubText)
+                    .bannerMainText(bannerMainText)
+                    .bannerExposeYn(false)
+                    .bannerImage(movie.getMovieBannerImage())
+                    .recruitment(recruitment)
+                    .build();
+            bannerRepository.save(banner);
+            List<MainBanner> mainBannerList = mainBannerRepository.findAll();
+            if (mainBannerList.size() < 10) {
+                MainBanner mainBanner = MainBanner
+                        .builder()
+                        .banner(banner)
+                        .build();
+
+                mainBannerRepository.save(mainBanner);
+            }
+        }
+
+        theater.addRecruitment(recruitment);
+        theaterRepository.save(theater);
+
         return recruitment.getId();
+    }
+
+    @Override
+    public void cancelReserve(Long recruitmentId) {
+        Optional<Recruitment> recruitmentOptional = recruitmentRepository.findById(recruitmentId);
+        if (recruitmentOptional.isEmpty()) {
+            throw new NullPointerException("존재 하지 않는 모집입니다.");
+        }
+
+        Recruitment recruitment = recruitmentOptional.get();
+        Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+
+        banner.deleteBanner();
+        ;
+        Theater theater = recruitment.getTheater();
+        theater.addRecruitment(null);
+
+        bannerRepository.save(banner);
+        theaterRepository.save(theater);
+        recruitmentRepository.delete(recruitment);
     }
 
     /**

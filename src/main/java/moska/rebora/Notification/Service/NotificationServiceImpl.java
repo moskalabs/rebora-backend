@@ -61,6 +61,26 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    public void createNotificationRecruitment(
+            String notificationSubject,
+            String notificationContent,
+            NotificationKind notificationKind,
+            Recruitment recruitment,
+            User user) {
+
+        Notification notification = Notification
+                .builder()
+                .notificationSubject(notificationSubject)
+                .notificationContent(notificationContent)
+                .notificationKind(notificationKind)
+                .recruitment(recruitment)
+                .user(user)
+                .build();
+
+        notificationRepository.save(notification);
+    }
+
+    @Override
     @Transactional
     public Page<NotificationDto> getNotificationList(Pageable pageable, String userEmail) {
         Page<NotificationDto> notificationDtoPage = notificationRepository.getNotificationPage(pageable, userEmail);
@@ -78,7 +98,21 @@ public class NotificationServiceImpl implements NotificationService {
             String notificationSubject,
             String notificationContent,
             NotificationKind notificationKind,
+            User user,
+            Recruitment recruitment,
             Payment payment) {
+
+        Notification notification = Notification
+                .builder()
+                .notificationSubject(notificationSubject)
+                .notificationContent(notificationContent)
+                .notificationKind(notificationKind)
+                .recruitment(recruitment)
+                .user(user)
+                .payment(payment)
+                .build();
+
+        notificationRepository.save(notification);
     }
 
     @Override

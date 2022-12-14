@@ -45,8 +45,10 @@ public class Payment extends BaseEntity {
     @Column(length = 50)
     private String pgProvider;
 
+    @Column
     private String paymentCardName;
 
+    @Column
     private LocalDateTime paidAt;
 
     @Column
