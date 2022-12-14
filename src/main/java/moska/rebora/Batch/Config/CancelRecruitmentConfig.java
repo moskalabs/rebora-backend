@@ -115,7 +115,6 @@ public class CancelRecruitmentConfig {
                     if (baseResponse.getResult()) {
                         notificationService.createNotificationPayment(notificationSubject, notificationContent, NotificationKind.CANCEL, user, recruitment, payment);
                     }
-
                 }
 
                 Banner banner = bannerRepository.getBannerByRecruitment(recruitment);

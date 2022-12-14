@@ -2,15 +2,20 @@ package moska.rebora.Batch.Config;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Enum.PaymentMethod;
 import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
+import moska.rebora.Movie.Entity.Movie;
+import moska.rebora.Notification.Service.NotificationService;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Repository.PaymentRepository;
 import moska.rebora.Payment.Service.PaymentService;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
+import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.User.DTO.UserSearchCondition;
+import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserRecruitment;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
@@ -42,6 +47,8 @@ public class ConfirmRecruitmentConfig {
     private PaymentRepository paymentRepository;
 
     private PaymentService paymentService;
+
+    NotificationService notificationService;
 
     @Bean
     public Job confirmRecruitmentJob(
@@ -83,13 +90,34 @@ public class ConfirmRecruitmentConfig {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
                 log.info("********** This is confirmRecruitmentProcessor");
+
+                Movie movie = recruitment.getMovie();
+                Theater theater = recruitment.getTheater();
+                List<UserRecruitment> userWishRecruitmentList = userRecruitmentRepository.getBatchUserWishRecruitment(recruitment.getId());
+
                 paymentService.paymentByRecruitment(recruitment);
+
+                for (UserRecruitment userRecruitment : userWishRecruitmentList) {
+
+                    User user = userRecruitment.getUser();
+                    String notificationContent = notificationService.createNotificationContent(
+                            movie.getMovieName(),
+                            theater.getTheaterStartDatetime(),
+                            theater.getTheaterDay(),
+                            theater.getTheaterCinemaBrandName(),
+                            theater.getTheaterCinemaName(),
+                            theater.getTheaterName()
+                    );
+
+                    String notificationSubject = "찜한 모집의 상영이 확정되었습니다.";
+                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CONFORMATION, recruitment, user);
+                }
+
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
                 return recruitment;
             }
         };
     }
-
 
 
     public ItemWriter<Recruitment> confirmRecruitmentWriter() {
