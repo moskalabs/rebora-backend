@@ -359,4 +359,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitment.minusRecruitmentPeople(userRecruitmentPeople);
         recruitmentRepository.save(recruitment);
     }
+
+
 }

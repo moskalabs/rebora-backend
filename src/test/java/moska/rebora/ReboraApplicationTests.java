@@ -554,7 +554,7 @@ class ReboraApplicationTests {
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://api.iamport.kr/subscribe/payments/schedule"))
-                .header("Authorization", "Bearer "+auth)
+                .header("Authorization", "Bearer " + auth)
                 .header("Content-Type", "application/json")
                 .method("POST", body)
                 .build();
@@ -586,7 +586,7 @@ class ReboraApplicationTests {
     }
 
     @Test
-    void testTimeStamp(){
+    void testTimeStamp() {
         long inserted = 1670566562L;
         LocalDateTime authenticatedAt =
                 LocalDateTime.ofInstant(Instant.ofEpochSecond(inserted), TimeZone
@@ -595,14 +595,14 @@ class ReboraApplicationTests {
     }
 
     @Test
-    void testRecruitment(){
+    void testRecruitment() {
         Recruitment recruitment = recruitmentRepository.getRecruitmentById(6L);
         List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getUserRecruitmentByRecruitment(recruitment);
         log.info("size={}", userRecruitmentList.size());
     }
 
     @Test
-    void testJob(){
+    void testJob() {
         UserSearchCondition condition = new UserSearchCondition();
         condition.setRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
@@ -616,13 +616,13 @@ class ReboraApplicationTests {
     }
 
     @Test
-    void updateRecruitmentComplete(){
-        log.info("now={}",LocalDateTime.now().minusDays(3).toLocalDate().atStartOfDay().plusSeconds(1L));
+    void updateRecruitmentComplete() {
+        log.info("now={}", LocalDateTime.now().minusDays(3).toLocalDate().atStartOfDay().plusSeconds(1L));
     }
 
     @Test
     @Transactional
-    void testCancelJob(){
+    void testCancelJob() {
         UserSearchCondition condition = new UserSearchCondition();
         condition.setRecruitmentStatus(RecruitmentStatus.CANCEL);
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
@@ -657,5 +657,13 @@ class ReboraApplicationTests {
 
             log.info("bannerId={}", banner.getId());
         }
+
+
+    }
+
+    @Test
+    @Transactional
+    void testFailJon(){
+        List<Payment> paymentList = paymentRepository.getBatchPaymetList(PaymentStatus.FAILURE);
     }
 }

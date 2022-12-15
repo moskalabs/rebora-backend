@@ -14,8 +14,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static moska.rebora.Payment.Entity.QPayment.payment;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
+import static moska.rebora.User.Entity.QUserRecruitment.userRecruitment;
 
 @Slf4j
 public class RecruitmentBatchImpl implements RecruitmentBatch {
@@ -40,6 +42,7 @@ public class RecruitmentBatchImpl implements RecruitmentBatch {
                 )
                 .fetch();
     }
+
 
     @Override
     public List<Recruitment> getBatchWaitRecruitmentList() {

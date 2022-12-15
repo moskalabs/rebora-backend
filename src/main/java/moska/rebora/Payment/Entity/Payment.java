@@ -54,6 +54,9 @@ public class Payment extends BaseEntity {
     @Column
     private String receiptUrl;
 
+    @Column
+    private Boolean paymentReserve;
+
     @Column(length = 50)
     private String paymentCardNumber;
 
@@ -77,12 +80,17 @@ public class Payment extends BaseEntity {
         this.userRecruitment = userRecruitment;
     }
 
+    public void failPayment(String paymentContent, UserRecruitment userRecruitment){
+        this.paymentContent = paymentContent;
+        this.userRecruitment = userRecruitment;
+    }
+
     public void updatePaymentStatus(PaymentStatus paymentStatus){
         this.paymentStatus = paymentStatus;
     }
 
     @Builder
-    public Payment(String id, String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, UserRecruitment userRecruitment, List<PaymentLog> paymentLogList) {
+    public Payment(String id, String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, Boolean paymentReserve, String paymentCardNumber, UserRecruitment userRecruitment, List<PaymentLog> paymentLogList) {
         this.id = id;
         this.paymentContent = paymentContent;
         this.paymentAmount = paymentAmount;
@@ -93,6 +101,7 @@ public class Payment extends BaseEntity {
         this.paymentCardName = paymentCardName;
         this.paidAt = paidAt;
         this.receiptUrl = receiptUrl;
+        this.paymentReserve = paymentReserve;
         this.paymentCardNumber = paymentCardNumber;
         this.userRecruitment = userRecruitment;
         this.paymentLogList = paymentLogList;

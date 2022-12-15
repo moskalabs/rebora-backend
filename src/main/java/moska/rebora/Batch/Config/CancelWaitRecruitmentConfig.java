@@ -46,10 +46,9 @@ public class CancelWaitRecruitmentConfig {
     StepBuilderFactory stepBuilderFactory;
 
     @Bean
-    public Job cancelWaitRecruitmentJob(
-            Step cancelWaitRecruitmentJobStop) {
+    public Job cancelWaitRecruitmentJob(Step cancelWaitRecruitmentJobStop) {
         log.info("********** 모집 대기 취소 배치 cancelWaitRecruitment **********");
-        return jobBuilderFactory.get("cancelRecruitmentJob")  // 1_1
+        return jobBuilderFactory.get("cancelWaitRecruitmentJob")  // 1_1
                 .start(cancelWaitRecruitmentJobStop)  // 1_3
                 .build();  // 1_4
     }
@@ -57,12 +56,9 @@ public class CancelWaitRecruitmentConfig {
     @Bean
     public Step cancelWaitRecruitmentJobStop() {
         log.info("********** 메인 배너 생성 배치 confirmRecruitmentJobStep **********");
-        return stepBuilderFactory.get("cancelWaitRecruitmentJobStop")  // 2_1
-                .<Recruitment, Recruitment>chunk(10)
-                .reader(cancelWaitRecruitmentReader())// 2_2
-                .processor(cancelWaitRecruitmentProcessor())
-                .writer(cancelWaitRecruitmentWriter())
-                .build();
+        return stepBuilderFactory.get("cancelWaitRecruitmentJobStep")  // 2_1
+                .<Recruitment, Recruitment>chunk(10).reader(cancelWaitRecruitmentReader())// 2_2
+                .processor(cancelWaitRecruitmentProcessor()).writer(cancelWaitRecruitmentWriter()).build();
     }
 
     @Bean

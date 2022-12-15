@@ -1,10 +1,12 @@
 package moska.rebora.Payment.Service;
 
 import moska.rebora.Common.BaseResponse;
+import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Payment.Dto.CardDto;
 import moska.rebora.Payment.Entity.Card;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Recruitment.Entity.Recruitment;
+import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserRecruitment;
 
@@ -27,4 +29,6 @@ public interface PaymentService {
     CardDto getCard(Long userId);
 
     void deleteCard(Long userId);
+
+    public Payment getBatchPayment(User user, Recruitment recruitment, Payment payment, Theater theater, UserRecruitment userRecruitment, Movie movie);
 }
