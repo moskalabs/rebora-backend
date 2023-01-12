@@ -21,7 +21,7 @@
         pg: "tosspayments.627175",
         customer_uid: "${customerUid}",
         customer_id: "${customerId}",
-        m_redirect_url: "<%=CURRENT_SERVER%>/api/payment/applyDone?userId=1&customerUId=${customerUid}"
+        m_redirect_url: "<%=CURRENT_SERVER%>/api/payment/applyDone?userRecruitmentId=1&customerUId=${customerUid}"
         /* ...생략... */
     }, function (rsp) { // callback
         console.log(rsp)
