@@ -17,41 +17,10 @@
 <body style="background-color: #a29bfe">
 <script>
     $(document).ready(function () {
-        let imp_success = ${imp_success};
-        let message = "${error_msg}";
-        if(imp_success === true){
-            $.ajax({
-                url: "<%=CURRENT_SERVER%>/api/payment/applyCardSuccess",
-                data: {
-                    customerUid: "${customerUid}",
-                    userId: ${userId}
-                },
-                method: "GET",
-                dataType: "json",
-                error: function (data) {
-                    Swal.fire({
-                        title: "오류",
-                        text: data.responseJSON.message,
-                    }).then(() => {
-                        console.log(data.responseJSON)
-                    })
-                }
-            }).done(function (data) {
-                Swal.fire({
-                    title: "완료",
-                    text: "카드 등록이 완료되었습니다.",
-                }).then(() => {
-
-                })
-            })
-        }else{
-            Swal.fire({
-                title: "오류",
-                text: message,
-            }).then(() => {
-
-            })
-        }
+        console.log("customerUid = ", ${customerUid});
+        console.log("imp_success = ", ${imp_success});
+        console.log("userRecruitmentId = ", ${userRecruitmentId});
+        console.log("error_msg = ", ${error_msg});
     })
 </script>
 </body>
