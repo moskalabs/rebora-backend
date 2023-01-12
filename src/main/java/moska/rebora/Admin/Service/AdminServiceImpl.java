@@ -26,6 +26,7 @@ import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Entity.MovieCategory;
 import moska.rebora.Movie.Repository.MovieCategoryRepository;
 import moska.rebora.Movie.Repository.MovieRepository;
+import moska.rebora.Payment.Repository.PaymentRepository;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
@@ -53,6 +54,7 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -86,6 +88,8 @@ public class AdminServiceImpl implements AdminService {
     TheaterRepository theaterRepository;
 
     BrandRepository brandRepository;
+
+    PaymentRepository paymentRepository;
 
     Util util;
 
@@ -412,6 +416,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public AdminPaymentDto getPaymentInfo(String paymentId) {
+        return paymentRepository.getPaymentInfo(paymentId);
+    }
+
+    @Override
     public void createTheaters(MultipartFile file) {
 
         log.info(file.getOriginalFilename() + " CSV 업로드 시작");
@@ -422,7 +431,7 @@ public class AdminServiceImpl implements AdminService {
             CSVReader csvReader = new CSVReader(reader);
             csvReader.readNext();
             readTheaterFile(csvReader);
-        log.info(file.getOriginalFilename() + " CSV 업로드 종료");
+            log.info(file.getOriginalFilename() + " CSV 업로드 종료");
         } catch (IOException | CsvValidationException e) {
             throw new RuntimeException(e);
         }
@@ -434,8 +443,8 @@ public class AdminServiceImpl implements AdminService {
         try {
             String[] line;
             while ((line = csvReader.readNext()) != null) {
-                log.info("line={}", line);
-                if(line[0].equals("")){
+                //log.info("line={}", line);
+                if (line[0].equals("")) {
                     continue;
                 }
                 LocalDateTime theaterStartTime = convertDateTime(line[4], line[5]);
@@ -604,6 +613,30 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    @Override
+    public Page<AdminPaymentDto> getPaymentPage(UserSearchCondition userSearchCondition, String startDate, String endDate, Pageable pageable) {
+        LocalDate today = LocalDate.now();
+        LocalDate toDate;
+        LocalDate fromDate;
+
+        if (startDate.equals("")) {
+            fromDate = today.minusDays(30);
+        } else {
+            fromDate = LocalDate.parse(startDate);
+        }
+
+        if (endDate.equals("")) {
+            toDate = today;
+        } else {
+            toDate = LocalDate.parse(endDate);
+        }
+
+        LocalDateTime fromDateTime = fromDate.atStartOfDay();
+        LocalDateTime toDateTime = toDate.atTime(LocalTime.MAX);
+
+        return paymentRepository.getPaymentDto(pageable, userSearchCondition, fromDateTime, toDateTime);
+    }
+
     public LocalDateTime convertTheaterDateTime(String theaterDate, String Hour, String Minute) {
         String[] dateList = theaterDate.split("-");
         int Year = Integer.parseInt(dateList[0]);
@@ -641,5 +674,159 @@ public class AdminServiceImpl implements AdminService {
         );
 
         return jwtAuthToken.getToken(jwtAuthToken);
+    }
+
+    @Override
+    public void uploadMovieCsvFile(MultipartFile file) {
+        log.info(file.getOriginalFilename() + " CSV 업로드 시작");
+        Reader reader = null;
+        try {
+            reader = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+
+            CSVReader csvReader = new CSVReader(reader);
+            csvReader.readNext();
+            readMovieFile(csvReader);
+            log.info(file.getOriginalFilename() + " CSV 업로드 종료");
+        } catch (IOException | CsvValidationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Transactional
+    public void readMovieFile(CSVReader csvReader) {
+        try {
+            String[] line;
+
+            List<String> movieNameList = new ArrayList<>();
+            List<Movie> movieList = new ArrayList<>();
+
+            while ((line = csvReader.readNext()) != null) {
+                if (line[0].equals("")) {
+                    continue;
+                }
+                movieNameList.add(line[0]);
+
+                log.info("영화 이름={}", line[0]);
+                log.info("영화 감독={}", line[1]);
+                log.info("영화 등급={}", line[2]);
+                log.info("영화 평점={}", line[3]);
+                log.info("영화 상세 링크={}", line[4]);
+                log.info("영화 러닝 타임={}", line[5]);
+
+                onValidMovie(line[0], line[3], line[5]);
+
+                Movie movie = Movie
+                        .builder()
+                        .movieName(line[0])
+                        .movieDirector(line[1])
+                        .movieRating(MovieRating.valueOf(line[2]))
+                        .movieStarRating(Integer.parseInt(line[3]))
+                        .movieDetailLink(line[4])
+                        .movieRunningTime(Integer.parseInt(line[5]))
+                        .movieUseYn(false)
+                        .moviePopularCount(0)
+                        .build();
+
+                movieList.add(movie);
+            }
+
+            Integer movieDuplicateCount = movieRepository.countMovieByMovieNameIn(movieNameList);
+            log.info("영화 중복 개수={}", movieDuplicateCount);
+
+            if (movieDuplicateCount > 0) {
+                throw new RuntimeException("중복된 영화 이름이 있습니다. 다시 시도해주세요.");
+            }
+
+            movieRepository.saveAll(movieList);
+
+        } catch (NumberFormatException e) {
+            throw new RuntimeException(e);
+        } catch (CsvValidationException | IOException e) {
+            throw new RuntimeException("CSV 가져오던 도중 오류가 발생했습니다. \n 다시 시도해 주세요");
+        }
+    }
+
+    public void onValidMovie(String movieName, String movieStarRating, String movieRunningTime) {
+
+        try {
+            Integer.parseInt(movieStarRating);
+            Integer.parseInt(movieRunningTime);
+        } catch (NumberFormatException e) {
+            throw new NumberFormatException(movieName + "의 정보가 잘못 되었습니다.");
+        }
+    }
+
+    @Override
+    @Transactional
+    public void uploadMovieImageFile(List<MultipartFile> fileList) {
+
+        if (fileList.isEmpty()) {
+            throw new NullPointerException("파일이 존재하지 않습니다. 다시 시도해주세요.");
+        }
+
+        List<String> movieNameList = new ArrayList<>();
+
+        fileList.forEach(file -> {
+            String[] splitExt = file.getOriginalFilename().split("\\.");
+            log.info("ext={}", splitExt[splitExt.length - 1]);
+
+            String remainderString = splitExt[splitExt.length - 2];
+            String[] splitFilePath = remainderString.split("/");
+
+            String originFileName = splitFilePath[splitFilePath.length - 1];
+            String[] splitMovieName = originFileName.split("_");
+
+            log.info("movieName={}", splitMovieName[0]);
+            log.info("imageKind={}", splitMovieName[1]);
+
+            if (!splitMovieName[1].equals("poster") && !splitMovieName[1].equals("info") && !splitMovieName[1].equals("banner")) {
+                throw new NullPointerException("옳바른 형식의 파일이 아닙니다. " + "<br> 영화 이름 : " + originFileName + "." + splitExt[splitExt.length - 1]);
+            }
+
+            String replaceName = splitMovieName[0].replaceAll("\\^", ":");
+
+            if (!movieNameList.contains(replaceName)) {
+                movieNameList.add(replaceName);
+            }
+        });
+
+        Integer movieCount = movieRepository.countMovieByMovieNameIn(movieNameList);
+        log.info("movieNameListSize={}", movieNameList.size());
+        log.info("movieCount={}", movieCount);
+
+        if (movieCount != movieNameList.size()) {
+            throw new NullPointerException("존재 하지 않는 영화 제목이 있습니다.");
+        }
+
+        List<Movie> movieList = movieRepository.getMoviesByMovieNameIn(movieNameList);
+        String path = "https://rebora.s3.ap-northeast-2.amazonaws.com/movie/";
+        movieList.forEach(movie -> {
+            String movieImage = path + movie.getId() + "/poster.png";
+            String movieBannerImage = path + movie.getId() + "/banner.png";
+            String movieRecruitmentImage = path + movie.getId() + "/info.png";
+
+            movie.addImage(movieImage, movieBannerImage, movieRecruitmentImage);
+        });
+
+        movieRepository.saveAll(movieList);
+
+        fileList.forEach(file -> {
+            String[] splitExt = file.getOriginalFilename().split("\\.");
+            log.info("ext={}", splitExt[splitExt.length - 1]);
+
+            String remainderString = splitExt[splitExt.length - 2];
+            String[] splitFilePath = remainderString.split("/");
+
+            String originFileName = splitFilePath[splitFilePath.length - 1];
+            String[] splitMovieName = originFileName.split("_");
+            String replaceName = splitMovieName[0].replaceAll("\\^", ":");
+            log.info("movieName={}", replaceName);
+            log.info("imageKind={}", splitMovieName[1]);
+
+            Movie movie = movieRepository.getMovieByMovieName(replaceName);
+
+            String newFileName = "movie/" + movie.getId() + "/" + splitMovieName[1] + "." + splitExt[splitExt.length - 1];
+            fileUploadService.uploadImage(file, newFileName); //파일 Url
+        });
     }
 }

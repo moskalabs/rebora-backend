@@ -4,6 +4,7 @@ import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Admin.Dto.AdminPaymentDto;
 import moska.rebora.Admin.Dto.AdminUserDto;
 import moska.rebora.Admin.Dto.FileReadCsvDto;
 import moska.rebora.Admin.Service.AdminService;
@@ -159,6 +160,41 @@ public class AdminController {
         return mav;
     }
 
+    @GetMapping("/payment/list")
+    public ModelAndView paymentList(
+            ModelAndView mav,
+            @PageableDefault(page = 0, size = 10) Pageable pageable,
+            @RequestParam(defaultValue = "") String searchCondition,
+            @RequestParam(defaultValue = "") String searchWord,
+            @RequestParam(defaultValue = "") String toDate,
+            @RequestParam(defaultValue = "") String fromDate
+    ) {
+        UserSearchCondition userSearchCondition = new UserSearchCondition();
+        userSearchCondition.setSearchCondition(searchCondition);
+        userSearchCondition.setSearchWord(searchWord);
+
+        BasePageResponse<AdminPaymentDto> basePageResponse = new BasePageResponse<>();
+        basePageResponse.setResult(true);
+        basePageResponse.setPage(adminService.getPaymentPage(userSearchCondition, fromDate, toDate, pageable));
+
+        mav.addObject("paymentList", basePageResponse);
+        mav.setViewName("/admin/payment/list");
+        return mav;
+    }
+
+    @GetMapping("/payment/info/{paymentId}")
+    public ModelAndView paymentInfo(
+            @PathVariable String paymentId,
+            ModelAndView mav
+    ) {
+        BaseInfoResponse<AdminPaymentDto> baseInfoResponse = new BaseInfoResponse<>();
+        baseInfoResponse.setResult(true);
+        baseInfoResponse.setContent(adminService.getPaymentInfo(paymentId));
+        mav.addObject("payment", baseInfoResponse);
+        mav.setViewName("/admin/payment/info");
+        return mav;
+    }
+
     @GetMapping("/theater/info/{theaterId}")
     public ModelAndView theaterList(
             ModelAndView mav,
@@ -223,7 +259,6 @@ public class AdminController {
         adminService.changeRecruitment(recruitmentId, RecruitmentStatus.valueOf(recruitmentStatus), recruitmentExposeYn);
 
         return baseResponse;
-
     }
 
 
@@ -395,5 +430,34 @@ public class AdminController {
     @GetMapping("/theater/downloadCsvFile")
     public ResponseEntity<byte[]> download() throws IOException {
         return s3Service.getObject("default/theaterCsv.csv");
+    }
+
+    @GetMapping("/testInfo")
+    public ModelAndView testInfo(
+            ModelAndView mav
+    ) {
+        mav.setViewName("/admin/payment/infoTest");
+
+        return mav;
+    }
+
+    @PostMapping("/movie/uploadCsvFile")
+    public BaseResponse movieUploadCsv(
+            MultipartFile file
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+        adminService.uploadMovieCsvFile(file);
+        baseResponse.setResult(true);
+        return baseResponse;
+    }
+
+    @PostMapping("/movie/uploadImageFolder")
+    public BaseResponse uploadImageFolder(
+            List<MultipartFile> files
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+        adminService.uploadMovieImageFile(files);
+        return baseResponse;
     }
 }

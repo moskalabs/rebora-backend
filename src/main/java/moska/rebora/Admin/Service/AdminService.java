@@ -1,9 +1,6 @@
 package moska.rebora.Admin.Service;
 
-import moska.rebora.Admin.Dto.AdminMovieDto;
-import moska.rebora.Admin.Dto.AdminTheaterDto;
-import moska.rebora.Admin.Dto.AdminTheaterResponseDto;
-import moska.rebora.Admin.Dto.AdminUserDto;
+import moska.rebora.Admin.Dto.*;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
@@ -22,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface AdminService {
 
@@ -114,4 +112,19 @@ public interface AdminService {
     );
 
     void createTheaters(MultipartFile file);
+
+    Page<AdminPaymentDto> getPaymentPage(
+            @Param("userSearchCondition") UserSearchCondition userSearchCondition,
+            @Param("startDate") String startDate,
+            @Param("endDate") String endDate,
+            Pageable pageable
+    );
+
+    AdminPaymentDto getPaymentInfo(
+            @Param("paymentId") String paymentId
+    );
+
+    void uploadMovieCsvFile(MultipartFile file);
+
+    void uploadMovieImageFile(List<MultipartFile> fileList);
 }
