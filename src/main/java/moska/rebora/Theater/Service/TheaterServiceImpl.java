@@ -1,6 +1,8 @@
 package moska.rebora.Theater.Service;
 
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Movie.Entity.Movie;
+import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Theater.Dto.TheaterMovieDto;
 import moska.rebora.Theater.Dto.TheaterPageDto;
 import moska.rebora.Theater.Repository.TheaterRepository;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +22,8 @@ import java.util.List;
 @Service
 @Slf4j
 public class TheaterServiceImpl implements TheaterService {
+    @Autowired
+    private MovieRepository movieRepository;
 
     @Autowired
     TheaterRepository theaterRepository;
@@ -82,11 +87,11 @@ public class TheaterServiceImpl implements TheaterService {
     }
 
     @Override
+    @Transactional
     public Page<TheaterPageDto> getPageTheater(String theaterRegion,
                                                String selectDate,
                                                Long movieId,
                                                Pageable pageable) {
-
 
         return theaterRepository.getPageTheater(theaterRegion, LocalDate.parse(selectDate), movieId, pageable);
     }

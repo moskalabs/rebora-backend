@@ -1,16 +1,24 @@
 package moska.rebora.Theater.Repository;
 
 import com.querydsl.core.types.ConstantImpl;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringTemplate;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Movie.Entity.Movie;
+import moska.rebora.Movie.Entity.QMovie;
+import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Theater.Dto.QTheaterPageDto;
 import moska.rebora.Theater.Dto.TheaterPageDto;
+import moska.rebora.User.Entity.QUser;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
@@ -18,13 +26,16 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 
+import static com.querydsl.jpa.JPAExpressions.select;
 import static moska.rebora.Cinema.Entity.QBrand.brand;
 import static moska.rebora.Cinema.Entity.QBrandMovie.brandMovie;
 import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
 
+@Slf4j
 public class TheaterCustomImpl implements TheaterCustom {
 
     private final JPAQueryFactory queryFactory;
@@ -32,6 +43,8 @@ public class TheaterCustomImpl implements TheaterCustom {
     public TheaterCustomImpl(EntityManager em) {
         this.queryFactory = new JPAQueryFactory(em);
     }
+
+    MovieRepository movieRepository;
 
     static final LocalDateTime minAvailDate = LocalDateTime.from(LocalDateTime.now().plusDays(3).atZone(ZoneId.systemDefault()));
 
@@ -60,6 +73,7 @@ public class TheaterCustomImpl implements TheaterCustom {
     }
 
     @Override
+    @Transactional
     public Page<TheaterPageDto> getPageTheater(String theaterRegion,
                                                LocalDate selectDate,
                                                Long movieId,
@@ -69,6 +83,8 @@ public class TheaterCustomImpl implements TheaterCustom {
         LocalDateTime startDate = selectDate.atStartOfDay();
         LocalDateTime endDate = selectDate.atTime(LocalTime.MAX);
 
+        QMovie movieEx = new QMovie("movie");
+
         List<TheaterPageDto> content = queryFactory.select(new QTheaterPageDto(
                         theater.id.as("theaterId"),
                         theater.theaterName,
@@ -76,7 +92,9 @@ public class TheaterCustomImpl implements TheaterCustom {
                         theater.theaterEndDatetime.as("theaterEndTime"),
                         theater.theaterDay,
                         theater.theaterRegion,
-                        theater.theaterPrice,
+                        ExpressionUtils.as(select(movieEx.moviePrice.add(theater.theaterPrice))
+                                .from(movieEx)
+                                .where(movieEx.id.eq(movieId)) , "theaterPrice"),
                         theater.theaterCinemaBrandName,
                         theater.theaterCinemaName,
                         theater.theaterMaxPeople,

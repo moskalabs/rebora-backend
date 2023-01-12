@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRecruitmentCustom {
 
@@ -31,4 +32,6 @@ public interface UserRecruitmentCustom {
     List<UserRecruitment> getBatchRefundUserRecruitment(Long recruitmentId);
 
     List<UserRecruitment> getBatchUserWishRecruitment(Long recruitmentId);
+
+    Optional<UserRecruitment> getUserRecruitmentById(Long userRecruitmentId);
 }

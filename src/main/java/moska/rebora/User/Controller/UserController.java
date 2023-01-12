@@ -102,9 +102,11 @@ public class UserController {
                         @RequestParam(value = "userPushYn", required = false) Boolean userPushYn,
                         @RequestParam(value = "userPushNightYn", required = false) Boolean userPushNightYn,
                         @RequestParam(value = "userPushKey", required = false) String userPushKey,
-                        @RequestParam(value = "authKey") String authKey
+                        @RequestParam(value = "authKey") String authKey,
+                        @RequestParam(value = "userSnsKind") String userSnsKind,
+                        @RequestParam(value = "userSnsId") String userSnsId
     ) throws SQLIntegrityConstraintViolationException {
-        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushNightYn, userPushKey, authKey);
+        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushNightYn, userPushKey, authKey, userSnsKind, userSnsId);
     }
 
     /**

@@ -82,7 +82,8 @@ public class UserAdminImpl implements UserAdmin {
 
     @Override
     public AdminUserDto getAdminUserInfo(Long userId) {
-        AdminUserDto adminUserDto = queryFactory.select(Projections.fields(
+        AdminUserDto adminUserDto = queryFactory.select(
+                Projections.fields(
                         AdminUserDto.class,
                         user.id.as("userId"),
                         user.userEmail,

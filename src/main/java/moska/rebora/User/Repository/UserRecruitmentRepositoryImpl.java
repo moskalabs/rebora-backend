@@ -29,6 +29,7 @@ import javax.persistence.EntityManager;
 import javax.validation.Valid;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.querydsl.jpa.JPAExpressions.select;
 import static moska.rebora.Movie.Entity.QMovie.movie;
@@ -225,6 +226,17 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                         userRecruitment.userRecruitmentWish.eq(true)
                 )
                 .fetch();
+    }
+
+    public Optional<UserRecruitment> getUserRecruitmentById(Long userRecruitmentId) {
+        return Optional.ofNullable(queryFactory.select(userRecruitment)
+                .from(userRecruitment)
+                .join(userRecruitment.user, user).fetchJoin()
+                .join(userRecruitment.recruitment, recruitment).fetchJoin()
+                .join(recruitment.movie, movie).fetchJoin()
+                .join(recruitment.theater, theater).fetchJoin()
+                .where(userRecruitment.id.eq(userRecruitmentId))
+                .fetchOne());
     }
 
     //자신의 프로필 먼저

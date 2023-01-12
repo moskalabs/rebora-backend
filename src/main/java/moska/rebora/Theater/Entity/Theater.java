@@ -48,6 +48,7 @@ public class Theater extends BaseEntity {
     @Column(length = 50)
     private String theaterRegion;
 
+    @Column
     private Integer theaterPrice;
 
     @Column

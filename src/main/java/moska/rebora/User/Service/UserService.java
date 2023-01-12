@@ -15,14 +15,17 @@ public interface UserService {
     UserLoginDto login(@Param("userEmail") String userEmail,
                        @Param("password") String password);
 
-    UserLoginDto signUp(@Param("userEmail") String userEmail,
-                        @Param("password") String password,
-                        @Param("userName") String userName,
-                        @Param("userNickname") String userNickname,
-                        @Param("userPushYn") Boolean userPushYn,
-                        @Param("userPushNightYn") Boolean userPushNightYn,
-                        @Param("userPushKey") String userPushKey,
-                        @Param("authKey") String authKey
+    UserLoginDto signUp(
+            @Param("userEmail") String userEmail,
+            @Param("password") String password,
+            @Param("userName") String userName,
+            @Param("userNickname") String userNickname,
+            @Param("userPushYn") Boolean userPushYn,
+            @Param("userPushNightYn") Boolean userPushNightYn,
+            @Param("userPushKey") String userPushKey,
+            @Param("authKey") String authKey,
+            @Param("userSnsKind") String userSnsKind,
+            @Param("userSnsId") String userSnsId
     ) throws SQLIntegrityConstraintViolationException;
 
     BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail,
@@ -36,4 +39,6 @@ public interface UserService {
                                 @Param("password") String password,
                                 @Param("authKey") String authKey
     );
+
+    boolean isOnValidUser(User user);
 }

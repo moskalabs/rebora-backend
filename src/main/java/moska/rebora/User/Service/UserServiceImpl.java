@@ -10,6 +10,7 @@ import moska.rebora.Config.PasswordAuthAuthenticationManager;
 import moska.rebora.Config.PasswordAuthAuthenticationToken;
 import moska.rebora.Enum.EmailAuthKind;
 import moska.rebora.Enum.UserGrade;
+import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.Notification.Repository.NotificationRepository;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
@@ -111,7 +112,9 @@ public class UserServiceImpl implements UserService {
                                @Param("userPushYn") Boolean userPushYn,
                                @Param("userPushYn") Boolean userPushNightYn,
                                @Param("userPushKey") String userPushKey,
-                               @Param("authKey") String authKey
+                               @Param("authKey") String authKey,
+                               @Param("userSnsKind") String userSnsKind,
+                               @Param("userSnsId") String userSnsId
 
     ) throws SQLIntegrityConstraintViolationException {
 
@@ -132,6 +135,8 @@ public class UserServiceImpl implements UserService {
                     .userPushNightYn(userPushNightYn)
                     .userName(userName)
                     .userPushKey(userPushKey)
+                    .userSnsKind(UserSnsKind.valueOf(userSnsKind))
+                    .userSnsId(userSnsId)
                     .build();
 
             userRepository.save(user);
@@ -267,5 +272,26 @@ public class UserServiceImpl implements UserService {
         );
 
         return jwtAuthToken.getToken(jwtAuthToken);
+    }
+
+    /**
+     * 유저 유효성 검사
+     *
+     * @param user 유저 엔티티
+     * @return boolean
+     */
+    @Override
+    public boolean isOnValidUser(User user) {
+
+        //유저 사용 여부
+        if (!user.getUserUseYn()) {
+            return false;
+            
+            //탈퇴 및 휴면 계정 여부
+        } else if (user.getUserGrade().equals(UserGrade.WITHDRAWAL) || user.getUserGrade().equals(UserGrade.DORMANCY)) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

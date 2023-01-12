@@ -12,7 +12,7 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Table(indexes = {
         @Index(name = "i_user_email_use", columnList = "userEmail,userUseYn"),
         @Index(name = "search_recruitment", columnList = "user_id,userEmail")
@@ -84,6 +84,9 @@ public class User extends BaseTimeEntity {
     @Comment("유저 SNS ID")
     private String userSnsId;
 
+    public User() {
+    }
+
     public void changePassword(String password) {
         this.password = password;
     }
@@ -138,6 +141,14 @@ public class User extends BaseTimeEntity {
         this.userPushNightYn = userPushNightYn;
         this.userUseYn = userUseYn;
         this.userGrade = UserGrade.valueOf(userGrade);
+    }
+
+    public void addUserSns(
+            UserSnsKind userSnsKind,
+            String userSnsId
+    ) {
+        this.userSnsKind = userSnsKind;
+        this.userSnsId = userSnsId;
     }
 
     public void withdrawalUser() {

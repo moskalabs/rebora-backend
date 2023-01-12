@@ -5,5 +5,8 @@ import lombok.Setter;
 
 @Getter
 public enum UserGrade {
-    NORMAL , ADMIN, DORMANCY, WITHDRAWAL
+    NORMAL, //일반
+    ADMIN, //관리자
+    DORMANCY, //휴면
+    WITHDRAWAL //탈퇴
 }

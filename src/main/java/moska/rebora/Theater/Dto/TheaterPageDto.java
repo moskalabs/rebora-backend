@@ -25,7 +25,6 @@ public class TheaterPageDto{
     private Integer theaterMaxPeople;
     private Integer theaterMinPeople;
     private Integer theaterTime;
-
     private Long recruitmentId;
     private RecruitmentStatus recruitmentStatus;
 
