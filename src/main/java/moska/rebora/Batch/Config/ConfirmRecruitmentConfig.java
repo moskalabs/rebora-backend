@@ -83,7 +83,7 @@ public class ConfirmRecruitmentConfig {
         UserSearchCondition condition = new UserSearchCondition();
         condition.setRecruitmentStatus(RecruitmentStatus.CONFIRMATION);
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
-        log.info("recruitmentList = {}", recruitmentList.size());
+        log.info("recruitmentList 사이즈 = {}", recruitmentList.size());
         return new ListItemReader<>(recruitmentList);
     }
 
@@ -95,6 +95,7 @@ public class ConfirmRecruitmentConfig {
 
                 Movie movie = recruitment.getMovie();
                 Theater theater = recruitment.getTheater();
+
                 List<UserRecruitment> userWishRecruitmentList = userRecruitmentRepository.getBatchUserWishRecruitment(recruitment.getId());
 
                 paymentService.paymentByRecruitment(recruitment);

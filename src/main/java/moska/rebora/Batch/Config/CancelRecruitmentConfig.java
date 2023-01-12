@@ -33,7 +33,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -86,59 +88,53 @@ public class CancelRecruitmentConfig {
         UserSearchCondition condition = new UserSearchCondition();
         condition.setRecruitmentStatus(RecruitmentStatus.CANCEL);
         List<Recruitment> recruitmentList = recruitmentRepository.getBatchRecruitmentList(RecruitmentStatus.RECRUITING, condition);
-        log.info("recruitmentList = {}", recruitmentList.size());
+        log.info("recruitmentList Size = {}", recruitmentList.size());
         return new ListItemReader<>(recruitmentList);
     }
 
+    @Transactional
     public ItemProcessor<Recruitment, Recruitment> cancelRecruitmentProcessor() {
         return new ItemProcessor<Recruitment, Recruitment>() {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
+
                 log.info("********** 모집 취소 배치 cancelRecruitmentProcessor **********");
 
                 List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getBatchRefundUserRecruitment(recruitment.getId());
                 List<UserRecruitment> userWishRecruitmentList = userRecruitmentRepository.getBatchUserWishRecruitment(recruitment.getId());
+                List<User> userList = new ArrayList<>();
 
                 Movie movie = recruitment.getMovie();
                 Theater theater = recruitment.getTheater();
+
                 String notificationSubject = "참여한 모집이 취소되었습니다.";
+                String notificationContent = notificationService.createNotificationContent(
+                        movie.getMovieName(),
+                        theater.getTheaterStartDatetime(),
+                        theater.getTheaterDay(),
+                        theater.getTheaterCinemaBrandName(),
+                        theater.getTheaterCinemaName(),
+                        theater.getTheaterName()
+                );
 
                 for (UserRecruitment userRecruitment : userRecruitmentList) {
-
-                    Payment payment = userRecruitment.getPayment();
-                    BaseResponse baseResponse = paymentService.paymentCancel(payment);
+                    userRecruitment = paymentService.paymentCancel(userRecruitment);
                     User user = userRecruitment.getUser();
-
-                    String notificationContent = notificationService.createNotificationContent(
-                            movie.getMovieName(),
-                            theater.getTheaterStartDatetime(),
-                            theater.getTheaterDay(),
-                            theater.getTheaterCinemaBrandName(),
-                            theater.getTheaterCinemaName(),
-                            theater.getTheaterName()
-                    );
-
-                    if (baseResponse.getResult()) {
-                        notificationService.createNotificationPayment(notificationSubject, notificationContent, NotificationKind.CANCEL, user, recruitment, payment);
-                    }
+                    userList.add(user);
                 }
 
-                Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+                userRecruitmentRepository.saveAll(userRecruitmentList);
 
-                bannerService.bannerDelete(banner);
+                Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+                if (banner != null) {
+                    bannerService.bannerDelete(banner);
+                }
+
+                notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, userList);
 
                 for (UserRecruitment userRecruitment : userWishRecruitmentList) {
                     User user = userRecruitment.getUser();
-
-                    String notificationContent = notificationService.createNotificationContent(
-                            movie.getMovieName(),
-                            theater.getTheaterStartDatetime(),
-                            theater.getTheaterDay(),
-                            theater.getTheaterCinemaBrandName(),
-                            theater.getTheaterCinemaName(),
-                            theater.getTheaterName()
-                    );
-                    notificationSubject = "찜한 모집의 상영이 취소되었습니다.";
+                    notificationSubject = "찜한 모집의 모집이 취소되었습니다.";
                     notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, user);
                 }
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CANCEL);

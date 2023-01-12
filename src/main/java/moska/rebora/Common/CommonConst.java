@@ -15,4 +15,6 @@ public class CommonConst {
     public static final String NAVER_TOKEN_URL = "https://nid.naver.com/oauth2.0/token";
 
     public static final String NAVER_TOKEN_ME_URL = "https://openapi.naver.com/v1/nid/me";
+
+    public static final String KAKAO_TOKEN_ME_URL = "https://kapi.kakao.com/v2/user/me";
 }
