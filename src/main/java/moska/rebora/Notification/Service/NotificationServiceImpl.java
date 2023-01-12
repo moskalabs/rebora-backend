@@ -145,7 +145,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie, Boolean paymentEndYn) {
+    public void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie,Payment payment, Boolean paymentEndYn) {
         String content = createNotificationContent(
                 movie.getMovieName(),
                 theater.getTheaterStartDatetime(),
@@ -162,6 +162,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .notificationKind(NotificationKind.CONFORMATION)
                 .recruitment(recruitment)
                 .user(user)
+                .payment(payment)
                 .build();
 
         notificationRepository.save(notification);

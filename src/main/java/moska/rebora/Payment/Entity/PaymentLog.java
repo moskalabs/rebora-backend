@@ -42,6 +42,10 @@ public class PaymentLog extends BaseEntity {
     private String receiptUrl;
     @Column(length = 50)
     private String paymentCardNumber;
+
+    @Column(length = 50)
+    private String paymentCardName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")
     private Payment payment;
@@ -51,7 +55,7 @@ public class PaymentLog extends BaseEntity {
     }
 
     @Builder
-    public PaymentLog(String paymentLogContent, Integer paymentLogAmount, String paymentMethod, PaymentStatus paymentLogStatus, String paymentLogCardCode, String pgProvider, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, Payment payment) {
+    public PaymentLog(String paymentLogContent, Integer paymentLogAmount, String paymentMethod, PaymentStatus paymentLogStatus, String paymentLogCardCode, String pgProvider, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, Payment payment, String paymentCardName) {
         this.paymentLogContent = paymentLogContent;
         this.paymentLogAmount = paymentLogAmount;
         this.paymentMethod = paymentMethod;
@@ -62,5 +66,6 @@ public class PaymentLog extends BaseEntity {
         this.receiptUrl = receiptUrl;
         this.paymentCardNumber = paymentCardNumber;
         this.payment = payment;
+        this.paymentCardName = paymentCardName;
     }
 }

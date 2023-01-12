@@ -29,6 +29,9 @@ public class RecruitmentInfoDto {
     private String theaterCinemaName;
     private String theaterCinemaBrandName;
     private String theaterRegion;
+    private Integer theaterPrice;
+
+    private Integer theaterTime;
 
     private Long userRecruitmentId;
     private Boolean userRecruitmentWish;
@@ -48,12 +51,15 @@ public class RecruitmentInfoDto {
     private List<UserImageListDto> userImageList;
 
 
-    public void addPageComment(Page<CommentDto> pageComment){
+    public void addPageComment(Page<CommentDto> pageComment) {
         this.pageComment = pageComment;
     }
-    public void addUserImageList(List<UserImageListDto> userImageList){this.userImageList = userImageList; }
 
-    public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople) {
+    public void addUserImageList(List<UserImageListDto> userImageList) {
+        this.userImageList = userImageList;
+    }
+
+    public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople) {
         this.movieName = movieName;
         this.movieRecruitmentImage = movieRecruitmentImage;
         this.movieId = movieId;
@@ -66,6 +72,8 @@ public class RecruitmentInfoDto {
         this.theaterCinemaName = theaterCinemaName;
         this.theaterCinemaBrandName = theaterCinemaBrandName;
         this.theaterRegion = theaterRegion;
+        this.theaterPrice = theaterPrice;
+        this.theaterTime = theaterTime;
         this.userRecruitmentId = userRecruitmentId;
         this.userRecruitmentWish = userRecruitmentWish;
         this.userRecruitmentYn = userRecruitmentYn;

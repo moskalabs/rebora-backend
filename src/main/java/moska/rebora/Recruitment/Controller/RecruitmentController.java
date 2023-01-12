@@ -6,6 +6,7 @@ import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.RecruitmentStatus;
+import moska.rebora.Payment.Dto.ReserveRecruitmentDto;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Service.RecruitmentService;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
@@ -115,7 +116,9 @@ public class RecruitmentController {
      */
     @Tag(name = "모집")
     @GetMapping("/info/{recruitmentId}")
-    public BaseInfoResponse<RecruitmentInfoDto> info(@PathVariable Long recruitmentId) {
+    public BaseInfoResponse<RecruitmentInfoDto> info(
+            @PathVariable Long recruitmentId
+    ) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         Pageable commentPageable = PageRequest.of(0, 10);
         return recruitmentService.getRecruitmentInfo(recruitmentId, userEmail, commentPageable);
@@ -132,12 +135,14 @@ public class RecruitmentController {
     @PostMapping("/createRecruitment/{recruitmentId}")
     public BaseResponse createRecruitment(
             @PathVariable Long recruitmentId,
-            @RequestParam Integer userRecruitmentPeople
+            @RequestParam Integer userRecruitmentPeople,
+            @RequestParam String merchantUid,
+            @RequestParam String impUid
     ) {
         BaseResponse baseResponse = new BaseResponse();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        recruitmentService.createRecruitment(recruitmentId, userRecruitmentPeople, userEmail);
+        recruitmentService.createRecruitment(recruitmentId, userRecruitmentPeople, userEmail, merchantUid, impUid);
         baseResponse.setResult(true);
 
 
@@ -156,7 +161,7 @@ public class RecruitmentController {
      * @return JSONObject
      */
     @PostMapping("/reserveRecruitment")
-    public JSONObject reserveRecruitment(
+    public BaseInfoResponse<ReserveRecruitmentDto> reserveRecruitment(
             @RequestParam Long movieId,
             @RequestParam Long theaterId,
             @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
@@ -164,20 +169,25 @@ public class RecruitmentController {
             @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
             @RequestParam(value = "bannerMainText", required = false) String bannerMainText
     ) {
-
+        BaseInfoResponse<ReserveRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
         JSONObject jsonObject = new JSONObject();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        jsonObject.put("result", true);
-        jsonObject.put("recruitmentId", recruitmentService.reserveRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText));
+        baseInfoResponse.setContent(recruitmentService.reserveRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText));
 
-        return jsonObject;
+        return baseInfoResponse;
     }
 
+    /**
+     * 모집 취소
+     *
+     * @param recruitmentId 모집 아이디
+     * @return BaseResponse
+     */
     @PostMapping("/cancelReserve/{recruitmentId}")
     public BaseResponse cancelReserve(
             @PathVariable Long recruitmentId
-    ){
+    ) {
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
 

@@ -55,5 +55,5 @@ public interface NotificationService {
             @Param("userEmail") String userEmail
     );
 
-    void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie, Boolean paymentEndYn);
+    void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie,Payment payment, Boolean paymentEndYn);
 }

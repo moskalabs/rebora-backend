@@ -4,6 +4,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Enum.PaymentStatus;
+import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Recruitment.Entity.Recruitment;
 
@@ -30,10 +31,10 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
     }
 
     @Override
-    public List<Payment> getBatchPaymetList(PaymentStatus paymentStatus) {
+    public List<Payment> getBatchPaymentList(PaymentStatus paymentStatus) {
 
-        LocalDateTime beforeDate = LocalDate.now().minusDays(3).atStartOfDay();
-        LocalDateTime now = LocalDate.now().minusDays(1).atTime(LocalTime.MAX).minusMinutes(30L);
+        LocalDateTime beforeDate = LocalDate.now().atStartOfDay();
+        LocalDateTime now = LocalDateTime.now();
 
         return queryFactory
                 .select(payment)
@@ -44,7 +45,10 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
                 .join(recruitment.theater, theater).fetchJoin()
                 .join(userRecruitment.user, user).fetchJoin()
                 .where(
+                        recruitment.recruitmentExposeYn.eq(true),
+                        recruitment.recruitmentStatus.eq(RecruitmentStatus.CONFIRMATION),
                         payment.paymentStatus.eq(paymentStatus),
+                        payment.paymentReserve.eq(true),
                         recruitment.recruitmentEndDate.between(beforeDate, now)
                 )
                 .fetch();

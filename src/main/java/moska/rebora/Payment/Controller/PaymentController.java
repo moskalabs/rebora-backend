@@ -8,7 +8,10 @@ import moska.rebora.Common.BaseResponse;
 import moska.rebora.Common.Service.BaseCountResponse;
 import moska.rebora.Enum.PaymentMethod;
 import moska.rebora.Enum.PaymentStatus;
+import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Payment.Dto.CardDto;
+import moska.rebora.Payment.Dto.CustomerUIdDto;
+import moska.rebora.Payment.Dto.MerchantUidDto;
 import moska.rebora.Payment.Entity.Card;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Repository.PaymentRepository;
@@ -21,6 +24,7 @@ import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -33,101 +37,150 @@ import java.util.Optional;
 @Tag(name = "결제")
 @RequestMapping("/api/payment")
 @Slf4j
+@AllArgsConstructor
 public class PaymentController {
-
-    @Value("${toss.payments.test.client-key}")
-    private String TossClientKey;
-    @Autowired
     UserRecruitmentRepository userRecruitmentRepository;
-    @Autowired
-    PaymentRepository paymentRepository;
-    @Autowired
     PaymentService paymentService;
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     RecruitmentRepository recruitmentRepository;
+
+    /**
+     * customerUId 생성
+     *
+     * @param userId        유저 아이디
+     * @param recruitmentId 모집 아이디
+     * @return BaseInfoResponse<CustomerUIdDto>
+     */
+    @PostMapping("/createCustomerUid")
+    public BaseInfoResponse<CustomerUIdDto> createCustomerUId(
+            @RequestParam Long recruitmentId,
+            @RequestParam Integer userRecruitmentPeople
+    ) {
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.getUserByUserEmail(userEmail);
+
+        BaseInfoResponse<CustomerUIdDto> baseInfoResponse = new BaseInfoResponse<>();
+        baseInfoResponse.setResult(true);
+        baseInfoResponse.setContent(paymentService.createCustomerUid(user.getId(), recruitmentId, userRecruitmentPeople));
+
+        return baseInfoResponse;
+    }
+
+    /**
+     * 모집 예약 등록
+     *
+     * @param userRecruitmentId 유저 모집 아이디
+     * @return BaseResponse
+     */
+    @PostMapping("/reserveRecruitment/{userRecruitmentId}")
+    public BaseResponse reserveRecruitment(
+            @PathVariable Long userRecruitmentId
+    ) {
+
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+
+        paymentService.reserveRecruitment(userRecruitmentId);
+
+        return baseResponse;
+    }
+
+    /**
+     * 주문 번호 생성
+     *
+     * @param userId                유저 아이디
+     * @param recruitmentId         모집 아이디
+     * @param userRecruitmentPeople 유저 모집 신청 인원
+     * @return BaseResponse
+     */
+    @PostMapping("/createMerchantUid")
+    public BaseInfoResponse<MerchantUidDto> saveMerchantUid(
+            @RequestParam Long recruitmentId,
+            @RequestParam(defaultValue = "0") Integer userRecruitmentPeople
+    ) {
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.getUserByUserEmail(userEmail);
+
+        BaseInfoResponse<MerchantUidDto> baseInfoResponse = new BaseInfoResponse<>();
+        baseInfoResponse.setResult(true);
+        baseInfoResponse.setContent(paymentService.createMerchantUid(user.getId(), recruitmentId, userRecruitmentPeople));
+
+        return baseInfoResponse;
+    }
+
+    /**
+     * 즉시 결제 정보 저장
+     *
+     * @param userRecruitmentId 유저 아이디
+     * @param merchantUid       주문 번호
+     * @param impUid            거래고유번호
+     * @return BaseResponse
+     */
+    @PostMapping("/saveImmediatePayment/{userRecruitmentId}")
+    public BaseResponse saveImmediatePayment(
+            @PathVariable Long userRecruitmentId,
+            @RequestParam String merchantUid,
+            @RequestParam String impUid
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+
+        paymentService.saveImmediatePayment(userRecruitmentId, merchantUid, impUid);
+        baseResponse.setResult(true);
+
+        return baseResponse;
+    }
 
     @GetMapping("/applyCard")
     public ModelAndView applyCard(
             ModelAndView mav,
-            @RequestParam Long userId
+            @RequestParam Long userRecruitmentId
     ) {
 
-        Optional<User> userOptional = userRepository.findById(userId);
+        Optional<UserRecruitment> optionalUserRecruitment = userRecruitmentRepository.findById(userRecruitmentId);
 
-        if (userOptional.isEmpty()) {
-            throw new NullPointerException("존재하지 않는 유저입니다.");
+        if (optionalUserRecruitment.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 모집 정보입니다.");
         }
 
-        User user = userOptional.get();
-        String customerUid = paymentService.createCustomerUid(user);
+        //String customerUid = paymentService.createCustomerUid(user);
 
-        mav.addObject("userId", user.getId());
-        mav.addObject("customerId", user.getUserCustomerId());
-        mav.addObject("customerUid", customerUid);
+        //mav.addObject("userId", user.getId());
+        //mav.addObject("customerId", user.getUserCustomerId());
+        //mav.addObject("customerUid", customerUid);
         mav.setViewName("payment/applyCard");
 
         return mav;
     }
 
+
     @GetMapping("/applyDone")
     public ModelAndView applyCardDone(
             ModelAndView mav,
-            @RequestParam Long userId,
+            @RequestParam Long userRecruitmentId,
             @RequestParam String customerUId,
             @RequestParam Boolean imp_success,
             @RequestParam(required = false) String error_msg
 
     ) {
-        mav.addObject("userId", userId);
+        mav.addObject("userRecruitmentId", userRecruitmentId);
         mav.addObject("customerUid", customerUId);
         mav.addObject("imp_success", imp_success);
         mav.addObject("error_msg", error_msg);
+
+        Optional<UserRecruitment> optionalUserRecruitment = userRecruitmentRepository.findById(userRecruitmentId);
+
+        if (optionalUserRecruitment.isEmpty()) {
+            throw new NullPointerException("모집 정보가 존재하지 않습니다 다시 시도해주세요");
+        }
+
+        paymentService.applyCardUserRecruitment(optionalUserRecruitment.get(), customerUId);
+
         mav.setViewName("payment/applyDone");
         return mav;
     }
 
-
-    @GetMapping("/applyCardSuccess")
-    public BaseResponse paymentPageFail(
-            @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) String customerUid
-    ) {
-
-        Optional<User> userOptional = userRepository.findById(userId);
-
-        if (userOptional.isEmpty()) {
-            throw new NullPointerException("존재하지 않는 유저입니다.");
-        }
-
-        paymentService.applyCard(userOptional.get(), customerUid);
-        BaseResponse baseResponse = new BaseResponse();
-        baseResponse.setResult(true);
-        return baseResponse;
-    }
-
-    @PostMapping("/paymentConfirmMovie/{userId}/{recruitmentId}")
-    public BaseResponse paymentConfirmMovie(
-            @PathVariable Long userId,
-            @PathVariable Long recruitmentId,
-            @RequestParam Integer userRecruitmentPeople
-    ) {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        Optional<Recruitment> optionalRecruitment = recruitmentRepository.findById(recruitmentId);
-
-        if (optionalUser.isEmpty()) {
-            throw new NullPointerException("존재하지 않는 유저입니다. 다시 시도해주세요.");
-        }
-
-        if (optionalRecruitment.isEmpty()) {
-            throw new NullPointerException("존재하지 않는 모집입니다. 다시 시도해주세요.");
-        }
-
-
-        return paymentService.paymentConfirmMovie(optionalUser.get(), optionalRecruitment.get(), userRecruitmentPeople);
-    }
 
     @PostMapping("/refundPayment/{userRecruitmentId}")
     @Transactional
@@ -146,12 +199,13 @@ public class PaymentController {
             throw new NullPointerException("결재내역이 존재하지 않습니다. 다시 시도해주세요");
         }
 
-        BaseResponse baseResponse = paymentService.paymentCancel(payment);
-        if (baseResponse.getResult()) {
-            Recruitment recruitment = userRecruitment.getRecruitment();
-            recruitment.minusRecruitmentPeople(userRecruitment.getUserRecruitmentPeople());
-            recruitmentRepository.save(recruitment);
-        }
+        BaseResponse baseResponse = new BaseResponse();
+//                paymentService.paymentCancel(userRecruitment);
+//        if (baseResponse.getResult()) {
+//            Recruitment recruitment = userRecruitment.getRecruitment();
+//            recruitment.minusRecruitmentPeople(userRecruitment.getUserRecruitmentPeople());
+//            recruitmentRepository.save(recruitment);
+//        }
 
         return baseResponse;
     }

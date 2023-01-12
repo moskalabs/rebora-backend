@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Payment.Entity.QPayment.payment;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
@@ -53,6 +54,7 @@ public class RecruitmentBatchImpl implements RecruitmentBatch {
         return queryFactory.select(recruitment)
                 .from(recruitment)
                 .join(recruitment.theater, theater).fetchJoin()
+                .join(recruitment.movie, movie).fetchJoin()
                 .where(
                         recruitment.recruitmentStatus.eq(RecruitmentStatus.WAIT),
                         recruitment.regDate.lt(baseTime)

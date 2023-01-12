@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface PaymentRepositoryCustom {
 
-    public List<Payment> getBatchPaymetList(
+    List<Payment> getBatchPaymentList(
             PaymentStatus paymentStatus
     );
 }

@@ -60,13 +60,19 @@ public class Payment extends BaseEntity {
     @Column(length = 50)
     private String paymentCardNumber;
 
+    @Column
+    private String impUid;
+
+    @Column(columnDefinition = "LONGTEXT")
+    private String paymentMemo;
+
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "payment", cascade = CascadeType.ALL)
     private UserRecruitment userRecruitment;
 
     @OneToMany(mappedBy = "payment")
     List<PaymentLog> paymentLogList = new ArrayList<>();
 
-    public void updatePayment(String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, UserRecruitment userRecruitment) {
+    public void updatePayment(String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, UserRecruitment userRecruitment, String impUid, Boolean paymentReserve) {
         this.paymentContent = paymentContent;
         this.paymentAmount = paymentAmount;
         this.paymentMethod = paymentMethod;
@@ -78,19 +84,21 @@ public class Payment extends BaseEntity {
         this.receiptUrl = receiptUrl;
         this.paymentCardNumber = paymentCardNumber;
         this.userRecruitment = userRecruitment;
+        this.impUid = impUid;
+        this.paymentReserve = paymentReserve;
     }
 
-    public void failPayment(String paymentContent, UserRecruitment userRecruitment){
+    public void failPayment(String paymentContent, UserRecruitment userRecruitment) {
         this.paymentContent = paymentContent;
         this.userRecruitment = userRecruitment;
     }
 
-    public void updatePaymentStatus(PaymentStatus paymentStatus){
+    public void updatePaymentStatus(PaymentStatus paymentStatus) {
         this.paymentStatus = paymentStatus;
     }
 
     @Builder
-    public Payment(String id, String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, Boolean paymentReserve, String paymentCardNumber, UserRecruitment userRecruitment, List<PaymentLog> paymentLogList) {
+    public Payment(String id, String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, Boolean paymentReserve, String paymentCardNumber, UserRecruitment userRecruitment, List<PaymentLog> paymentLogList, String paymentMemo, String impUid) {
         this.id = id;
         this.paymentContent = paymentContent;
         this.paymentAmount = paymentAmount;
@@ -105,5 +113,7 @@ public class Payment extends BaseEntity {
         this.paymentCardNumber = paymentCardNumber;
         this.userRecruitment = userRecruitment;
         this.paymentLogList = paymentLogList;
+        this.paymentMemo = paymentMemo;
+        this.impUid = impUid;
     }
 }

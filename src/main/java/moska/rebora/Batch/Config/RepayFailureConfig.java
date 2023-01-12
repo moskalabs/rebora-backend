@@ -66,7 +66,7 @@ public class RepayFailureConfig {
     @Bean
     public Step repayFailureJobStop(
     ) {
-        log.info("********** 모집 취소 배치 repayFailureJobStop **********");
+        log.info("********** 결제 실패 재결제 배치 repayFailureJobStop **********");
         return stepBuilderFactory.get("repayFailureJobStop")  // 2_1
                 .<Payment, Payment>chunk(10)
                 .reader(repayFailureReader())// 2_2
@@ -79,9 +79,9 @@ public class RepayFailureConfig {
     @StepScope
     @Transactional
     public ListItemReader<Payment> repayFailureReader() {
-        log.info("********** 모집 취소 배치 cancelRecruitmentReader **********");
+        log.info("********** 결제 실패 재결제 배치 repayFailureReader **********");
         UserSearchCondition condition = new UserSearchCondition();
-        List<Payment> paymentList = paymentRepository.getBatchPaymetList(PaymentStatus.FAILURE);
+        List<Payment> paymentList = paymentRepository.getBatchPaymentList(PaymentStatus.FAILURE);
 
         return new ListItemReader<>(paymentList);
     }
@@ -90,7 +90,7 @@ public class RepayFailureConfig {
         return new ItemProcessor<Payment, Payment>() {
             @Override
             public Payment process(Payment payment) throws Exception {
-                log.info("********** 모집 취소 배치 cancelRecruitmentProcessor **********");
+                log.info("********** 결제 실패 재결제 배치 repayFailureProcessor **********");
 
                 UserRecruitment userRecruitment = payment.getUserRecruitment();
                 Recruitment recruitment = payment.getUserRecruitment().getRecruitment();
@@ -146,7 +146,7 @@ public class RepayFailureConfig {
     }
 
     public ItemWriter<Payment> repayFailureWriter() {
-        log.info("********** 상영 확정 배치 confirmRecruitmentWriter **********");
+        log.info("********** 결제 실패 재결제 배치 repayFailureWriter **********");
         return ((List<? extends Payment> paymentList) ->
                 paymentRepository.saveAll(paymentList));  // 1
     }

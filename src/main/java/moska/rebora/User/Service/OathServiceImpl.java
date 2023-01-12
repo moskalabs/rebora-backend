@@ -2,6 +2,9 @@ package moska.rebora.User.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mchange.util.DuplicateElementException;
+import io.jsonwebtoken.JwtException;
+import lombok.AllArgsConstructor;
 import moska.rebora.Config.JwtAuthToken;
 import moska.rebora.Config.JwtAuthTokenProvider;
 import moska.rebora.Config.PasswordAuthAuthenticationManager;
@@ -13,7 +16,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Enum.UserSnsKind;
-import moska.rebora.User.DTO.AuthorizationNaverDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -31,119 +34,104 @@ import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static moska.rebora.Common.CommonConst.NAVER_TOKEN_ME_URL;
 import static moska.rebora.Common.CommonConst.NAVER_TOKEN_URL;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class OathServiceImpl implements OathService {
 
-    @Value("${sns.login.naver.key}")
-    private String NAVER_KEY;
-
-    @Value("${sns.login.naver.client-id}")
-    private String NAVER_CLIENT_ID;
-
-    @Autowired
-    RestTemplate restTemplate;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    NotificationRepository notificationRepository;
-
-    @Autowired
+    private RestTemplate restTemplate;
+    private UserRepository userRepository;
+    private NotificationRepository notificationRepository;
     private PasswordAuthAuthenticationManager authenticationManager;
-
-    @Autowired
     private JwtAuthTokenProvider jwtAuthTokenProvider;
 
     private static final Date expiredDate = Date.from(LocalDateTime.now().plusYears(1L).atZone(ZoneId.systemDefault()).toInstant());
 
     @Override
-    public UserLoginDto login(
-            String code,
-            String callbackUrl,
-            String state,
-            UserSnsKind userSnsKind) {
+    public UserLoginDto login(String authToken, UserSnsKind userSnsKind) {
 
         HashMap<Object, Object> prmMap = new HashMap<Object, Object>();
 
-        if (userSnsKind.equals(UserSnsKind.NAVER)) {
-            AuthorizationNaverDto authorizationNaverDto = naverLogin(code, callbackUrl, state);
-            prmMap = getNaverUserInfo(authorizationNaverDto.getAccess_token());
-            String userEmail = String.valueOf(prmMap.get("userEmail"));
-            String userName = String.valueOf(prmMap.get("userName"));
-            String userSnsId = String.valueOf(prmMap.get("snsId"));
-            log.error("snsLoginUserEmail={}", userEmail);
-            log.error("snsUserName={}", userName);
-            log.error("snsUserSnsId={}", userSnsId);
-            User user = userRepository.getUserByUserEmail(userEmail);
+        User user = new User();
+        UserLoginDto userLoginDto = new UserLoginDto();
+        String userSnsId = "";
+        String userName = "";
+        String userEmail = "";
 
-            if(user == null){
-                UserLoginDto userLoginDto = new UserLoginDto();
+        switch (userSnsKind) {
+            case NAVER: {
+                prmMap = getNaverUserInfo(authToken);
+                userEmail = String.valueOf(prmMap.get("userEmail"));
+                userName = String.valueOf(prmMap.get("userName"));
+                userSnsId = String.valueOf(prmMap.get("snsId"));
 
-                userLoginDto.setResult(false);
-                userLoginDto.setErrorCode("500");
-                userLoginDto.setUserEmail(userEmail);
-                userLoginDto.setUserName(userName);
-                userLoginDto.setUserSnsId(userSnsId);
-                userLoginDto.setUserSnsKind(UserSnsKind.NAVER);
+                log.info("네이버 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserName={} snsUserSnsId={}", userEmail, userName, userSnsId);
 
-                return userLoginDto;
-            }else if(user.getUserSnsKind() == null){
-                UserLoginDto userLoginDto = new UserLoginDto();
-                userLoginDto.setResult(false);
-                userLoginDto.setErrorCode("409");
-                userLoginDto.setUserEmail(userEmail);
-                userLoginDto.setUserName(userName);
-                userLoginDto.setUserSnsId(userSnsId);
-                userLoginDto.setUserSnsKind(UserSnsKind.NAVER);
-
-                return userLoginDto;
+                user = userRepository.getUserByUserEmail(userEmail);
+                break;
             }
-            else{
-                UserLoginDto userLoginDto = UserLoginDto
-                        .builder()
-                        .user(user)
-                        .result(true)
-                        .token(createToken(userEmail))
-                        .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(userEmail))
-                        .build();
-
-                return userLoginDto;
+            case KAKAO: {
+                prmMap = getKaKaoUserInfo(authToken);
+                userEmail = String.valueOf(prmMap.get("user_email"));
+                userSnsId = String.valueOf(prmMap.get("snsId"));
+                log.info("카카오 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
+                user = userRepository.getUserByUserEmail(userEmail);
+                break;
             }
-        }else{
-            return null;
         }
+
+        return getUserLoginDto(user, userSnsKind, userSnsId);
     }
 
-    public AuthorizationNaverDto naverLogin(
-            String code,
-            String callbackUrl,
-            String state
-    ) {
-
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String grantType = "authorization_code";
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-            params.add("grant_type", grantType);
-            params.add("client_id", NAVER_CLIENT_ID);
-            params.add("client_secret", NAVER_KEY);
-            params.add("redirect_uri", callbackUrl);
-            params.add("code", code);
-            params.add("state", state);
-            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-            ResponseEntity<String> response = restTemplate.postForEntity(NAVER_TOKEN_URL, request, String.class);
-            return objectMapper.readValue(response.getBody(), AuthorizationNaverDto.class);
-        } catch (JsonProcessingException e) {
-            return null;
+    @Override
+    public UserLoginDto appleLogin(String userEmail, String clientId) {
+        UserLoginDto userLoginDto = new UserLoginDto();
+        User user = new User();
+        if (userEmail == null) {
+            Optional<User> userOptional = userRepository.getUserByUserSnsKindAndUserSnsId(UserSnsKind.APPLE, clientId);
+            if (userOptional.isPresent()) {
+                user = userOptional.get();
+            }
+        } else {
+            user = userRepository.getUserByUserEmail(userEmail);
         }
+
+        return getUserLoginDto(user, UserSnsKind.APPLE, clientId);
+    }
+
+    public UserLoginDto getUserLoginDto(User user, UserSnsKind userSnsKind, String userSnsId) {
+        UserLoginDto userLoginDto = new UserLoginDto();
+
+        if (user == null) {
+            throw new NullPointerException("해당하는 유저가 없습니다. 회원가입 해주세요");
+        } else if (user.getUserSnsKind() == null) {
+            user.addUserSns(userSnsKind, userSnsId);
+            userLoginDto = UserLoginDto
+                    .builder()
+                    .user(user)
+                    .result(false)
+                    .errorCode("409")
+                    .message("이미 가입된 아이디가 있습니다 연동하시겠습니까?.")
+                    .build();
+
+        } else if (user.getUserSnsKind() != userSnsKind) {
+            throw new DuplicateElementException("이미 가입된 SNS 아이디가 존재합니다. 다시 로그인 해주세요");
+        } else {
+            userLoginDto = UserLoginDto
+                    .builder()
+                    .user(user)
+                    .result(true)
+                    .token(createToken(user.getUserEmail()))
+                    .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(user.getUserEmail()))
+                    .build();
+        }
+
+        return userLoginDto;
     }
 
     public HashMap<Object, Object> getNaverUserInfo(String accessToken) {
@@ -156,18 +144,85 @@ public class OathServiceImpl implements OathService {
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
             ResponseEntity<String> response = restTemplate.exchange(NAVER_TOKEN_ME_URL, HttpMethod.GET, request, String.class);
+            log.info("body={}", response.getBody());
+            log.info("statusCode={}", response.getStatusCode());
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObj = (JSONObject) jsonParser.parse(response.getBody());
             JSONObject naverAccount = (JSONObject) jsonObj.get("response");
             prmMap.put("snsId", naverAccount.get("id"));
             prmMap.put("userEmail", naverAccount.get("email"));
             prmMap.put("userName", naverAccount.get("name"));
+            return prmMap;
+        } catch (ParseException e) {
+            log.error(e.getMessage());
+            return null;
+        } catch (HttpClientErrorException e) {
+            throw new JwtException("인증되지 않은 사용자입니다.");
+        }
+    }
+
+    public HashMap<Object, Object> getKaKaoUserInfo(String accessToken) {
+
+        try {
+            HashMap<Object, Object> prmMap = new HashMap<Object, Object>();
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("Authorization", "Bearer " + accessToken);
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+            ResponseEntity<String> response = restTemplate.exchange(NAVER_TOKEN_ME_URL, HttpMethod.GET, request, String.class);
+
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObj = (JSONObject) jsonParser.parse(response.getBody());
+            JSONObject kakaoAccount = (JSONObject) jsonObj.get("kakao_account");
+            JSONObject profile = (JSONObject) kakaoAccount.get("profile");
+
+            prmMap.put("snsId", jsonObj.get("id"));
+            prmMap.put("connectedAt", jsonObj.get("connected_at"));
+            prmMap.put("user_name", profile.get("nickname"));
+            prmMap.put("user_email", kakaoAccount.get("email"));
 
             return prmMap;
         } catch (ParseException e) {
             log.error(e.getMessage());
             return null;
+        } catch (HttpClientErrorException e) {
+            throw new JwtException("인증되지 않은 사용자입니다.");
         }
+    }
+
+    @Override
+    public HashMap<Object, Object> getUserInfo(UserSnsKind userSnsKind, String authToken) {
+
+        HashMap<Object, Object> prmMap = new HashMap<Object, Object>();
+
+        switch (userSnsKind) {
+            case NAVER:
+                prmMap = getNaverUserInfo(authToken);
+                break;
+            case KAKAO:
+                prmMap = getKaKaoUserInfo(authToken);
+                break;
+        }
+
+        return prmMap;
+    }
+
+    @Override
+    public UserLoginDto syncUser(String userEmail, String userSnsKind, String userSnsId) {
+        User user = userRepository.getUserByUserEmail(userEmail);
+        user.addUserSns(UserSnsKind.valueOf(userSnsKind), userSnsId);
+        userRepository.save(user);
+        
+        UserLoginDto userLoginDto = UserLoginDto.builder()
+                .user(user)
+                .result(true)
+                .token(createToken(user.getUserEmail()))
+                .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(user.getUserEmail()))
+                .build();
+
+        return userLoginDto;
     }
 
     /**
@@ -188,12 +243,7 @@ public class OathServiceImpl implements OathService {
         claims.put("role", authToken.getRole());
         claims.put("userEmail", authToken.getUserEmail());
 
-        JwtAuthToken jwtAuthToken = jwtAuthTokenProvider.createAuthToken(
-                authentication.getName(),
-                String.valueOf(authentication.getAuthorities()),
-                claims,
-                expiredDate
-        );
+        JwtAuthToken jwtAuthToken = jwtAuthTokenProvider.createAuthToken(authentication.getName(), String.valueOf(authentication.getAuthorities()), claims, expiredDate);
 
         return jwtAuthToken.getToken(jwtAuthToken);
     }

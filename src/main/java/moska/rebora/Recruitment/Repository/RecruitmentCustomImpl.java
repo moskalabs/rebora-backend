@@ -10,6 +10,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
+import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.DTO.UserImageListDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -22,6 +23,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.querydsl.jpa.JPAExpressions.select;
@@ -136,6 +138,8 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                         theater.theaterCinemaName,
                         theater.theaterCinemaBrandName,
                         theater.theaterRegion,
+                        theater.theaterPrice.add(movie.moviePrice).as("theaterPrice"),
+                        theater.theaterTime,
                         userRecruitment.id.as("userRecruitmentId"),
                         userRecruitment.userRecruitmentWish,
                         userRecruitment.userRecruitmentYn,
@@ -158,6 +162,17 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                 .leftJoin(recruitment.userRecruitmentList, userRecruitment).on(userRecruitment.user.userEmail.eq(userEmail))
                 .where(recruitment.id.eq(recruitmentId))
                 .fetchOne();
+    }
+
+    @Override
+    public Optional<Recruitment> getOptionalRecruitmentById(Long recruitmentId) {
+        return Optional.ofNullable(
+                queryFactory.select(recruitment)
+                        .from(recruitment)
+                        .join(recruitment.theater, theater).fetchJoin()
+                        .join(recruitment.movie, movie).fetchJoin()
+                        .where(recruitment.id.eq(recruitmentId))
+                        .fetchOne());
     }
 
     private BooleanExpression getTheaterRegion(String theaterRegion) {

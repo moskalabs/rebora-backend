@@ -18,8 +18,8 @@ public class RepayFailureJobRunner extends JobRunner {
     protected void doRun(ApplicationArguments args) {
 
         JobDetail jobDetail = buildJobDetail(RepayFailureSchJob.class, "repayFailureJob", "batch", new HashMap());
-        Trigger trigger = buildJobTrigger("0 0 0 * * ?"); // 30초마다 실행
-        //Trigger trigger = buildJobTrigger("0/30 * * * * ?"); // 30초마다 실행
+        Trigger trigger = buildJobTrigger("0 0 9,15 * * ?"); // 30초마다 실행
+
         try {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {

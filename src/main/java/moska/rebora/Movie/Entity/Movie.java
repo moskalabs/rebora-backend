@@ -9,6 +9,7 @@ import moska.rebora.Common.BaseEntity;
 import moska.rebora.Enum.MovieRating;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.Entity.UserMovie;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.*;
@@ -58,6 +59,12 @@ public class Movie extends BaseEntity {
     @Column
     private Integer movieStarRating;
 
+    @Column(columnDefinition = "boolean default false")
+    private Boolean movieUseYn;
+
+    @Column(columnDefinition = "integer default 0")
+    private Integer moviePrice;
+
     public void addMoviePopularCount() {
         this.moviePopularCount += 1;
     }
@@ -78,15 +85,15 @@ public class Movie extends BaseEntity {
         this.moviePopularCount = moviePopularCount / 10;
     }
 
-    public void changeMovieImage(String movieImage){
+    public void changeMovieImage(String movieImage) {
         this.movieImage = movieImage;
     }
 
-    public void changeMovieBannerImage(String movieBannerImage){
+    public void changeMovieBannerImage(String movieBannerImage) {
         this.movieBannerImage = movieBannerImage;
     }
 
-    public void changeMovieRecruitmentImage(String movieRecruitmentImage){
+    public void changeMovieRecruitmentImage(String movieRecruitmentImage) {
         this.movieRecruitmentImage = movieRecruitmentImage;
     }
 
@@ -108,8 +115,19 @@ public class Movie extends BaseEntity {
         this.movieRunningTime = movieRunningTime;
     }
 
+    public void addImage(
+            String movieImage,
+            String movieBannerImage,
+            String movieRecruitmentImage
+    ) {
+        this.movieImage = movieImage;
+        this.movieBannerImage = movieBannerImage;
+        this.movieRecruitmentImage = movieRecruitmentImage;
+        this.movieUseYn = true;
+    }
+
     @Builder
-    public Movie(String movieName, MovieRating movieRating, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList, String movieRecruitmentImage) {
+    public Movie(String movieName, MovieRating movieRating, String movieDirector, String movieImage, String movieBannerImage, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, Integer movieStarRating, List<Recruitment> recruitmentList, List<BrandMovie> cinemaBrandMovieList, String movieRecruitmentImage, Boolean movieUseYn, Integer moviePrice) {
         this.movieName = movieName;
         this.movieRating = movieRating;
         this.movieDirector = movieDirector;
@@ -122,5 +140,7 @@ public class Movie extends BaseEntity {
         this.recruitmentList = recruitmentList;
         this.cinemaBrandMovieList = cinemaBrandMovieList;
         this.movieRecruitmentImage = movieRecruitmentImage;
+        this.movieUseYn = movieUseYn;
+        this.moviePrice = moviePrice;
     }
 }

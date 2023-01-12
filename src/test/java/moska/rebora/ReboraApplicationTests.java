@@ -2,6 +2,7 @@ package moska.rebora;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Admin.Dto.AdminRegionDto;
@@ -40,6 +41,8 @@ import moska.rebora.User.Repository.UserRepository;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,13 +50,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -61,6 +69,8 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Slf4j
@@ -505,31 +515,31 @@ class ReboraApplicationTests {
         log.info("dateTime={}", dateTime);
     }
 
-    @Test
-    @Transactional
-    void testPay() throws IOException, InterruptedException {
-
-        User user = userTestRepository.getUserById(1L);
-        ObjectMapper objectMapper = new ObjectMapper();
-        Map<String, String> params = new HashMap<>();
-        params.put("customerKey", user.getUserCustomerId());
-        params.put("amount", "1000");
-        params.put("orderId", "recruitment_1_2");
-        params.put("orderName", "모집_1_2명");
-        String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
-        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
-
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://api.tosspayments.com/v1/billing/" + user.getUserBillingKey()))
-                .header("Authorization", "Basic dGVzdF9za196WExrS0V5cE5BcldtbzUwblgzbG1lYXhZRzVSOg==")
-                .header("Content-Type", "application/json")
-                .method("POST", body)
-                .build();
-
-        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-        log.info(String.valueOf(response.statusCode()));
-        log.info(response.body());
-    }
+//    @Test
+//    @Transactional
+//    void testPay() throws IOException, InterruptedException {
+//
+//        User user = userTestRepository.getUserById(1L);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Map<String, String> params = new HashMap<>();
+//        params.put("customerKey", user.getUserCustomerId());
+//        params.put("amount", "1000");
+//        params.put("orderId", "recruitment_1_2");
+//        params.put("orderName", "모집_1_2명");
+//        String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
+//        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+//
+//        HttpRequest request = HttpRequest.newBuilder()
+//                .uri(URI.create("https://api.tosspayments.com/v1/billing/" + user.getUserBillingKey()))
+//                .header("Authorization", "Basic dGVzdF9za196WExrS0V5cE5BcldtbzUwblgzbG1lYXhZRzVSOg==")
+//                .header("Content-Type", "application/json")
+//                .method("POST", body)
+//                .build();
+//
+//        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+//        log.info(String.valueOf(response.statusCode()));
+//        log.info(response.body());
+//    }
 
     @Test
     @Transactional
@@ -663,7 +673,121 @@ class ReboraApplicationTests {
 
     @Test
     @Transactional
-    void testFailJon(){
-        List<Payment> paymentList = paymentRepository.getBatchPaymetList(PaymentStatus.FAILURE);
+    void testFailJon() {
+        List<Payment> paymentList = paymentRepository.getBatchPaymentList(PaymentStatus.FAILURE);
+    }
+
+    @Test
+    @Transactional
+    @Rollback(false)
+    void fileCateGoryUpload() {
+        File file = new File("/Users/kibong/Downloads/movieCategory.csv");
+
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+            CSVReader csvReader = new CSVReader(reader);
+            String[] line;
+            while ((line = csvReader.readNext()) != null) {
+                //log.info("line={}", line);
+                if (line[0].equals("")) {
+                    continue;
+                }
+                log.info("fileLin0={}", line[0]);
+                log.info("fileLine1={}", line[1]);
+                Movie movie = movieRepository.getMovieByMovieName(line[0]);
+                log.info("movieName={}", movie.getMovieName());
+                String[] categoryList = line[1].split(",");
+                for (String s : categoryList) {
+                    Category category = categoryRepository.getCategoryByCategoryName(s);
+                    MovieCategory movieCategory = MovieCategory.builder().movie(movie).category(category).build();
+                    movieCategoryRepository.save(movieCategory);
+                    log.info("movieCategoryId={}", movieCategory.getId());
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    @Transactional
+    void testFileUpload() {
+        Path dirPath = Paths.get("/Users/kibong/Downloads/movie");
+
+        System.out.println(dirPath);
+        List<Path> result;
+        Stream<Path> walk = null;
+        try {
+            walk = Files.walk(dirPath).filter(Files::isDirectory);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        result = walk.collect(Collectors.toList());
+        for (int i = 1; i < result.size(); i++) {
+            log.info("file={}", result.get(i));
+            Path path = result.get(i);
+            String pathString = path.toString();
+            String dir = pathString.split("/")[5];
+            //String reNamepath = "/Users/kibong/Downloads/movie/"+dir+"/";
+            File file = new File(pathString);
+            Movie movie = movieRepository.getMovieByMovieName(dir);
+            log.info("movieId={}", movie.getId());
+            String reNamepath = "/Users/kibong/Downloads/movie/" + movie.getId();
+            File file2 = new File(reNamepath);
+            log.info("fileName={}", file.renameTo(file2));
+        }
+
+//        for (int i = 1; i < result.size(); i++) {
+//
+//            Path path = result.get(i);
+//            String pathString = path.toString();
+//            File file = new File(pathString);
+//            String fileName = file.getName();
+//            String[] fileNameList = fileName.split(" ");
+//            String movieName = "";
+//            for (int j = 1; j < fileNameList.length; j++) {
+//                if(j == 1){
+//                    movieName += fileNameList[j];
+//                }else{
+//                    movieName += " "+fileNameList[j];
+//                }
+//            }
+//            String reNamepath = "/Users/kibong/Downloads/movie/"+movieName;
+//            File file2 = new File(reNamepath);
+//
+//            log.info("fileName={}", file.renameTo(file2));
+//        }
+    }
+
+    @Test
+    void findById() {
+
+        Optional<Recruitment> optionalRecruitment = recruitmentRepository.findById(1L);
+        Recruitment recruitment = optionalRecruitment.get();
+        Theater theater = recruitment.getTheater();
+        log.info("theaterName={}", theater.getTheaterName());
+    }
+
+    @Test
+    void createMovieBrand() {
+        List<Movie> movieList = movieRepository.findAll();
+        Brand brand = brandRepository.getBrandByBrandName("CGV");
+        List<BrandMovie> brandMovieList = new ArrayList<>();
+        movieList.forEach(movie -> {
+            BrandMovie brandMovie = BrandMovie.builder()
+                    .movie(movie)
+                    .brand(brand)
+                    .build();
+
+            brandMovieList.add(brandMovie);
+        });
+
+        brandMovieRepository.saveAll(brandMovieList);
+    }
+
+    @Test
+    void dateTest() {
+        log.info("int test={}", Integer.parseInt("01"));
     }
 }

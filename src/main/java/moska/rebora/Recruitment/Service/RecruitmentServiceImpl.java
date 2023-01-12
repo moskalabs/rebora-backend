@@ -12,14 +12,18 @@ import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Common.Service.AsyncTaskService;
 import moska.rebora.Enum.NotificationKind;
+import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Notification.Service.NotificationService;
+import moska.rebora.Payment.Dto.ReserveRecruitmentDto;
+import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Repository.PaymentRepository;
 import moska.rebora.Payment.Service.PaymentService;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Entity.Recruitment;
+import moska.rebora.Recruitment.Repository.RecruitmentCustom;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.Theater.Repository.TheaterRepository;
@@ -31,6 +35,7 @@ import moska.rebora.User.Repository.UserMovieRepository;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
 import org.hibernate.DuplicateMappingException;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
@@ -38,10 +43,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.TimeZone;
 
 @Service
 public class RecruitmentServiceImpl implements RecruitmentService {
@@ -137,31 +144,62 @@ public class RecruitmentServiceImpl implements RecruitmentService {
      */
     @Override
     @Transactional
-    public void createRecruitment(@Param("recruitmentId") Long recruitmentId,
-                                  @Param("userRecruitmentPeople") Integer userRecruitmentPeople,
-                                  @Param("userEmail") String userEmail) {
+    public void createRecruitment(
+            @Param("recruitmentId") Long recruitmentId,
+            @Param("userRecruitmentPeople") Integer userRecruitmentPeople,
+            @Param("userEmail") String userEmail,
+            @Param("merchantUid") String merchantUid,
+            @Param("impUid") String impUid
+    ) {
+        JSONObject response = new JSONObject();
 
-        Optional<Recruitment> recruitmentOptional = recruitmentRepository.findById(recruitmentId);
         User user = userRepository.getUserByUserEmail(userEmail);
+        Optional<Recruitment> optionalRecruitment = recruitmentRepository.getOptionalRecruitmentById(recruitmentId);
 
-        if (recruitmentOptional.isEmpty()) {
+        if (optionalRecruitment.isEmpty()) {
             throw new NullPointerException("존재하지 않는 모집입니다. 다시 시도해주세요");
         }
 
-        Recruitment recruitment = recruitmentOptional.get();
+        Recruitment recruitment = optionalRecruitment.get();
+
         Theater theater = recruitment.getTheater();
         Movie movie = recruitment.getMovie();
+
         Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
         movie.addMoviePopularCount();
 
-        BaseResponse baseResponse = paymentService.paymentConfirmMovie(user, recruitment, userRecruitmentPeople);
+        String content = user.getUserNickname() + "님의 모집 영화(" + movie.getMovieName() + ")의 " + userRecruitmentPeople + "명 즉시 결제";
 
-        if (!baseResponse.getResult()) {
-            throw new RuntimeException("결제 도중 오류가 발생 했습니다 다시 시도해주세요.");
-        }
+        response = paymentService.getPaymentByMerchantUid(impUid);
+
+        Long amount = (Long) response.get("amount"); //결제금액
+        Long paidAt = (Long) response.get("paid_at"); //결제 시각
+        String cardNumber = (String) response.get("card_number"); //카드 번호
+        String cardName = (String) response.get("card_name"); //카드사
+        String cardCode = (String) response.get("card_code"); //카드 코드
+        String payMethod = (String) response.get("pay_method"); //결제 방법
+        String pgProvider = (String) response.get("pg_provider"); //PG사
+        String receiptUrl = (String) response.get("receipt_url"); //영수증 URL
+
+        //결제 시기
+        LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
+
+        UserRecruitment userRecruitment = UserRecruitment
+                .builder()
+                .user(user)
+                .recruitment(recruitment)
+                .userRecruitmentYn(true)
+                .userRecruitmentPeople(userRecruitmentPeople)
+                .userRecruitmentWish(false)
+                .build();
+
+        userRecruitmentRepository.save(userRecruitment);
+
+        Payment payment = paymentService.createPayment(Math.toIntExact(amount), cardNumber, cardName, cardCode, payMethod, pgProvider, receiptUrl, content, false, userRecruitment, merchantUid, impUid, PaymentStatus.COMPLETE, authenticatedAt);
 
         recruitment.updateRecruitmentStatus(RecruitmentStatus.RECRUITING);
         recruitment.changeExpose(true);
+        recruitment.plusRecruitmentPeople(20);
         recruitmentRepository.save(recruitment);
 
         if (banner != null) {
@@ -178,6 +216,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 theater.getTheaterCinemaName(),
                 theater.getTheaterName()
         );
+
         String notificationSubject = "찜한 영화의 모집게시물이 등록되었습니다.";
 
         asyncTaskService.createNotificationRecruitment(
@@ -187,13 +226,25 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 recruitment.getId(),
                 movie.getId()
         );
+
+        notificationService.createNotificationPayment(
+                "모집의 결제가 완료되었습니다.",
+                notificationContent,
+                NotificationKind.RECRUITING,
+                user,
+                recruitment,
+                payment
+        );
     }
 
     @Override
-    public Long reserveRecruitment(Long movieId, Long theaterId, String userEmail, String recruitmentIntroduce, Boolean bannerYn, String bannerSubText, String bannerMainText) {
+    public ReserveRecruitmentDto reserveRecruitment(Long movieId, Long theaterId, String userEmail, String recruitmentIntroduce, Boolean bannerYn, String bannerSubText, String bannerMainText) {
 
+        ReserveRecruitmentDto reserveRecruitmentDto = new ReserveRecruitmentDto();
         Optional<Theater> theaterOptional = theaterRepository.findById(theaterId);
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
+
+        User user = userRepository.getUserByUserEmail(userEmail);
 
         if (theaterOptional.isEmpty()) {
             throw new NullPointerException("존재하지 않는 상영관입니다.");
@@ -250,7 +301,10 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         theater.addRecruitment(recruitment);
         theaterRepository.save(theater);
 
-        return recruitment.getId();
+        reserveRecruitmentDto.setRecruitmentId(recruitment.getId());
+        reserveRecruitmentDto.setMerchantUid(paymentService.createPaymentId(user.getId(), recruitment.getId()));
+
+        return reserveRecruitmentDto;
     }
 
     @Override

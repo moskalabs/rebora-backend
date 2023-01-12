@@ -1,55 +1,72 @@
 package moska.rebora.User.Controller;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Common.BaseInfoResponse;
+import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Service.OathService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.bind.annotation.*;
 
-import static moska.rebora.Common.CommonConst.CURRENT_NAVER_CALLBACK;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/user/oath")
 @Slf4j
 public class OathController {
 
-    @Value("${sns.login.naver.key}")
-    private String NAVER_KEY;
-
-    @Value("${sns.login.naver.client-id}")
-    private String NAVER_CLIENT_ID;
-
     @Autowired
     OathService oathService;
 
-    @GetMapping("/naverLogin")
-    public ModelAndView naverLogin(ModelAndView mav) {
-
-        mav.addObject("NAVER_KEY", NAVER_KEY);
-        mav.addObject("NAVER_CLIENT_ID", NAVER_CLIENT_ID);
-        mav.addObject("CALLBACK_URL", CURRENT_NAVER_CALLBACK);
-        mav.setViewName("/oath/naverLogin");
-
-        return mav;
+    @PostMapping("/naverLogin")
+    public UserLoginDto naverLogin(
+            @RequestParam String authToken
+    ) {
+        return oathService.login(authToken, UserSnsKind.NAVER);
     }
 
-    @GetMapping("/naverCallback")
-    public ModelAndView naverCallback(
-            ModelAndView mav,
-            @RequestParam String code,
-            @RequestParam String state) throws Exception {
-
-        String callbackUrl = CURRENT_NAVER_CALLBACK;
-        UserLoginDto userLoginDto = oathService.login(code, callbackUrl, state, UserSnsKind.NAVER);
-        mav.setViewName("/oath/naverCallback");
-        mav.addObject("userLoginDto", userLoginDto);
-
-        return mav;
+    @PostMapping("/kakaoLogin")
+    public UserLoginDto kakaoLogin(
+            @RequestParam String authToken
+    ) {
+        return oathService.login(authToken, UserSnsKind.KAKAO);
     }
+
+    @PostMapping("/appleLogin")
+    public UserLoginDto appleLogin(
+            @RequestParam(required = false) String clientId,
+            @RequestParam(required = false) String userEmail
+    ) {
+        return oathService.appleLogin(userEmail, clientId);
+    }
+
+    @GetMapping("/getSnsInfo")
+    public BaseInfoResponse<SnsInfo> getSnsInfo(String userSnsKind, String authToken) {
+
+        BaseInfoResponse<SnsInfo> baseInfoResponse = new BaseInfoResponse<>();
+        SnsInfo snsInfo = new SnsInfo();
+
+        HashMap<Object, Object> prmMap = new HashMap<Object, Object>();
+        prmMap = oathService.getUserInfo(UserSnsKind.valueOf(userSnsKind), authToken);
+        snsInfo.setUserSnsKind(UserSnsKind.valueOf(userSnsKind));
+        snsInfo.setUserSnsId(String.valueOf(prmMap.get("snsId")));
+        baseInfoResponse.setResult(true);
+        baseInfoResponse.setContent(snsInfo);
+
+        return baseInfoResponse;
+    }
+
+    @PostMapping("/syncUser")
+    public UserLoginDto syncUser(String userEmail, String userSnsKind, String userSnsId) {
+        return oathService.syncUser(userEmail, userSnsKind, userSnsId);
+    }
+}
+
+@Data
+class SnsInfo {
+    private UserSnsKind userSnsKind;
+    private String userSnsId;
 }
