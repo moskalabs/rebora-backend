@@ -76,7 +76,8 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                                 recruitment.recruitmentStatus,
                                 recruitment.createdBy.as("recruitmentUsername"),
                                 recruitment.recruitmentPeople,
-                                ExpressionUtils.as(select(recruiterUser.userImage.as("recruiterUserImage"))
+                                ExpressionUtils.as(
+                                        select(recruiterUser.userImage.as("recruiterUserImage"))
                                         .from(recruiterUser)
                                         .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
                                 ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))

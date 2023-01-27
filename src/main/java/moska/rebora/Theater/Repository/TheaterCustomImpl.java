@@ -31,6 +31,8 @@ import java.util.Optional;
 import static com.querydsl.jpa.JPAExpressions.select;
 import static moska.rebora.Cinema.Entity.QBrand.brand;
 import static moska.rebora.Cinema.Entity.QBrandMovie.brandMovie;
+import static moska.rebora.Cinema.Entity.QCinema.cinema;
+import static moska.rebora.Cinema.Entity.QMovieCinema.movieCinema;
 import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
@@ -48,6 +50,30 @@ public class TheaterCustomImpl implements TheaterCustom {
 
     static final LocalDateTime minAvailDate = LocalDateTime.from(LocalDateTime.now().plusDays(3).atZone(ZoneId.systemDefault()));
 
+//    @Override
+//    public List<String> getAvailableDate(String theaterRegion,
+//                                         LocalDateTime startMonthDate,
+//                                         LocalDateTime endMonthDate,
+//                                         Long movieId) {
+//
+//        return queryFactory.select(formattedDate).distinct()
+//                .from(theater)
+//                .where(
+//                        theater.theaterStartDatetime.goe(startMonthDate),
+//                        theater.theaterStartDatetime.goe(minAvailDate),
+//                        theater.theaterEndDatetime.loe(endMonthDate),
+//                        theater.theaterRegion.eq(theaterRegion),
+//                        theater.recruitment.isNull(),
+//                        theater.theaterCinemaBrandName.in(JPAExpressions.select(brand.brandName)
+//                                .from(brandMovie)
+//                                .join(brandMovie.movie, movie)
+//                                .join(brandMovie.brand, brand)
+//                                .where(movie.id.eq(movieId))
+//                        )
+//                )
+//                .fetch();
+//    }
+
     @Override
     public List<String> getAvailableDate(String theaterRegion,
                                          LocalDateTime startMonthDate,
@@ -55,19 +81,17 @@ public class TheaterCustomImpl implements TheaterCustom {
                                          Long movieId) {
 
         return queryFactory.select(formattedDate).distinct()
-                .from(theater)
+                .from(movieCinema)
+                .join(movieCinema.cinema, cinema)
+                .join(movieCinema.movie, movie)
+                .join(cinema.theaterList, theater)
                 .where(
                         theater.theaterStartDatetime.goe(startMonthDate),
                         theater.theaterStartDatetime.goe(minAvailDate),
                         theater.theaterEndDatetime.loe(endMonthDate),
-                        theater.theaterRegion.eq(theaterRegion),
+                        cinema.regionName.eq(theaterRegion),
                         theater.recruitment.isNull(),
-                        theater.theaterCinemaBrandName.in(JPAExpressions.select(brand.brandName)
-                                .from(brandMovie)
-                                .join(brandMovie.movie, movie)
-                                .join(brandMovie.brand, brand)
-                                .where(movie.id.eq(movieId))
-                        )
+                        movie.id.eq(movieId)
                 )
                 .fetch();
     }
@@ -102,34 +126,33 @@ public class TheaterCustomImpl implements TheaterCustom {
                         theater.theaterTime,
                         recruitment.id.as("recruitmentId"),
                         recruitment.recruitmentStatus
-                )).from(theater)
+                ))
+                .from(movieCinema)
+                .join(movieCinema.cinema, cinema)
+                .join(movieCinema.movie, movie)
+                .join(cinema.theaterList, theater)
                 .leftJoin(theater.recruitment, recruitment)
                 .where(
+                        movie.id.eq(movieId),
                         theater.theaterStartDatetime.goe(startDate),
                         theater.theaterEndDatetime.loe(endDate),
-                        theater.theaterRegion.eq(theaterRegion),
-                        theater.theaterCinemaBrandName.in(JPAExpressions.select(brand.brandName)
-                                .from(brandMovie)
-                                .join(brandMovie.movie, movie)
-                                .join(brandMovie.brand, brand)
-                                .where(movie.id.eq(movieId))
-                        )
+                        theater.theaterRegion.eq(theaterRegion)
                 )
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        JPAQuery<Long> total = queryFactory.select(theater.id.count()).from(theater).leftJoin(theater.recruitment, recruitment)
+        JPAQuery<Long> total = queryFactory.select(theater.id.count())
+                .from(movieCinema)
+                .join(movieCinema.cinema, cinema)
+                .join(movieCinema.movie, movie)
+                .join(cinema.theaterList, theater)
+                .leftJoin(theater.recruitment, recruitment)
                 .where(
+                        movie.id.eq(movieId),
                         theater.theaterStartDatetime.goe(startDate),
                         theater.theaterEndDatetime.loe(endDate),
-                        theater.theaterRegion.eq(theaterRegion),
-                        theater.theaterCinemaBrandName.in(JPAExpressions.select(brand.brandName)
-                                .from(brandMovie)
-                                .join(brandMovie.movie, movie)
-                                .join(brandMovie.brand, brand)
-                                .where(movie.id.eq(movieId))
-                        )
+                        theater.theaterRegion.eq(theaterRegion)
                 );
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchFirst);

@@ -278,7 +278,7 @@
                             <button type="button" class="btn btn-secondary" onclick="goToList()">&nbsp;목록&nbsp;</button>
                         </div>
                         <div style="display:flex; width: 100%; height:40px; justify-content:flex-end">
-                            <button type="button" class="btn btn-success mr-3" onclick="saveTheater()">&nbsp;수정&nbsp;
+                            <button type="button" class="btn btn-success mr-3" onclick="saveTheater()">&nbsp;저장&nbsp;
                             </button>
                             <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;</button>
                         </div>
@@ -340,7 +340,7 @@
             cancelButtonText : '취소',
         }).then((result) => {
             if (result.isConfirmed) {
-                location.reload();
+                goToList();
             } else {
                 return false;
             }

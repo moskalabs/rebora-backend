@@ -97,6 +97,16 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th class="border-end" scope="row" style="width: 25%;">비밀번호</th>
+                                    <td>
+                                        <input type="password" value=""
+                                               style="width:300px"
+                                               placeholder="비밀번호를 입력해 주세요"
+                                               class="form-control" id="userPassword"
+                                        >
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th class="border-end" scope="row" style="width: 25%;">유저 이미지</th>
                                     <td>
                                         <c:if test="${user.content.userImage != null}">
@@ -183,190 +193,213 @@
                                                                id="userPushNightY">
                                                     </c:otherwise>
                                                 </c:choose>
-                                                <label class="form-check-label" for="userPushY">
+                                                <label class="form-check-label" for="userPushNightY">
                                                     예
                                                 </label>
                                             </div>
                                             <div class="icheck-primary d-inline">
-                                            <c:choose>
-                                                <c:when test="${user.content.userPushNightYn == false}">
-                                                    <input style="margin: 0" class="form-check-input" type="radio"
-                                                           value="false"
-                                                           name="userPushNightYn"
-                                                           id="userPushNightN" checked>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <input style="margin: 0" class="form-check-input" type="radio"
-                                                           value="false"
-                                                           name="userPushNightYn"
-                                                           id="userPushNightN">
-                                                </c:otherwise>
-                                            </c:choose>
-                                            <label class="form-check-label" for="userPushN">
-                                                아니요
-                                            </label>
-                                        </div>
+                                                <c:choose>
+                                                    <c:when test="${user.content.userPushNightYn == false}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="false"
+                                                               name="userPushNightYn"
+                                                               id="userPushNightN" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="false"
+                                                               name="userPushNightYn"
+                                                               id="userPushNightN">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="userPushNightN">
+                                                    아니요
+                                                </label>
+                                            </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 25%;">유저 활성화 여부</th>
                                     <td style="width: 100%; height: 60px; font-size:16px; align-items: center">
-                                        <c:choose>
-                                            <c:when test="${user.content.userUseYn == true}">
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="true"
-                                                       name="userUseYn"
-                                                       id="userUseY" checked>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="true"
-                                                       name="userUseYn"
-                                                       id="userUseY">
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <label class="form-check-label" for="userPushY">
-                                            예
-                                        </label>
-                                        <c:choose>
-                                            <c:when test="${user.content.userPushNightYn == false}">
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="false"
-                                                       name="userUseYn"
-                                                       id="userUseN" checked>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="false"
-                                                       name="userUseYn"
-                                                       id="userUseN">
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <label class="form-check-label" for="userPushN">
-                                            아니요
-                                        </label>
+                                        <div class="form-group clearfix" style="margin-bottom: 0; margin-top: 6px;">
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${user.content.userUseYn == true}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="true"
+                                                               name="userUseYn"
+                                                               id="userUseY" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="true"
+                                                               name="userUseYn"
+                                                               id="userUseY">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="userUseY">
+                                                    예
+                                                </label>
+                                            </div>
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${user.content.userPushNightYn == false}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="false"
+                                                               name="userUseYn"
+                                                               id="userUseN" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="false"
+                                                               name="userUseYn"
+                                                               id="userUseN">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="userUseN">
+                                                    아니요
+                                                </label>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 25%;">유저 등급</th>
                                     <td style="width: 100%; height: 60px; font-size:16px; align-items: center">
-                                        <c:choose>
-                                            <c:when test="${user.content.userGrade == 'NORMAL'}">
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="NORMAL"
-                                                       name="userGrade"
-                                                       id="NORMAL" checked>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="NORMAL"
-                                                       name="userGrade"
-                                                       id="NORMAL">
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <label class="form-check-label" for="userPushY">
-                                            일반
-                                        </label>
-                                        <c:choose>
-                                            <c:when test="${user.content.userGrade == 'ADMIN'}">
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="ADMIN"
-                                                       name="userGrade"
-                                                       id="ADMIN" checked>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="ADMIN"
-                                                       name="userGrade"
-                                                       id="ADMIN">
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <label class="form-check-label" for="userPushN">
-                                            관리자
-                                        </label>
-                                        <c:choose>
-                                            <c:when test="${user.content.userGrade == 'DORMANCY'}">
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="DORMANCY"
-                                                       name="userGrade"
-                                                       id="DORMANCY" checked>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="DORMANCY"
-                                                       name="userGrade"
-                                                       id="DORMANCY">
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <label class="form-check-label" for="userPushN">
-                                            휴면
-                                        </label>
-                                        <c:choose>
-                                            <c:when test="${user.content.userGrade == 'WITHDRAWAL'}">
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="WITHDRAWAL"
-                                                       name="userGrade"
-                                                       id="WITHDRAWAL" checked>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <input style="margin: 0" class="form-check-input" type="radio"
-                                                       value="WITHDRAWAL"
-                                                       name="userGrade"
-                                                       id="WITHDRAWAL">
-                                            </c:otherwise>
-                                        </c:choose>
-                                        <label class="form-check-label" for="userPushN">
-                                            휴면
-                                        </label>
+                                        <div class="form-group clearfix" style="margin-bottom: 0; margin-top: 6px;">
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${user.content.userGrade == 'NORMAL'}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="NORMAL"
+                                                               name="userGrade"
+                                                               id="NORMAL" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="NORMAL"
+                                                               name="userGrade"
+                                                               id="NORMAL">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="NORMAL">
+                                                    일반
+                                                </label>
+                                            </div>
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${user.content.userGrade == 'ADMIN'}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="ADMIN"
+                                                               name="userGrade"
+                                                               id="ADMIN" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="ADMIN"
+                                                               name="userGrade"
+                                                               id="ADMIN">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="ADMIN">
+                                                    관리자
+                                                </label>
+                                            </div>
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${user.content.userGrade == 'DORMANCY'}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="DORMANCY"
+                                                               name="userGrade"
+                                                               id="DORMANCY" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="DORMANCY"
+                                                               name="userGrade"
+                                                               id="DORMANCY">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="DORMANCY">
+                                                    휴면
+                                                </label>
+                                            </div>
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${user.content.userGrade == 'WITHDRAWAL'}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="WITHDRAWAL"
+                                                               name="userGrade"
+                                                               id="WITHDRAWAL" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="WITHDRAWAL"
+                                                               name="userGrade"
+                                                               id="WITHDRAWAL">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="WITHDRAWAL">
+                                                    휴면
+                                                </label>
+                                            </div>
+                                        </div>
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th class="border-end" scope="row" style="width: 25%;">유저 SNS 종류</th>
-                                    <td style="width: 80%; height: 60px; display: flex; flex-direction: row; align-items: center">
-                                        <c:choose>
-                                            <c:when test="${user.content.userSnsKind == 'NAVER'}">
-                                                <p>일반</p>
-                                            </c:when>
-                                            <c:when test="${user.content.userSnsKind == 'KAKAO'}">
-                                                <p>관리자</p>
-                                            </c:when>
-                                            <c:when test="${user.content.userSnsKind == 'APPLE'}">
-                                                <p>휴면</p>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <p>일반</p>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="border-end" scope="row" style="width: 25%;">등록일</th>
-                                    <td style="width: 80%; height: 60px; display: flex; flex-direction: row; align-items: center">
-                                        <p><fmt:formatDate pattern="yyyy년MM월dd일 HH:mm" value="${ parseRegDate }"/></p>
-                                    </td>
-                                </tr>
+                                <c:if test="${param.userId != null}">
+                                    <tr>
+                                        <th class="border-end" scope="row" style="width: 25%;">유저 SNS 종류</th>
+                                        <td style="width: 80%; height: 60px; display: flex; flex-direction: row; align-items: center">
+                                            <c:choose>
+                                                <c:when test="${user.content.userSnsKind == 'NAVER'}">
+                                                    <p>일반</p>
+                                                </c:when>
+                                                <c:when test="${user.content.userSnsKind == 'KAKAO'}">
+                                                    <p>관리자</p>
+                                                </c:when>
+                                                <c:when test="${user.content.userSnsKind == 'APPLE'}">
+                                                    <p>휴면</p>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <p>일반</p>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                    </tr>
+                                </c:if>
+                                <c:if test="${param.userId != null}">
+                                    <tr>
+                                        <th class="border-end" scope="row" style="width: 25%;">등록일</th>
+                                        <td style="width: 80%; height: 60px; display: flex; flex-direction: row; align-items: center">
+                                            <p><fmt:formatDate pattern="yyyy년MM월dd일 HH:mm"
+                                                               value="${ parseRegDate }"/></p>
+                                        </td>
+                                    </tr>
+                                </c:if>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
             </div>
-            <div style="display:flex; width: 100%; height:60px">
-                <div style="display:flex; width: 100%; height:40px; justify-content:flex-start">
-                    <button type="button" class="btn btn-secondary" onclick="goToList()">&nbsp;목록&nbsp;</button>
-                </div>
-                <div style="display:flex; width: 100%; height:40px; justify-content:flex-end">
-                    <button type="button" class="btn btn-success me-3" onclick="saveUser()">&nbsp;수정&nbsp;
-                    </button>
-                    <button type="button" class="btn btn-danger" onclick="cancelSave()">&nbsp;취소&nbsp;</button>
+            <div class="container-fluid">
+                <div class="row">
+                    <div style="display:flex; width: 100%; height:120px">
+                        <div style="display:flex; width: 100%; height:40px; justify-content:flex-start">
+                            <button type="button" class="btn btn-secondary" onclick="goToList()">&nbsp;목록&nbsp;</button>
+                        </div>
+                        <div style="display:flex; width: 100%; height:40px; justify-content:flex-end">
+                            <button type="button" class="btn btn-success mr-3" onclick="saveUser()">&nbsp;저장&nbsp;
+                            </button>
+                            <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
-        crossorigin="anonymous"></script>
+<%@include file="../include/footer.jsp" %>
 <script>
     $(document).ready(function () {
         let token = localStorage.getItem("token");
@@ -377,6 +410,7 @@
             }).then(() => {
                 location.href = "<%=CURRENT_SERVER%>/admin/login";
             })
+
         }
 
         $.ajax({
@@ -422,7 +456,7 @@
             cancelButtonText : '취소',
         }).then((result) => {
             if (result.isConfirmed) {
-                location.reload();
+                goToList();
             } else {
                 return false;
             }
@@ -434,6 +468,7 @@
         let userEmail = $("#userEmail").val();
         let userName = $("#userName").val();
         let userNickname = $("#userNickname").val();
+        let userPassword = $("#userPassword").val();
         let userImage = $('input#userImage')[0].files[0];
         let userPushYn = $('input:radio[name=userPushYn]:checked').val();
         let userPushNightYn = $('input:radio[name=userPushNightYn]:checked').val();
@@ -474,9 +509,11 @@
         if (userPushNightYn != undefined) {
             formData.append("userPushNightYn", userPushNightYn);
         }
+
         if (userUseYn != undefined) {
             formData.append("userUseYn", userUseYn);
         }
+
         if (userGrade != undefined) {
             formData.append("userGrade", userGrade);
         }
@@ -484,6 +521,8 @@
         if (userId != "") {
             formData.append("userId", ${param.userId});
         }
+
+        formData.append("userPassword", userPassword);
 
         $.ajax({
             url        : "<%=CURRENT_SERVER%>/admin/user/saveUser",

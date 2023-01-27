@@ -61,6 +61,7 @@ public interface AdminService {
             @Param("movieDirector") String movieDirector,
             @Param("movieStarRating") String movieStarRating,
             @Param("category") String category,
+            @Param("cinema") String cinema,
             @Param("movieDetailLink") String movieDetailLink,
             @Param("movieRunningTime") Integer movieRunningTime,
             @Param("moviePopularCount") Integer moviePopularCount,
@@ -108,7 +109,9 @@ public interface AdminService {
             @Param("userPushYn") Boolean userPushYn,
             @Param("userPushNightYn") Boolean userPushNightYn,
             @Param("userUseYn") Boolean userUseYn,
-            @Param("userGrade") String userGrade
+            @Param("userGrade") String userGrade,
+            @Param("userPassword") String userPassword,
+            @Param("userNickname") String userNickname
     );
 
     void createTheaters(MultipartFile file);
@@ -127,4 +130,9 @@ public interface AdminService {
     void uploadMovieCsvFile(MultipartFile file);
 
     void uploadMovieImageFile(List<MultipartFile> fileList);
+
+    void updatePaymentInfo(
+            @Param("paymentId") String paymentId,
+            @Param("paymentMemo") String paymentMemo
+    );
 }

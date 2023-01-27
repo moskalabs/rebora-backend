@@ -1,5 +1,6 @@
 package moska.rebora.Common.Service;
 
+import lombok.AllArgsConstructor;
 import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Notification.Entity.Notification;
@@ -12,26 +13,22 @@ import moska.rebora.User.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@AllArgsConstructor
 public class CommonServiceImpl implements CommonService {
 
-    @Autowired
     UserRepository userRepository;
 
-    @Autowired
     MovieRepository movieRepository;
 
-    @Autowired
     UserMovieRepository userMovieRepository;
-
-    @Autowired
     RecruitmentRepository recruitmentRepository;
-
-    @Autowired
     NotificationRepository notificationRepository;
+    PushService pushService;
 
     @Override
     public void createNotification(String notificationSubject,
@@ -40,12 +37,15 @@ public class CommonServiceImpl implements CommonService {
                                    Long recruitmentId,
                                    Long movieId) {
 
+        LocalDateTime now = LocalDateTime.now();
+
         List<User> userList = userMovieRepository.getUserListByMovie(movieId);
         Recruitment recruitment = recruitmentRepository.getRecruitmentById(recruitmentId);
 
         List<Notification> notificationList = new ArrayList<>();
 
         userList.forEach(u -> {
+
             Notification notification = Notification
                     .builder()
                     .notificationSubject(notificationSubject)
@@ -55,6 +55,8 @@ public class CommonServiceImpl implements CommonService {
                     .recruitment(recruitment)
                     .user(u)
                     .build();
+
+            pushService.sendUserPush(u, notificationSubject, notificationContent);
 
             notificationList.add(notification);
         });

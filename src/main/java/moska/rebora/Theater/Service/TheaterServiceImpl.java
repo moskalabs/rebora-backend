@@ -1,6 +1,8 @@
 package moska.rebora.Theater.Service;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Cinema.Repository.MovieCinemaRepository;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Theater.Dto.TheaterMovieDto;
@@ -21,16 +23,20 @@ import java.util.List;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class TheaterServiceImpl implements TheaterService {
-    @Autowired
-    private MovieRepository movieRepository;
-
-    @Autowired
     TheaterRepository theaterRepository;
+
+    MovieCinemaRepository movieCinemaRepository;
 
     public Page<TheaterMovieDto> getTheaterListByMovie(Long movieId) {
 
         return null;
+    }
+
+    @Override
+    public List<String> getAvailableDateRegion(Long movieId) {
+        return movieCinemaRepository.getByRegionName(movieId);
     }
 
     @Override

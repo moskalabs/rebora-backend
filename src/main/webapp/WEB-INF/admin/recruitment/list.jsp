@@ -36,7 +36,7 @@
                         <div class="card">
                             <div class="card-body" style="display: flex; flex-direction: row;">
                                 <div class="form-group ml-4" style="display:flex; width:130px;">
-                                    <select class="form-control select2bs4" style="width: 100%;">
+                                    <select class="form-control select2bs4" style="width: 100%;" id="searchCondition">
                                         <c:choose>
                                             <c:when test="${param.searchCondition == '' || param.searchCondition == 'movieName'}">
                                                 <option value="movieName" selected>영화 이름</option>
@@ -55,7 +55,7 @@
                                         </c:choose>
                                     </select>
                                 </div>
-                                <input type="text" class="form-control ml-4" style="width:300px" id="searchWord"
+                                <input type="text" class="form-control ml-4" style="width:100%" id="searchWord"
                                        value="${param.searchWord}"
                                        placeholder="검색어를 입력해 주세요">
                                 <div class="ml-4" style="display:flex; width:130px; height: 36px;">
@@ -269,6 +269,7 @@
     function searchRecruitment() {
         let searchWord = $("#searchWord").val();
         let searchCondition = $("#searchCondition").val();
+        console.log()
         location.href = "<%=CURRENT_SERVER%>/admin/recruitment/list?page=0&size=10&searchWord=" + searchWord + "&searchCondition=" + searchCondition;
     }
 

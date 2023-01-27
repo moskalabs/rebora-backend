@@ -125,7 +125,7 @@ public class PaymentServiceImpl implements PaymentService {
             String paymentId = createPaymentId(user.getId(), recruitment.getId());
             String paymentName = user.getUserNickname() + "님의 상영 확정된 모집 영화(" + movie.getMovieName() + ")의 " + userRecruitment.getUserRecruitmentPeople() + "명 예약 결제";
             Integer theaterPrice = (theater.getTheaterPrice() + movie.getMoviePrice()) * userRecruitment.getUserRecruitmentPeople();
-
+            log.info("customerUId={}", customerUId);
             if (customerUId.equals("")) {
                 paymentName = "빌링키 정보가 없습니다.";
                 Payment payment = Payment.builder()
@@ -150,34 +150,33 @@ public class PaymentServiceImpl implements PaymentService {
                 paymentLogRepository.save(paymentLog);
 
             } else {
-
-                log.info("customerUid={}, amount={} paymentId={} paymentName={}", customerUId, theaterPrice, paymentId, paymentName);
-
-                JSONObject result = paymentAgain(customerUId, paymentId, theaterPrice, paymentName);
+                JSONObject result = paymentAgain(customerUId, paymentId, theaterPrice, paymentName, user.getUserName(), user.getUserEmail());
                 Long code = (Long) result.get("code");
-                String message = (String) result.get("message"); //에러 메세지
+                String message = (String) result.get("message");
                 JSONObject response = (JSONObject) result.get("response");
-
-                Long amount = (Long) response.get("amount"); //결제금액
-                Long paidAt = (Long) response.get("paid_at"); //결제 시각
-                String cardNumber = (String) response.get("card_number"); //카드 번호
-                String cardName = (String) response.get("card_name"); //카드사
-                String cardCode = (String) response.get("card_code"); //카드 코드
-                String payMethod = (String) response.get("pay_method"); //결제 방법
-                String pgProvider = (String) response.get("pg_provider"); //PG사
-                String receiptUrl = (String) response.get("receipt_url"); //영수증 URL
-                String impUid = (String) response.get("impUid"); //영수증 URL
-                LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
+                log.info("response={}", response);
+                log.info("PaymentMessage={}", message);
 
                 if (code != 0) {
-
-                    Payment payment = createPayment(Math.toIntExact(amount), cardNumber, cardName, cardCode, payMethod, pgProvider, receiptUrl, message, false, userRecruitment, paymentId, impUid, PaymentStatus.FAILURE, authenticatedAt);
+                    String failReason = (String) response.get("fail_reason"); //영수증 URL
+                    log.info(failReason);
+                    Payment payment = createPayment(0, "", "", "", "", "", "", failReason, true, userRecruitment, paymentId, "", PaymentStatus.FAILURE, LocalDateTime.now());
                     notificationService.createPaymentEndNotification(recruitment, theater, user, movie, payment, false);
 
                     recruitment.minusRecruitmentPeople(userRecruitment.getUserRecruitmentPeople());
                     recruitmentRepository.save(recruitment);
                 } else {
-                    Payment payment = createPayment(Math.toIntExact(amount), cardNumber, cardName, cardCode, payMethod, pgProvider, receiptUrl, paymentName, false, userRecruitment, paymentId, impUid, PaymentStatus.COMPLETE, authenticatedAt);
+                    Long amount = (Long) response.get("amount"); //결제금액
+                    Long paidAt = (Long) response.get("paid_at"); //결제 시각
+                    String cardNumber = (String) response.get("card_number"); //카드 번호
+                    String cardName = (String) response.get("card_name"); //카드사
+                    String cardCode = (String) response.get("card_code"); //카드 코드
+                    String payMethod = (String) response.get("pay_method"); //결제 방법
+                    String pgProvider = (String) response.get("pg_provider"); //PG사
+                    String receiptUrl = (String) response.get("receipt_url"); //영수증 URL
+                    String impUid = (String) response.get("impUid"); //영수증 URL
+                    LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
+                    Payment payment = createPayment(Math.toIntExact(amount), cardNumber, cardName, cardCode, payMethod, pgProvider, receiptUrl, paymentName, true, userRecruitment, paymentId, impUid, PaymentStatus.COMPLETE, authenticatedAt);
                     notificationService.createPaymentEndNotification(recruitment, theater, user, movie, payment, true);
                 }
                 log.info(user.getUserNickname() + "님의 예약 카드 결제 종료");
@@ -403,31 +402,39 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = userRecruitment.getPayment();
         if (payment != null) {
 
-            JSONObject result = refundPayment(payment.getImpUid());
-            JSONObject response = (JSONObject) result.get("response"); //카드 결과 응답 값
+            JSONObject result = refundPayment(payment.getId());
+            Long code = (Long) result.get("code");
+            String message = (String) result.get("message");
+            if (code == 0L) {
+                JSONObject response = (JSONObject) result.get("response"); //카드 결과 응답 값
 
-            Long amount = (Long) response.get("amount"); //결제금액
-            Long paidAt = (Long) response.get("paid_at"); //결제 시각
-            String cardNumber = (String) response.get("card_number"); //카드 번호
-            String cardName = (String) response.get("card_name"); //카드사
-            String cardCode = (String) response.get("card_code"); //카드 코드
-            String payMethod = (String) response.get("pay_method"); //결제 방법
-            String pgProvider = (String) response.get("pg_provider"); //PG사
-            String receiptUrl = (String) response.get("receipt_url"); //영수증 URL
-            LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
+                Long amount = (Long) response.get("amount"); //결제금액
+                Long paidAt = (Long) response.get("paid_at"); //결제 시각
+                String cardNumber = (String) response.get("card_number"); //카드 번호
+                String cardName = (String) response.get("card_name"); //카드사
+                String cardCode = (String) response.get("card_code"); //카드 코드
+                String payMethod = (String) response.get("pay_method"); //결제 방법
+                String pgProvider = (String) response.get("pg_provider"); //PG사
+                String receiptUrl = (String) response.get("receipt_url"); //영수증 URL
+                LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
 
-            createPayment(Math.toIntExact(amount), cardNumber, cardName, cardCode, payMethod, pgProvider, receiptUrl, "결제 취소", false, userRecruitment, payment.getId(), payment.getImpUid(), PaymentStatus.CANCEL, authenticatedAt);
+                createPayment(Math.toIntExact(amount), cardNumber, cardName, cardCode, payMethod, pgProvider, receiptUrl, "결제 취소", false, userRecruitment, payment.getId(), payment.getImpUid(), PaymentStatus.CANCEL, authenticatedAt);
+            } else {
+                createPayment(payment.getPaymentAmount(), payment.getPaymentCardNumber(), payment.getPaymentCardName(), payment.getPaymentCardCode(), payment.getPaymentMethod(), payment.getPgProvider(), payment.getReceiptUrl(), message, false, userRecruitment, payment.getId(), payment.getImpUid(), PaymentStatus.FAILURE, LocalDateTime.now());
+            }
         }
 
         return userRecruitment;
     }
 
-    public JSONObject refundPayment(String impUid) {
+    public JSONObject refundPayment(String merchantUid) {
+
+        log.info("impUid={}", merchantUid);
 
         String paymentAuth = getPaymentAuth();
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> params = new HashMap<>();
-        params.put("imp_uid", impUid);
+        params.put("merchant_uid", merchantUid);
 
         try {
 
@@ -508,78 +515,58 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public Payment getBatchPayment(User user, Recruitment recruitment, Payment payment, Theater theater, UserRecruitment userRecruitment, Movie movie) {
 
-        try {
+        Integer amount = userRecruitment.getUserRecruitmentPeople() * (theater.getTheaterPrice() + movie.getMoviePrice());
+        String paymentName = user.getUserNickname() + "님의 상영 확정된 모집 영화(" + movie.getMovieName() + ")의 " + userRecruitment.getUserRecruitmentPeople() + "명 결제";
 
-            CardDto card = getCard(user.getId());
+        log.info("확정된 영화 카드 결제 시작");
+        log.info("customerUid={}, amount={} paymentId={} paymentName={}", userRecruitment.getCustomerUId(), amount, payment.getId(), paymentName);
 
-            String paymentAuth = getPaymentAuth();
-            Integer amount = userRecruitment.getUserRecruitmentPeople() * theater.getTheaterPrice();
-            String paymentName = user.getUserNickname() + "님의 상영 확정된 모집 영화(" + movie.getMovieName() + ")의 " + userRecruitment.getUserRecruitmentPeople() + "명 결제";
+        JSONObject result = paymentAgain(userRecruitment.getCustomerUId(),
+                payment.getId(),
+                amount,
+                paymentName,
+                user.getUserName(),
+                user.getUserEmail());
 
-            log.info("확정된 영화 카드 결제 시작");
-            log.info("customerUid={}, amount={} paymentId={} paymentName={}", card.getCustomerUid(), amount, payment.getId(), paymentName);
+        Long code = (Long) result.get("code");
+        String message = (String) result.get("message"); //에러 메세지
 
-            ObjectMapper objectMapper = new ObjectMapper();
-            Map<String, Object> params = new HashMap<>();
-            params.put("customer_uid", card.getCustomerUid());
-            params.put("merchant_uid", payment.getId());
-            params.put("amount", amount);
-            params.put("name", paymentName);
+        if (code == 0L) {
+            log.info(paymentName + "의 결제성공");
+            JSONObject responseJson = (JSONObject) result.get("response"); //카드 결과 응답 값
+            Long amountResult = (Long) responseJson.get("amount"); //결제금액
+            Long paidAt = (Long) responseJson.get("paid_at"); //결제 시각
+            String cardNumber = (String) responseJson.get("card_number"); //카드 번호
+            String cardName = (String) responseJson.get("card_name"); //카드사
+            String cardCode = (String) responseJson.get("card_code"); //카드 코드
+            String payMethod = (String) responseJson.get("pay_method"); //결제 방법
+            String pgProvider = (String) responseJson.get("pg_provider"); //PG사
+            String receiptUrl = (String) responseJson.get("receipt_url"); //영수증 URL
+            LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
 
-            String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
-            HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+            payment.updatePayment(
+                    paymentName,
+                    Math.toIntExact(amountResult),
+                    payMethod,
+                    PaymentStatus.COMPLETE,
+                    cardCode,
+                    pgProvider,
+                    cardName,
+                    authenticatedAt,
+                    receiptUrl,
+                    cardNumber,
+                    userRecruitment,
+                    "",
+                    true
+            );
 
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.iamport.kr/subscribe/payments/again"))
-                    .header("Authorization", "Bearer " + paymentAuth)
-                    .header("Content-Type", "application/json")
-                    .method("POST", body)
-                    .build();
-
-            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
-            JSONParser jsonParser = new JSONParser();
-            JSONObject result = (JSONObject) jsonParser.parse(response.body());
-            Long code = (Long) result.get("code");
-            String message = (String) result.get("message"); //에러 메세지
-            if (code == 0L) {
-                log.info(paymentName + "의 결제성공");
-                JSONObject responseJson = (JSONObject) result.get("response"); //카드 결과 응답 값
-                Long amountResult = (Long) responseJson.get("amount"); //결제금액
-                Long paidAt = (Long) responseJson.get("paid_at"); //결제 시각
-                String cardNumber = (String) responseJson.get("card_number"); //카드 번호
-                String cardName = (String) responseJson.get("card_name"); //카드사
-                String cardCode = (String) responseJson.get("card_code"); //카드 코드
-                String payMethod = (String) responseJson.get("pay_method"); //결제 방법
-                String pgProvider = (String) responseJson.get("pg_provider"); //PG사
-                String receiptUrl = (String) responseJson.get("receipt_url"); //영수증 URL
-                LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
-
-                payment.updatePayment(
-                        paymentName,
-                        Math.toIntExact(amountResult),
-                        payMethod,
-                        PaymentStatus.COMPLETE,
-                        cardCode,
-                        pgProvider,
-                        cardName,
-                        authenticatedAt,
-                        receiptUrl,
-                        cardNumber,
-                        userRecruitment,
-                        "",
-                        true
-                );
-
-                log.info("message={}", result.get("message"));
-            } else {
-                log.info(paymentName + "의 결제실패");
-                payment.failPayment(message, userRecruitment);
-            }
-
-            return payment;
-        } catch (IOException | InterruptedException | ParseException e) {
-            throw new RuntimeException(e);
+            log.info("message={}", result.get("message"));
+        } else {
+            log.info(paymentName + "의 결제실패");
+            payment.failPayment(message, userRecruitment);
         }
+
+        return payment;
     }
 
     /**
@@ -618,7 +605,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         //최대 모집 여부
-        if (recruitment.getRecruitmentPeople() + userRecruitmentPeople >= theater.getTheaterMaxPeople()) {
+        if (recruitment.getRecruitmentPeople() + userRecruitmentPeople > theater.getTheaterMaxPeople()) {
             throw new RuntimeException("모집 인원이 초과했습니다. 다시 시도해 주세요");
         }
 
@@ -704,7 +691,7 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         //최대 모집 여부
-        if (recruitment.getRecruitmentPeople() + userRecruitmentPeople >= theater.getTheaterMaxPeople()) {
+        if (recruitment.getRecruitmentPeople() + userRecruitmentPeople > theater.getTheaterMaxPeople()) {
             throw new RuntimeException("모집 인원이 초과했습니다. 다시 시도해 주세요");
         }
 
@@ -975,7 +962,9 @@ public class PaymentServiceImpl implements PaymentService {
             String customerUid,
             String merchantUid,
             Integer amount,
-            String paymentName
+            String paymentName,
+            String userName,
+            String userEmail
     ) {
 
         JSONObject jsonObject = new JSONObject();
@@ -986,8 +975,11 @@ public class PaymentServiceImpl implements PaymentService {
             Map<String, Object> params = new HashMap<>();
             params.put("customer_uid", customerUid);
             params.put("merchant_uid", merchantUid);
+            params.put("buyer_name", userName);
+            params.put("buyer_email", userEmail);
             params.put("amount", amount);
             params.put("name", paymentName);
+            log.info("prmMap={}", params);
             String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
             HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
 

@@ -6,7 +6,12 @@ import io.jsonwebtoken.JwtException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Admin.Dto.*;
+import moska.rebora.Cinema.Dto.CinemaMovieDto;
+import moska.rebora.Cinema.Entity.Cinema;
+import moska.rebora.Cinema.Entity.MovieCinema;
 import moska.rebora.Cinema.Repository.BrandRepository;
+import moska.rebora.Cinema.Repository.CinemaRepository;
+import moska.rebora.Cinema.Repository.MovieCinemaRepository;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.Entity.Category;
@@ -26,6 +31,7 @@ import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Entity.MovieCategory;
 import moska.rebora.Movie.Repository.MovieCategoryRepository;
 import moska.rebora.Movie.Repository.MovieRepository;
+import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Payment.Repository.PaymentRepository;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Entity.Recruitment;
@@ -66,6 +72,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @Slf4j
 public class AdminServiceImpl implements AdminService {
+    private final MovieCinemaRepository movieCinemaRepository;
 
     UserRepository userRepository;
 
@@ -91,6 +98,8 @@ public class AdminServiceImpl implements AdminService {
 
     PaymentRepository paymentRepository;
 
+    CinemaRepository cinemaRepository;
+
     Util util;
 
     @Override
@@ -108,12 +117,7 @@ public class AdminServiceImpl implements AdminService {
             throw new NullPointerException("관리자등급이 아닙니다.");
         }
 
-        return UserLoginDto.builder()
-                .token(createToken(userEmail, password))
-                .result(true)
-                .errorCode(null)
-                .user(user)
-                .build();
+        return UserLoginDto.builder().token(createToken(userEmail, password)).result(true).errorCode(null).user(user).build();
     }
 
     @Override
@@ -162,21 +166,33 @@ public class AdminServiceImpl implements AdminService {
         if (movieId == null) {
             AdminMovieDto adminMovieDto = new AdminMovieDto();
             List<AdminMovieCategoryDto> movieCategoryDtoList = new ArrayList<>();
+
             List<Category> categoryList = categoryRepository.findAll();
+            List<Cinema> cinemaList = cinemaRepository.findAll();
+
             movieCategoryDtoList = categoryList.stream().map(AdminMovieCategoryDto::new).collect(Collectors.toList());
+            List<CinemaMovieDto> cinemaMovieDtoList = cinemaList.stream().map(CinemaMovieDto::new).collect(Collectors.toList());
 
             adminMovieDto.setCategoryList(movieCategoryDtoList);
+            adminMovieDto.setCinemaMovieDtoList(cinemaMovieDtoList);
             baseInfoResponse.setResult(true);
             baseInfoResponse.setContent(adminMovieDto);
+
         } else {
+
             MoviePageDto moviePageDto = movieRepository.getMovieInfo(movieId);
             AdminMovieDto adminMovieDto = new AdminMovieDto(moviePageDto);
 
             List<AdminMovieCategoryDto> movieCategoryDtoList = new ArrayList<>();
+
             List<Category> categoryList = categoryRepository.findAll();
+            List<Cinema> cinemaList = cinemaRepository.findAll();
+
             movieCategoryDtoList = categoryList.stream().map(AdminMovieCategoryDto::new).collect(Collectors.toList());
+            List<CinemaMovieDto> cinemaMovieDtoList = cinemaList.stream().map(CinemaMovieDto::new).collect(Collectors.toList());
 
             List<Category> moviePageCategoryList = moviePageDto.getCategoryList();
+            List<Cinema> cinemaSearchList = cinemaRepository.getCinemaListByMovieId(movieId);
 
             List<AdminMovieCategoryDto> finalMovieCategoryDtoList = movieCategoryDtoList;
             moviePageCategoryList.forEach(c -> {
@@ -187,7 +203,19 @@ public class AdminServiceImpl implements AdminService {
                 });
             });
 
+            cinemaSearchList.forEach(c -> {
+                String cinemaName = c.getBrandName() + " " + c.getRegionName() + " " + c.getCinemaName();
+                cinemaMovieDtoList.forEach(cinema -> {
+                    String compareName = cinema.getBrandName() + " " + cinema.getRegionName() + " " + cinema.getCinemaName();
+                    if (cinemaName.equals(compareName)) {
+                        cinema.setCinemaYn(true);
+                    }
+                });
+            });
+
             adminMovieDto.setCategoryList(finalMovieCategoryDtoList);
+            adminMovieDto.setCinemaMovieDtoList(cinemaMovieDtoList);
+            log.info("cinemaList={}", cinemaMovieDtoList);
             baseInfoResponse.setResult(true);
             baseInfoResponse.setContent(adminMovieDto);
         }
@@ -223,6 +251,7 @@ public class AdminServiceImpl implements AdminService {
             String movieDirector,
             String movieStarRating,
             String category,
+            String cinema,
             String movieDetailLink,
             Integer movieRunningTime,
             Integer moviePopularCount,
@@ -231,51 +260,15 @@ public class AdminServiceImpl implements AdminService {
             MultipartFile changeMovieRecruitmentImage) {
 
         if (movieId == null) {
-            createMovie(
-                    movieName,
-                    movieRating,
-                    movieDirector,
-                    movieStarRating,
-                    category,
-                    movieDetailLink,
-                    movieRunningTime,
-                    moviePopularCount,
-                    changeMovieImage,
-                    changeMovieBannerImage,
-                    changeMovieRecruitmentImage
-            );
+            createMovie(movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePopularCount, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
         } else {
-            updateMovie(
-                    movieId,
-                    movieName,
-                    movieRating,
-                    movieDirector,
-                    movieStarRating,
-                    category,
-                    movieDetailLink,
-                    movieRunningTime,
-                    moviePopularCount,
-                    changeMovieImage,
-                    changeMovieBannerImage,
-                    changeMovieRecruitmentImage
-            );
+            updateMovie(movieId, movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePopularCount, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
         }
     }
 
     @Transactional
-    void createMovie(
-            String movieName,
-            String movieRating,
-            String movieDirector,
-            String movieStarRating,
-            String category,
-            String movieDetailLink,
-            Integer movieRunningTime,
-            Integer moviePopularCount,
-            MultipartFile changeMovieImage,
-            MultipartFile changeMovieBannerImage,
-            MultipartFile changeMovieRecruitmentImage
-    ) {
+    void createMovie(String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
+
         int convertMovieStarRating = 0;
         String[] startRatingList = movieStarRating.split("\\.");
         for (int i = 0; i < startRatingList.length; i++) {
@@ -287,16 +280,7 @@ public class AdminServiceImpl implements AdminService {
             }
         }
 
-        Movie movie = Movie
-                .builder()
-                .movieName(movieName)
-                .movieRating(MovieRating.valueOf(movieRating))
-                .movieDirector(movieDirector)
-                .movieDetailLink(movieDetailLink)
-                .movieRunningTime(movieRunningTime)
-                .movieStarRating(convertMovieStarRating)
-                .moviePopularCount(moviePopularCount)
-                .build();
+        Movie movie = Movie.builder().movieName(movieName).movieRating(MovieRating.valueOf(movieRating)).movieDirector(movieDirector).movieDetailLink(movieDetailLink).movieRunningTime(movieRunningTime).movieStarRating(convertMovieStarRating).moviePopularCount(moviePopularCount).build();
 
         movieRepository.save(movie);
 
@@ -312,38 +296,35 @@ public class AdminServiceImpl implements AdminService {
             movie.changeMovieRecruitmentImage(uploadMovieImage(changeMovieRecruitmentImage, movie.getId(), "info"));
         }
 
-        String[] categoryList = category.split(",");
-
+        List<MovieCinema> movieCinemaList = new ArrayList<>();
         List<MovieCategory> movieCategoryList = new ArrayList<>();
-        for (String s : categoryList) {
-            Category category1 = categoryRepository.getReferenceById(Long.valueOf(s));
-            MovieCategory movieCategory = MovieCategory
-                    .builder()
-                    .movie(movie)
-                    .category(category1)
-                    .build();
 
-            movieCategoryList.add(movieCategory);
+        if (cinema != null) {
+            String[] cinemaList = cinema.split(",");
+            for (String s : cinemaList) {
+                Cinema cinema1 = cinemaRepository.getReferenceById(Long.valueOf(s));
+                MovieCinema movieCinema = MovieCinema.builder().cinema(cinema1).movie(movie).build();
+
+                movieCinemaList.add(movieCinema);
+            }
+            movieCinemaRepository.saveAll(movieCinemaList);
         }
 
-        movieCategoryRepository.saveAll(movieCategoryList);
+        if (category != null) {
+            String[] categoryList = category.split(",");
+            for (String s : categoryList) {
+                Category category1 = categoryRepository.getReferenceById(Long.valueOf(s));
+                MovieCategory movieCategory = MovieCategory.builder().movie(movie).category(category1).build();
+
+                movieCategoryList.add(movieCategory);
+            }
+
+            movieCategoryRepository.saveAll(movieCategoryList);
+        }
     }
 
     @Transactional
-    void updateMovie(
-            Long movieId,
-            String movieName,
-            String movieRating,
-            String movieDirector,
-            String movieStarRating,
-            String category,
-            String movieDetailLink,
-            Integer movieRunningTime,
-            Integer moviePopularCount,
-            MultipartFile changeMovieImage,
-            MultipartFile changeMovieBannerImage,
-            MultipartFile changeMovieRecruitmentImage
-    ) {
+    void updateMovie(Long movieId, String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
         Movie movie = movieRepository.getMovieById(movieId);
         int convertMovieStarRating = 0;
         String[] startRatingList = movieStarRating.split("\\.");
@@ -371,26 +352,42 @@ public class AdminServiceImpl implements AdminService {
         movie.updateMovie(movieName, movieRating, movieDirector, convertMovieStarRating, movieDetailLink, moviePopularCount, movieRunningTime);
         movieRepository.save(movie);
 
-        String[] categoryList = category.split(",");
 
         List<MovieCategory> movieCategories = movieCategoryRepository.getMovieCategoryByMovie(movie);
         if (movieCategories.size() != 0) {
             movieCategoryRepository.deleteAll(movieCategories);
         }
 
-        List<MovieCategory> movieCategoryList = new ArrayList<>();
-        for (String s : categoryList) {
-            Category category1 = categoryRepository.getReferenceById(Long.valueOf(s));
-            MovieCategory movieCategory = MovieCategory
-                    .builder()
-                    .movie(movie)
-                    .category(category1)
-                    .build();
-
-            movieCategoryList.add(movieCategory);
+        List<MovieCinema> movieCinemas = movieCinemaRepository.getMovieCinemasByMovieId(movieId);
+        if (movieCinemas.size() != 0) {
+            movieCinemaRepository.deleteAll(movieCinemas);
         }
 
-        movieCategoryRepository.saveAll(movieCategoryList);
+        List<MovieCinema> movieCinemaList = new ArrayList<>();
+        List<MovieCategory> movieCategoryList = new ArrayList<>();
+
+        if (cinema != null) {
+            String[] cinemaList = cinema.split(",");
+            for (String s : cinemaList) {
+                Cinema cinema1 = cinemaRepository.getReferenceById(Long.valueOf(s));
+                MovieCinema movieCinema = MovieCinema.builder().cinema(cinema1).movie(movie).build();
+
+                movieCinemaList.add(movieCinema);
+            }
+            movieCinemaRepository.saveAll(movieCinemaList);
+        }
+
+        if (category != null) {
+            String[] categoryList = category.split(",");
+            for (String s : categoryList) {
+                Category category1 = categoryRepository.getReferenceById(Long.valueOf(s));
+                MovieCategory movieCategory = MovieCategory.builder().movie(movie).category(category1).build();
+
+                movieCategoryList.add(movieCategory);
+            }
+
+            movieCategoryRepository.saveAll(movieCategoryList);
+        }
     }
 
     @Override
@@ -443,28 +440,19 @@ public class AdminServiceImpl implements AdminService {
         try {
             String[] line;
             while ((line = csvReader.readNext()) != null) {
-                //log.info("line={}", line);
                 if (line[0].equals("")) {
                     continue;
                 }
+
                 LocalDateTime theaterStartTime = convertDateTime(line[4], line[5]);
+                Optional<Cinema> optionalCinema = cinemaRepository.getCinemaByCinemaNameAndRegionName(line[1], line[0]);
+
+                if (optionalCinema.isEmpty()) {
+                    throw new NullPointerException("존재하지 않는 극장입니다. 극장을 먼저 생성해주세요");
+                }
 
                 log.info(line[7]);
-                Theater theater = Theater
-                        .builder()
-                        .theaterRegion(line[0])
-                        .theaterCinemaName(line[1])
-                        .theaterName(line[2])
-                        .theaterCinemaBrandName(line[3])
-                        .brand(brandRepository.getBrandByBrandName(line[3]))
-                        .theaterStartDatetime(theaterStartTime)
-                        .theaterEndDatetime(convertDateTime(line[4], line[6]))
-                        .theaterDay(theaterStartTime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA))
-                        .theaterTime(Integer.parseInt(line[7]))
-                        .theaterMinPeople(Integer.parseInt(line[8]))
-                        .theaterMaxPeople(Integer.parseInt(line[9]))
-                        .theaterPrice(Integer.parseInt(line[10]))
-                        .build();
+                Theater theater = Theater.builder().theaterRegion(line[0]).theaterCinemaName(line[1]).theaterName(line[2]).theaterCinemaBrandName(line[3]).brand(brandRepository.getBrandByBrandName(line[3])).theaterStartDatetime(theaterStartTime).theaterEndDatetime(convertDateTime(line[4], line[6])).theaterDay(theaterStartTime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA)).theaterTime(Integer.parseInt(line[7])).theaterMinPeople(Integer.parseInt(line[8])).theaterMaxPeople(Integer.parseInt(line[9])).theaterPrice(Integer.parseInt(line[10])).cinema(optionalCinema.get()).build();
 
                 theaterList.add(theater);
             }
@@ -497,63 +485,39 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void theaterSave(
-            Long theaterId,
-            String theaterCinemaBrandName,
-            String theaterRegion,
-            String theaterCinemaName,
-            String theaterName,
-            String theaterDate,
-            String theaterStartHour,
-            String theaterStartMinute,
-            String theaterEndHour,
-            String theaterEndMinute,
-            Integer theaterTime,
-            Integer theaterPrice,
-            Integer theaterMinPeople,
-            Integer theaterMaxPeople) {
+    public void theaterSave(Long theaterId, String theaterCinemaBrandName, String theaterRegion, String theaterCinemaName, String theaterName, String theaterDate, String theaterStartHour, String theaterStartMinute, String theaterEndHour, String theaterEndMinute, Integer theaterTime, Integer theaterPrice, Integer theaterMinPeople, Integer theaterMaxPeople) {
 
         LocalDateTime theaterStartDatetime = convertTheaterDateTime(theaterDate, theaterStartHour, theaterStartMinute);
         LocalDateTime theaterEndDatetime = convertTheaterDateTime(theaterDate, theaterEndHour, theaterEndMinute);
 
         if (theaterId != null) {
+
             Optional<Theater> theaterOptional = theaterRepository.findById(theaterId);
+
             if (theaterOptional.isEmpty()) {
                 throw new NullPointerException("존재하지 않는 상영관 정보입니다.");
             }
+
+            Optional<Cinema> optionalCinema = cinemaRepository.getCinemaByCinemaNameAndRegionName(theaterCinemaName, theaterRegion);
+
+            if (optionalCinema.isEmpty()) {
+                throw new NullPointerException("존재하지 않는 극장입니다. 먼저 극장을 생성해주세요");
+            }
+
             Theater theater = theaterOptional.get();
-            theater.updateTheater(
-                    theaterName,
-                    theaterStartDatetime,
-                    theaterEndDatetime,
-                    theaterStartDatetime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA),
-                    theaterMaxPeople,
-                    theaterMinPeople,
-                    theaterCinemaName,
-                    theaterCinemaBrandName,
-                    theaterRegion,
-                    theaterPrice,
-                    theaterTime,
-                    brandRepository.getBrandByBrandName(theaterCinemaBrandName)
-            );
+            theater.updateTheater(theaterName, theaterStartDatetime, theaterEndDatetime, theaterStartDatetime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA), theaterMaxPeople, theaterMinPeople, theaterCinemaName, theaterCinemaBrandName, theaterRegion, theaterPrice, theaterTime, brandRepository.getBrandByBrandName(theaterCinemaBrandName));
 
             theaterRepository.save(theater);
+
         } else {
-            Theater theater = Theater
-                    .builder()
-                    .theaterName(theaterName)
-                    .theaterStartDatetime(theaterStartDatetime)
-                    .theaterEndDatetime(theaterEndDatetime)
-                    .theaterDay(theaterStartDatetime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA))
-                    .theaterMaxPeople(theaterMaxPeople)
-                    .theaterMinPeople(theaterMinPeople)
-                    .theaterCinemaName(theaterCinemaName)
-                    .theaterCinemaBrandName(theaterCinemaBrandName)
-                    .theaterRegion(theaterRegion)
-                    .theaterPrice(theaterPrice)
-                    .theaterTime(theaterTime)
-                    .brand(brandRepository.getBrandByBrandName(theaterCinemaBrandName))
-                    .build();
+
+            Optional<Cinema> optionalCinema = cinemaRepository.getCinemaByCinemaNameAndRegionName(theaterCinemaName, theaterRegion);
+
+            if (optionalCinema.isEmpty()) {
+                throw new NullPointerException("존재하지 않는 극장입니다. 먼저 극장을 생성해주세요");
+            }
+
+            Theater theater = Theater.builder().theaterName(theaterName).theaterStartDatetime(theaterStartDatetime).theaterEndDatetime(theaterEndDatetime).theaterDay(theaterStartDatetime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA)).theaterMaxPeople(theaterMaxPeople).theaterMinPeople(theaterMinPeople).theaterCinemaName(theaterCinemaName).theaterCinemaBrandName(theaterCinemaBrandName).theaterRegion(theaterRegion).theaterPrice(theaterPrice).theaterTime(theaterTime).brand(brandRepository.getBrandByBrandName(theaterCinemaBrandName)).cinema(optionalCinema.get()).build();
 
             theaterRepository.save(theater);
         }
@@ -565,16 +529,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public void saveUser(
-            Long userId,
-            String userEmail,
-            String userName,
-            MultipartFile userImage,
-            Boolean userPushYn,
-            Boolean userPushNightYn,
-            Boolean userUseYn,
-            String userGrade
-    ) {
+    public void saveUser(Long userId, String userEmail, String userName, MultipartFile userImage, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, String userGrade, String userPassword, String userNickname) {
 
         if (userId != null) {
             Optional<User> userOptional = userRepository.findById(userId);
@@ -582,6 +537,7 @@ public class AdminServiceImpl implements AdminService {
             if (userOptional.isEmpty()) {
                 throw new NullPointerException("해당하는 유저가 없습니다.");
             }
+
             User user = userOptional.get();
             String fileUrl = user.getUserImage();
 
@@ -596,20 +552,48 @@ public class AdminServiceImpl implements AdminService {
                 fileUrl = "";
             }
 
-            user.changeAdminUserInfo(
-                    userEmail,
-                    userName,
-                    fileUrl,
-                    userPushYn,
-                    userPushNightYn,
-                    userUseYn,
-                    userGrade
-            );
+            user.changeAdminUserInfo(userEmail, userName, fileUrl, userPushYn, userPushNightYn, userUseYn, userGrade);
+
+            if (!userPassword.equals("")) {
+                String bcryptPassword = passwordEncoder.encode(userPassword);
+                user.changePassword(bcryptPassword);
+            }
 
             userRepository.save(user);
 
         } else {
 
+            String bcryptPassword = passwordEncoder.encode(userPassword);
+
+            User user = User
+                    .builder()
+                    .userEmail(userEmail)
+                    .password(bcryptPassword)
+                    .userSnsId("")
+                    .userSnsKind(null)
+                    .userImage("")
+                    .userName(userName)
+                    .userNickname(userNickname)
+                    .userGrade(UserGrade.valueOf(userGrade))
+                    .userUseYn(userUseYn)
+                    .userPushYn(userPushYn)
+                    .userPushNightYn(userPushNightYn)
+                    .build();
+
+            userRepository.save(user);
+
+            String fileUrl = "";
+
+            if (userImage != null) {
+                String originalFileName = userImage.getOriginalFilename(); //원본 파일 이름
+                String ext = FilenameUtils.getExtension(originalFileName); //확장자
+                String newFileName = "user/" + userId + "/" + userId + "_" + util.createRandomString(8) + "." + ext; //새로운 파일 이름
+                fileUrl = fileUploadService.uploadImage(userImage, newFileName); //파일 Url
+            }
+
+            user.updateUserImage(fileUrl);
+
+            userRepository.save(user);
         }
     }
 
@@ -666,12 +650,7 @@ public class AdminServiceImpl implements AdminService {
         claims.put("role", "ADMIN");
         claims.put("userEmail", authToken.getUserEmail());
 
-        JwtAuthToken jwtAuthToken = jwtAuthTokenProvider.createAuthToken(
-                authentication.getName(),
-                "ADMIN",
-                claims,
-                expiredDate
-        );
+        JwtAuthToken jwtAuthToken = jwtAuthTokenProvider.createAuthToken(authentication.getName(), "ADMIN", claims, expiredDate);
 
         return jwtAuthToken.getToken(jwtAuthToken);
     }
@@ -698,7 +677,6 @@ public class AdminServiceImpl implements AdminService {
             String[] line;
 
             List<String> movieNameList = new ArrayList<>();
-            List<Movie> movieList = new ArrayList<>();
 
             while ((line = csvReader.readNext()) != null) {
                 if (line[0].equals("")) {
@@ -712,11 +690,12 @@ public class AdminServiceImpl implements AdminService {
                 log.info("영화 평점={}", line[3]);
                 log.info("영화 상세 링크={}", line[4]);
                 log.info("영화 러닝 타임={}", line[5]);
+                log.info("카테고리={}", line[6]);
 
                 onValidMovie(line[0], line[3], line[5]);
 
-                Movie movie = Movie
-                        .builder()
+
+                Movie movie = Movie.builder()
                         .movieName(line[0])
                         .movieDirector(line[1])
                         .movieRating(MovieRating.valueOf(line[2]))
@@ -727,7 +706,18 @@ public class AdminServiceImpl implements AdminService {
                         .moviePopularCount(0)
                         .build();
 
-                movieList.add(movie);
+                movieRepository.save(movie);
+
+                if (line[6] != null) {
+                    List<Category> categoryList = new ArrayList<>();
+                    List<MovieCategory> movieCategoryList = new ArrayList<>();
+                    categoryList = categoryRepository.getCategoriesByCategoryNameIn(line[6].split(","));
+                    for (Category category : categoryList) {
+                        MovieCategory movieCategory = MovieCategory.builder().movie(movie).category(category).build();
+                        movieCategoryList.add(movieCategory);
+                    }
+                    movieCategoryRepository.saveAll(movieCategoryList);
+                }
             }
 
             Integer movieDuplicateCount = movieRepository.countMovieByMovieNameIn(movieNameList);
@@ -736,8 +726,6 @@ public class AdminServiceImpl implements AdminService {
             if (movieDuplicateCount > 0) {
                 throw new RuntimeException("중복된 영화 이름이 있습니다. 다시 시도해주세요.");
             }
-
-            movieRepository.saveAll(movieList);
 
         } catch (NumberFormatException e) {
             throw new RuntimeException(e);
@@ -828,5 +816,19 @@ public class AdminServiceImpl implements AdminService {
             String newFileName = "movie/" + movie.getId() + "/" + splitMovieName[1] + "." + splitExt[splitExt.length - 1];
             fileUploadService.uploadImage(file, newFileName); //파일 Url
         });
+    }
+
+    @Override
+    public void updatePaymentInfo(String paymentId, String paymentMemo) {
+        Optional<Payment> paymentOptional = paymentRepository.getPaymentById(paymentId);
+
+        if (paymentOptional.isEmpty()) {
+            throw new NullPointerException("결제 번호가 존재하지 않습니다.");
+        }
+
+        Payment payment = paymentOptional.get();
+        payment.updateMemo(paymentMemo);
+
+        paymentRepository.save(payment);
     }
 }

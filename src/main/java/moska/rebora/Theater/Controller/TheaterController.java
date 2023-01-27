@@ -1,6 +1,7 @@
 package moska.rebora.Theater.Controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import moska.rebora.Common.BaseListResponse;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Theater.Dto.TheaterPageDto;
@@ -16,18 +17,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/theater")
 @Tag(name = "상영관")
+@AllArgsConstructor
 public class TheaterController {
-
-    @Autowired
     TheaterService theaterService;
 
     @Tag(name = "상영관")
+    @GetMapping("/getAvailableRegion")
+    public BaseListResponse<String> getAvailableRegion(@RequestParam Long movieId) {
+        BaseListResponse<String> baseListResponse = new BaseListResponse<>();
+        baseListResponse.setResult(true);
+        baseListResponse.setList(theaterService.getAvailableDateRegion(movieId));
+
+        return baseListResponse;
+    }
+
+    @Tag(name = "상영관")
     @GetMapping("/getAvailableDate")
-    public BaseListResponse<String> getAvailableDate(
-            @RequestParam String theaterRegion,
-            @RequestParam String selectMonth,
-            @RequestParam Long movieId
-    ) {
+    public BaseListResponse<String> getAvailableDate(@RequestParam String theaterRegion, @RequestParam String selectMonth, @RequestParam Long movieId) {
         BaseListResponse<String> baseListResponse = new BaseListResponse<>();
         baseListResponse.setResult(true);
         baseListResponse.setList(theaterService.getAvailableDate(theaterRegion, selectMonth, movieId));
@@ -37,12 +43,7 @@ public class TheaterController {
 
     @Tag(name = "상영관")
     @GetMapping("/getPageTheater")
-    public BasePageResponse<TheaterPageDto> getPageTheater(
-            @RequestParam String theaterRegion,
-            @RequestParam String selectDate,
-            @RequestParam Long movieId,
-            @PageableDefault(page = 0, size = 10) Pageable pageable
-    ) {
+    public BasePageResponse<TheaterPageDto> getPageTheater(@RequestParam String theaterRegion, @RequestParam String selectDate, @RequestParam Long movieId, @PageableDefault(page = 0, size = 10) Pageable pageable) {
 
         BasePageResponse<TheaterPageDto> basePageResponse = new BasePageResponse<>();
         basePageResponse.setResult(true);

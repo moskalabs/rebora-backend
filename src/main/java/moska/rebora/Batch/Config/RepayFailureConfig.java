@@ -55,16 +55,16 @@ public class RepayFailureConfig {
 
     @Bean
     public Job repayFailureJob(
-            Step cancelRecruitmentJobStep
+            Step repayFailureJobStep
     ) {
         log.info("********** 결제 실패 재결제 배치 RepayFailureConfig **********");
         return jobBuilderFactory.get("repayFailureJob")  // 1_1
-                .start(cancelRecruitmentJobStep)  // 1_3
+                .start(repayFailureJobStep)  // 1_3
                 .build();  // 1_4
     }
 
     @Bean
-    public Step repayFailureJobStop(
+    public Step repayFailureJobStep(
     ) {
         log.info("********** 결제 실패 재결제 배치 repayFailureJobStop **********");
         return stepBuilderFactory.get("repayFailureJobStop")  // 2_1
@@ -80,7 +80,6 @@ public class RepayFailureConfig {
     @Transactional
     public ListItemReader<Payment> repayFailureReader() {
         log.info("********** 결제 실패 재결제 배치 repayFailureReader **********");
-        UserSearchCondition condition = new UserSearchCondition();
         List<Payment> paymentList = paymentRepository.getBatchPaymentList(PaymentStatus.FAILURE);
 
         return new ListItemReader<>(paymentList);

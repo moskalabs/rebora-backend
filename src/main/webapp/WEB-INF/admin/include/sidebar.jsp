@@ -22,6 +22,9 @@
             <a href="<%=CURRENT_SERVER%>/admin/recruitment/list" class="nav-link">모집 관리</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
+            <a href="<%=CURRENT_SERVER%>/admin/cinema/list" class="nav-link">극장 관리</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
             <a href="<%=CURRENT_SERVER%>/admin/theater/list" class="nav-link">상영관 관리</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
@@ -46,8 +49,9 @@
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                 data-accordion="false">
                 <li class="nav-item">
-                    <a href="../../index3.html" class="brand-link">
-                        <img src="/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+                    <a href="<%=CURRENT_SERVER%>/admin/movie/list" class="brand-link">
+                        <img src="https://rebora.s3.ap-northeast-2.amazonaws.com/default/logo.png" alt="AdminLTE Logo"
+                             class="brand-image img-circle elevation-3"
                              style="opacity: .8">
                         <span class="brand-text font-weight-light">리보라 관리자</span>
                     </a>
@@ -67,6 +71,14 @@
                         <i class="nav-icon fas fa-users"></i>
                         <p>
                             모집 관리
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<%=CURRENT_SERVER%>/admin/cinema/list" class="nav-link">
+                        <i class="nav-icon fas fa-building"></i>
+                        <p>
+                            극장 관리
                         </p>
                     </a>
                 </li>

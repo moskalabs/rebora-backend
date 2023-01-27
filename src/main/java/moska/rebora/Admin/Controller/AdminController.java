@@ -7,9 +7,13 @@ import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Admin.Dto.AdminPaymentDto;
 import moska.rebora.Admin.Dto.AdminUserDto;
 import moska.rebora.Admin.Dto.FileReadCsvDto;
+import moska.rebora.Admin.Service.AdminCinemaService;
 import moska.rebora.Admin.Service.AdminService;
+import moska.rebora.Cinema.Dto.CinemaPageDto;
+import moska.rebora.Cinema.Dto.MovieCinemaDto;
 import moska.rebora.Cinema.Entity.Brand;
 import moska.rebora.Cinema.Repository.BrandRepository;
+import moska.rebora.Cinema.Repository.MovieCinemaRepository;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
@@ -21,6 +25,7 @@ import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.User;
+import moska.rebora.User.Entity.UserRecruitment;
 import moska.rebora.User.Repository.UserRepository;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
@@ -48,6 +53,7 @@ import java.util.List;
 @AllArgsConstructor
 @Slf4j
 public class AdminController {
+    private final MovieCinemaRepository movieCinemaRepository;
 
     AdminService adminService;
 
@@ -56,6 +62,8 @@ public class AdminController {
     S3Service s3Service;
 
     BrandRepository brandRepository;
+
+    AdminCinemaService adminCinemaService;
 
     @GetMapping("/login")
     public ModelAndView login(
@@ -270,6 +278,7 @@ public class AdminController {
             @RequestParam(required = false) String movieDirector,
             @RequestParam(required = false) String movieStarRating,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) String cinema,
             @RequestParam(required = false) String movieDetailLink,
             @RequestParam(required = false) Integer movieRunningTime,
             @RequestParam(required = false) Integer moviePopularCount,
@@ -285,6 +294,7 @@ public class AdminController {
                 movieDirector,
                 movieStarRating,
                 category,
+                cinema,
                 movieDetailLink,
                 movieRunningTime,
                 moviePopularCount,
@@ -366,9 +376,11 @@ public class AdminController {
             @RequestParam Boolean userPushYn,
             @RequestParam Boolean userPushNightYn,
             @RequestParam Boolean userUseYn,
-            @RequestParam String userGrade
+            @RequestParam String userGrade,
+            @RequestParam(required = false, defaultValue = "") String userPassword,
+            @RequestParam String userNickname
     ) {
-        adminService.saveUser(userId, userEmail, userName, userImage, userPushYn, userPushNightYn, userUseYn, userGrade);
+        adminService.saveUser(userId, userEmail, userName, userImage, userPushYn, userPushNightYn, userUseYn, userGrade, userPassword, userNickname);
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
@@ -451,6 +463,11 @@ public class AdminController {
         return baseResponse;
     }
 
+    @GetMapping("/movie/downloadCsvFile")
+    public ResponseEntity<byte[]> movieDownload() throws IOException {
+        return s3Service.getObject("default/movieCsv.csv");
+    }
+
     @PostMapping("/movie/uploadImageFolder")
     public BaseResponse uploadImageFolder(
             List<MultipartFile> files
@@ -458,6 +475,97 @@ public class AdminController {
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
         adminService.uploadMovieImageFile(files);
+        return baseResponse;
+    }
+
+    @PostMapping("/payment/updatePaymentInfo/{paymentId}")
+    public BaseResponse updatePaymentInfo(
+            @PathVariable String paymentId,
+            @RequestParam String paymentMemo
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+
+        adminService.updatePaymentInfo(paymentId, paymentMemo);
+
+        return baseResponse;
+    }
+
+    @GetMapping("/cinema/list")
+    public ModelAndView getCinemaList(
+            ModelAndView mav,
+            @PageableDefault Pageable pageable,
+            @RequestParam(defaultValue = "", required = false) String searchWord,
+            @RequestParam(defaultValue = "", required = false) String searchCondition,
+            @RequestParam(defaultValue = "", required = false) String cinemaBrand
+    ) {
+        log.info("cinemaBrand={}", cinemaBrand);
+        log.info("searchWord={}", searchWord);
+        log.info("searchCondition={}", searchCondition);
+
+        BasePageResponse<CinemaPageDto> basePageResponse = new BasePageResponse<>();
+        UserSearchCondition userSearchCondition = new UserSearchCondition();
+        userSearchCondition.setSearchWord(searchWord);
+        userSearchCondition.setSearchCondition(searchCondition);
+        userSearchCondition.setCinemaBrand(cinemaBrand);
+
+        basePageResponse.setPage(adminCinemaService.getCinemaPage(pageable, userSearchCondition));
+        basePageResponse.setResult(true);
+
+        mav.addObject("cinemaList", basePageResponse);
+        mav.setViewName("/admin/cinema/list");
+
+        return mav;
+    }
+
+    @GetMapping("/cinema/info")
+    public ModelAndView getCinemaInfo(
+            ModelAndView mav,
+            @RequestParam(required = false) Long cinemaId
+    ) {
+        BaseInfoResponse<CinemaPageDto> baseInfoResponse = new BaseInfoResponse<>();
+        baseInfoResponse.setResult(true);
+        baseInfoResponse.setContent(adminCinemaService.getCinemaInfo(cinemaId));
+
+        mav.setViewName("/admin/cinema/info");
+        mav.addObject("cinema", baseInfoResponse);
+        return mav;
+    }
+
+    @PostMapping("/cinema/saveInfo")
+    public BaseResponse saveInfo(
+            Long cinemaId,
+            String brandName,
+            String regionName,
+            String cinemaName,
+            @RequestParam(value = "movieList") String[] movieList
+    ) {
+
+        BaseResponse baseResponse = new BaseResponse();
+        log.info("cinemaId={}", cinemaId);
+        log.info("brandName={}", brandName);
+        log.info("regionName={}", regionName);
+        log.info("cinemaName={}", cinemaName);
+
+        String finalString = "";
+        List<Long> movieIdList = new ArrayList<>();
+        log.info("movieList Length={}", movieList.length);
+        for (String s : movieList) {
+            if (s.equals("[]")) {
+                log.info("movieId={}", s);
+                continue;
+            }
+            finalString = s.replace("[", "");
+            finalString = finalString.replace("\"", "");
+            finalString = finalString.replace("]", "");
+            log.info("movieName={}", Long.valueOf(finalString));
+            movieIdList.add(Long.valueOf(finalString));
+        }
+
+        adminCinemaService.saveInfo(cinemaId, brandName, regionName, cinemaName, movieIdList);
+
+        baseResponse.setResult(true);
+
         return baseResponse;
     }
 }

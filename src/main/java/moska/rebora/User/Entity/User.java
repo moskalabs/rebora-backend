@@ -42,15 +42,15 @@ public class User extends BaseTimeEntity {
     @Comment("유저 닉네임")
     private String userNickname;
 
-    @Column(length = 100)
+    @Column(columnDefinition = "LONGTEXT")
     @Comment("유저 푸쉬 키")
     private String userPushKey;
 
-    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Column(nullable = true, columnDefinition = "boolean default false")
     @Comment("유저 푸쉬 여부")
     private Boolean userPushYn;
 
-    @Column(nullable = false, columnDefinition = "boolean default false")
+    @Column(nullable = true, columnDefinition = "boolean default false")
     @Comment("유저 푸쉬 야간")
     private Boolean userPushNightYn;
 
@@ -95,17 +95,25 @@ public class User extends BaseTimeEntity {
         this.userUseYn = userUseYn;
     }
 
-    public void changePushYn(Boolean userPushYn) {
+    public void changePushYn(Boolean userPushYn, String userPushKey) {
         if (userPushYn) {
             this.userPushYn = true;
         } else {
             this.userPushYn = false;
             this.userPushNightYn = false;
         }
+
+        if (!userPushKey.equals("")) {
+            this.userPushKey = userPushKey;
+        }
     }
 
-    public void changePushNightYn(Boolean userPushNightYn) {
+    public void changePushNightYn(Boolean userPushNightYn, String userPushKey) {
         this.userPushNightYn = userPushNightYn;
+
+        if (!userPushKey.equals("")) {
+            this.userPushKey = userPushKey;
+        }
     }
 
     public void changeUserInfo(String userImage, String password, String userNickname) {
@@ -153,6 +161,16 @@ public class User extends BaseTimeEntity {
 
     public void withdrawalUser() {
         this.userUseYn = false;
+    }
+
+    public void updateUserImage(String userImage) {
+        this.userImage = userImage;
+    }
+
+    public void changePushKey(String userPushKey){
+        if (!userPushKey.equals("")){
+            this.userPushKey = userPushKey;
+        }
     }
 
     @Builder

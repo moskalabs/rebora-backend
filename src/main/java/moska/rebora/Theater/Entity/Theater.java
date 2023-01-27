@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import moska.rebora.Cinema.Entity.Brand;
+import moska.rebora.Cinema.Entity.Cinema;
 import moska.rebora.Common.BaseEntity;
 import moska.rebora.Recruitment.Entity.Recruitment;
 
@@ -62,8 +63,24 @@ public class Theater extends BaseEntity {
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
-    public void addRecruitment(Recruitment recruitment){
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cinema_id")
+    private Cinema cinema;
+
+    public void addRecruitment(Recruitment recruitment) {
         this.recruitment = recruitment;
+    }
+
+    public void updateBrandName(String brandName) {
+        this.theaterCinemaBrandName = brandName;
+    }
+
+    public void updateRegionName(String regionName) {
+        this.theaterRegion = regionName;
+    }
+
+    public void updateCinemaName(String cinemaName) {
+        this.theaterCinemaName = cinemaName;
     }
 
     public void updateTheater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Brand brand) {
@@ -82,7 +99,7 @@ public class Theater extends BaseEntity {
     }
 
     @Builder
-    public Theater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Recruitment recruitment, Brand brand) {
+    public Theater(String theaterName, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Recruitment recruitment, Brand brand, Cinema cinema) {
         this.theaterName = theaterName;
         this.theaterStartDatetime = theaterStartDatetime;
         this.theaterEndDatetime = theaterEndDatetime;
@@ -96,5 +113,6 @@ public class Theater extends BaseEntity {
         this.theaterTime = theaterTime;
         this.recruitment = recruitment;
         this.brand = brand;
+        this.cinema = cinema;
     }
 }

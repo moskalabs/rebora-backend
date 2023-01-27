@@ -199,7 +199,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         recruitment.updateRecruitmentStatus(RecruitmentStatus.RECRUITING);
         recruitment.changeExpose(true);
-        recruitment.plusRecruitmentPeople(20);
+        recruitment.plusRecruitmentPeople(userRecruitmentPeople);
         recruitmentRepository.save(recruitment);
 
         if (banner != null) {
@@ -303,6 +303,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         reserveRecruitmentDto.setRecruitmentId(recruitment.getId());
         reserveRecruitmentDto.setMerchantUid(paymentService.createPaymentId(user.getId(), recruitment.getId()));
+        reserveRecruitmentDto.setTheaterPrice(movie.getMoviePrice() + theater.getTheaterPrice());
 
         return reserveRecruitmentDto;
     }

@@ -72,6 +72,10 @@ public class Payment extends BaseEntity {
     @OneToMany(mappedBy = "payment")
     List<PaymentLog> paymentLogList = new ArrayList<>();
 
+    public void updateMemo(String paymentMemo){
+        this.paymentMemo = paymentMemo;
+    }
+
     public void updatePayment(String paymentContent, Integer paymentAmount, String paymentMethod, PaymentStatus paymentStatus, String paymentCardCode, String pgProvider, String paymentCardName, LocalDateTime paidAt, String receiptUrl, String paymentCardNumber, UserRecruitment userRecruitment, String impUid, Boolean paymentReserve) {
         this.paymentContent = paymentContent;
         this.paymentAmount = paymentAmount;

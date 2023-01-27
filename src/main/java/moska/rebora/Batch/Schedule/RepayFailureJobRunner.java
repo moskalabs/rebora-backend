@@ -13,19 +13,17 @@ import java.util.HashMap;
 @Component
 @AllArgsConstructor
 public class RepayFailureJobRunner extends JobRunner {
-
+    private Scheduler scheduler;
     @Override
     protected void doRun(ApplicationArguments args) {
 
         JobDetail jobDetail = buildJobDetail(RepayFailureSchJob.class, "repayFailureJob", "batch", new HashMap());
         Trigger trigger = buildJobTrigger("0 0 9,15 * * ?"); // 30초마다 실행
-
+//        Trigger trigger = buildJobTrigger("0 0/1 * * * ?"); // 5분마다 실행
         try {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             e.printStackTrace();
         }
     }
-
-    private Scheduler scheduler;
 }

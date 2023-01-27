@@ -32,7 +32,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RestController
 @RequestMapping("/api/user")
 @Slf4j
-@Tag(name = "유저" , description = "유저 정보")
+@Tag(name = "유저", description = "유저 정보")
 public class UserController {
 
 
@@ -64,10 +64,12 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     })
     UserLoginDto login(@RequestParam("userEmail") String userEmail,
-                       @RequestParam("password") String password) {
+                       @RequestParam("password") String password,
+                       @RequestParam(value = "userPushKey", required = false, defaultValue = "") String userPushKey
+    ) {
         log.info("user login userEmail={}, password={}", userEmail, password);
 
-        return userService.login(userEmail, password);
+        return userService.login(userEmail, password, userPushKey);
     }
 
     /**
@@ -95,7 +97,8 @@ public class UserController {
             @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
             @ApiImplicitParam(name = "authKey", value = "이메일 인증 키", required = true),
     })
-    UserLoginDto signUp(@RequestParam("userEmail") String userEmail,
+    UserLoginDto signUp(
+            @RequestParam("userEmail") String userEmail,
                         @RequestParam("password") String password,
                         @RequestParam("userName") String userName,
                         @RequestParam("userNickname") String userNickname,
@@ -103,10 +106,21 @@ public class UserController {
                         @RequestParam(value = "userPushNightYn", required = false) Boolean userPushNightYn,
                         @RequestParam(value = "userPushKey", required = false) String userPushKey,
                         @RequestParam(value = "authKey") String authKey,
-                        @RequestParam(value = "userSnsKind") String userSnsKind,
-                        @RequestParam(value = "userSnsId") String userSnsId
+                        @RequestParam(value = "userSnsKind", required = false) String userSnsKind,
+                        @RequestParam(value = "userSnsId", required = false) String userSnsId
     ) throws SQLIntegrityConstraintViolationException {
-        return userService.signUp(userEmail, password, userName, userNickname, userPushYn, userPushNightYn, userPushKey, authKey, userSnsKind, userSnsId);
+        return userService.signUp(
+                userEmail,
+                password,
+                userName,
+                userNickname,
+                userPushYn,
+                userPushNightYn,
+                userPushKey,
+                authKey,
+                userSnsKind,
+                userSnsId
+        );
     }
 
     /**
@@ -117,7 +131,7 @@ public class UserController {
      * @return BaseResponse
      */
     @Tag(name = "유저")
-    @Operation(summary = "인증이메일 전송", description = "해당 이메일론 6자리 랜덤 문자를 보냅니다.")
+    @Operation(summary = "인증이메일 전송", description = "해당 이메일에 6자리 랜덤 문자를 보냅니다.")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userEmail", value = "유저 이메일", required = true),
             @ApiImplicitParam(name = "emailAuthKind", value = "이메일 권한 종류", required = true),
@@ -205,7 +219,7 @@ public class UserController {
     @Operation(summary = "회원 탈퇴")
     @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true)
     @PutMapping("/withdrawal/{userId}")
-    BaseResponse withdrawal(@PathVariable Long userId){
+    BaseResponse withdrawal(@PathVariable Long userId) {
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
@@ -213,8 +227,7 @@ public class UserController {
         User user = userRepository.getUserById(userId);
 
 
-
-        if(!user.getUserEmail().equals(SecurityContextHolder.getContext().getAuthentication().getName())){
+        if (!user.getUserEmail().equals(SecurityContextHolder.getContext().getAuthentication().getName())) {
             throw new JwtException("옳바르지 않은 인증입니다.");
         }
 

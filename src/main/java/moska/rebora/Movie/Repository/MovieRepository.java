@@ -24,4 +24,6 @@ public interface MovieRepository extends JpaRepository<Movie, Long>, MovieReposi
     Integer countMovieByMovieNameIn(List<String> movieName);
 
     List<Movie> getMoviesByMovieNameIn(List<String> movieName);
+
+    List<Movie> getMoviesByIdIn(List<Long> movieIdList);
 }

@@ -95,6 +95,7 @@ public class AdminRecruitmentImpl implements AdminRecruitment {
                 .from(recruitment)
                 .leftJoin(recruitment.movie, movie)
                 .leftJoin(recruitment.theater, theater)
+                .where(recruitment.id.eq(recruitmentId))
                 .fetchFirst();
     }
 

@@ -19,6 +19,8 @@ public interface UserRepository extends JpaRepository<User, Long>, UserCustom, U
 
     User getUserByUserEmail(String userEmail);
 
+    Optional<User> getUserByUserEmailAndUserSnsId(String userEmail, String userSnsId);
+
     Optional<User> getUserByUserSnsKindAndUserSnsId(UserSnsKind userSnsKind, String userSnsId);
 
     int countUSerByUserEmail(@Param("userEmail") String userEmail);

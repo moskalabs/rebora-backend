@@ -10,9 +10,15 @@ import java.util.List;
 
 public interface TheaterService {
 
-    List<String> getAvailableDate(@Param("theaterRegion") String theaterRegion,
-                                  @Param("selectMonth") String selectMonth,
-                                  @Param("movieId") Long movieId);
+    List<String> getAvailableDateRegion(
+            @Param("movieId") Long movieId
+    );
+
+    List<String> getAvailableDate(
+            @Param("theaterRegion") String theaterRegion,
+            @Param("selectMonth") String selectMonth,
+            @Param("movieId") Long movieId
+    );
 
     Page<TheaterPageDto> getPageTheater(@Param("theaterRegion") String theaterRegion,
                                         @Param("selectDate") String selectDate,

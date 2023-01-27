@@ -13,7 +13,9 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public interface UserService {
 
     UserLoginDto login(@Param("userEmail") String userEmail,
-                       @Param("password") String password);
+                       @Param("password") String password,
+                       @Param("userPushKey") String userPushKey
+    );
 
     UserLoginDto signUp(
             @Param("userEmail") String userEmail,

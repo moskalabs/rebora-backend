@@ -2,7 +2,10 @@ package moska.rebora;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.opencsv.CSVReader;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Admin.Dto.AdminRegionDto;
@@ -12,8 +15,13 @@ import moska.rebora.Banner.Repository.BannerRepository;
 import moska.rebora.Banner.Repository.MainBannerRepository;
 import moska.rebora.Cinema.Entity.Brand;
 import moska.rebora.Cinema.Entity.BrandMovie;
+import moska.rebora.Cinema.Entity.Cinema;
+import moska.rebora.Cinema.Entity.MovieCinema;
 import moska.rebora.Cinema.Repository.BrandMovieRepository;
 import moska.rebora.Cinema.Repository.BrandRepository;
+import moska.rebora.Cinema.Repository.CinemaRepository;
+import moska.rebora.Cinema.Repository.MovieCinemaRepository;
+import moska.rebora.Common.Dto.FCMMessage;
 import moska.rebora.Common.Entity.Category;
 import moska.rebora.Common.Repository.CategoryRepository;
 import moska.rebora.Enum.*;
@@ -29,6 +37,7 @@ import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.Theater.Entity.Theater;
 import moska.rebora.Theater.Repository.TheaterRepository;
+import moska.rebora.User.DTO.ApplePublicKeyDto;
 import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.Policy;
 import moska.rebora.User.Entity.User;
@@ -38,6 +47,8 @@ import moska.rebora.User.Repository.PolicyRepository;
 import moska.rebora.User.Repository.UserMovieRepository;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
 import moska.rebora.User.Repository.UserRepository;
+import moska.rebora.User.Service.OathService;
+import org.apiguardian.api.API;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -47,11 +58,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
 import java.net.URI;
@@ -62,20 +78,20 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static moska.rebora.Common.CommonConst.NAVER_TOKEN_ME_URL;
+
 
 @Slf4j
 @SpringBootTest
 class ReboraApplicationTests {
+    @Autowired
+    private MovieCinemaRepository movieCinemaRepository;
 
     @Autowired
     UserRepository userTestRepository;
@@ -124,6 +140,14 @@ class ReboraApplicationTests {
 
     @Autowired
     PaymentService paymentService;
+    @Autowired
+    CinemaRepository cinemaRepository;
+
+    @Autowired
+    OathService oathService;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Test
     @Transactional
@@ -713,23 +737,25 @@ class ReboraApplicationTests {
     @Test
     @Transactional
     void testFileUpload() {
+
         Path dirPath = Paths.get("/Users/kibong/Downloads/movie");
 
         System.out.println(dirPath);
         List<Path> result;
         Stream<Path> walk = null;
+
         try {
             walk = Files.walk(dirPath).filter(Files::isDirectory);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
         result = walk.collect(Collectors.toList());
         for (int i = 1; i < result.size(); i++) {
             log.info("file={}", result.get(i));
             Path path = result.get(i);
             String pathString = path.toString();
             String dir = pathString.split("/")[5];
-            //String reNamepath = "/Users/kibong/Downloads/movie/"+dir+"/";
             File file = new File(pathString);
             Movie movie = movieRepository.getMovieByMovieName(dir);
             log.info("movieId={}", movie.getId());
@@ -789,5 +815,167 @@ class ReboraApplicationTests {
     @Test
     void dateTest() {
         log.info("int test={}", Integer.parseInt("01"));
+    }
+
+    @Test
+    void createCinema() {
+        List<Movie> movieList = movieRepository.findAll();
+        Cinema cinema = cinemaRepository.findById(1L).get();
+        List<MovieCinema> movieCinemaList = new ArrayList<>();
+        movieList.forEach(movie -> {
+            MovieCinema movieCinema = MovieCinema.builder()
+                    .movie(movie)
+                    .cinema(cinema)
+                    .build();
+
+            movieCinemaList.add(movieCinema);
+        });
+
+        movieCinemaRepository.saveAll(movieCinemaList);
+    }
+
+    @Test
+    @Transactional
+    void cinemaTheaterTest() {
+        List<Payment> paymentList = paymentRepository.getBatchPaymentList(PaymentStatus.FAILURE);
+        log.info("payment Size={}", paymentList.size());
+    }
+
+    @Test
+    void appleLoginTest() {
+        List<ApplePublicKeyDto> applePublicKeyDtoList = new ArrayList<>();
+        applePublicKeyDtoList = oathService.getPublicAppleKeys();
+
+        for (ApplePublicKeyDto applePublicKeyDto : applePublicKeyDtoList) {
+            log.info("applePublicKeyDto kid={}", applePublicKeyDto.getKid());
+        }
+    }
+
+    @Test
+    void naverLoginChange() {
+
+    }
+
+    @Test
+    void createJwt() throws IOException {
+        Date expirationDate = Date.from(LocalDateTime.now().plusDays(30).atZone(ZoneId.systemDefault()).toInstant());
+        String compact = Jwts.builder()
+                .setHeaderParam("alg", "RS256")
+                .setHeaderParam("kid", "W6WcOKB")
+                .setIssuer("G87RV7262L")
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(expirationDate)
+                .setAudience("https://appleid.apple.com")
+                .compact();
+
+        log.info("jwt={}", compact);
+    }
+
+//    @Test
+//    void testJwts() throws IOException {
+//        log.info("jwt={}", createJwt());
+//    }
+
+//    private Key getPrivateKey() throws IOException {
+//        ClassPathResource resource = new ClassPathResource("static/AuthKey_8N747Q9974.p8");
+//        String privateKey = new String(Files.readAllBytes(Paths.get(resource.getURI())));
+//        log.info("key={}", privateKey);
+//        Reader pemReader = new StringReader(privateKey);
+//        PEMParser pemParser = new PEMParser(pemReader);
+//        JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+//        PrivateKeyInfo object = (PrivateKeyInfo) pemParser.readObject();
+//        return converter.getPrivateKey(object);
+//    }
+
+//    @Test
+//    void privateKeyApple() throws IOException, ParseException, InterruptedException {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        Map<String, Object> params = new HashMap<>();
+//        params.put("client_id", "com.moca.rebora");
+//        params.put("client_secret", createJwt());
+//        params.put("code", "ced9ca8413f6e424ab4f5c2776528704b.0.srutz.Itg3IE1pNhNMcXizcwhltA");
+//        params.put("grant_type", "authorization_code");
+//        String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
+//        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+//
+//        HttpRequest request = HttpRequest.newBuilder()
+//                .uri(URI.create("https://appleid.apple.com/auth/token"))
+//                .header("Content-Type", "application/x-www-form-urlencoded")
+//                .method("POST", body)
+//                .build();
+//
+//        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+//        JSONParser jsonParser = new JSONParser();
+//        JSONObject jsonObj = (JSONObject) jsonParser.parse(response.body());
+//
+//        log.info("response={}", jsonObj);
+//    }
+
+    String firebase() throws IOException {
+        String firebaseConfigPath = "static/rebora-98afa-firebase-adminsdk-4dgzs-196b51a679.json";
+        GoogleCredentials googleCredentials = GoogleCredentials
+                .fromStream(new ClassPathResource(firebaseConfigPath).getInputStream())
+                .createScoped(List.of("https://www.googleapis.com/auth/cloud-platform"));
+        googleCredentials.refreshIfExpired();
+        String tokenValue = googleCredentials.getAccessToken().getTokenValue();
+        log.info("token={}", tokenValue);
+
+        return tokenValue;
+    }
+
+    @Test
+    void messageFireBase() throws IOException, InterruptedException, ParseException {
+        String API_URL = "https://fcm.googleapis.com/v1/projects/rebora-98afa/messages:send";
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        FCMMessage fcmMessage = FCMMessage.builder()
+                .message(
+                        FCMMessage.Message
+                                .builder()
+                                .notification(FCMMessage.Notification.builder()
+                                        .title("참여한 모집의 결제가 실패하였습니다.")
+                                        .body("이미 주문이 이루어진 건입니다. (동일한 merchant_uid로 결제 또는 취소된 기록이 있습니다)")
+                                        .image(null)
+                                        .build())
+                                .token("eu3IsGgqT_KeqobTg0lirc:APA91bGYOyjsUq0xXxhogos3Z-BXu7Q8pGzxW9zM34DZVjabyXJORekoFJBL96NRtGkHwqtWlsOKnkBkZsIicd2EQRlbE1GFtahlgQ0oMU9pf3n62ad9AOykoebITB2_T3veBKSrGkG3")
+                                .build()
+                )
+                .validate_only(false)
+                .build();
+
+        String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(fcmMessage);
+        log.info("requestBody={}", requestBody);
+        HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(API_URL))
+                .header("Authorization", "Bearer " + firebase())
+                .header("Content-Type", "application/json; UTF-8")
+                .method("POST", body)
+                .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        JSONParser jsonParser = new JSONParser();
+        JSONObject result = (JSONObject) jsonParser.parse(response.body());
+        log.info("result={}", result);
+    }
+
+    @Test
+    @Transactional
+    void getHour() throws IOException, ParseException, InterruptedException {
+        User user = userTestRepository.getUserById(1L);
+        LocalDateTime now = LocalDateTime.now();
+        log.info("message start");
+        if (now.getHour() > 22 || now.getHour() < 7) {
+            if (user.getUserUseYn() && user.getUserPushYn() && user.getUserPushNightYn() && user.getUserPushKey() != null && !user.getUserPushKey().equals("")) {
+                log.info("message afternoon start");
+                messageFireBase();
+            }
+        } else {
+            if (user.getUserUseYn() && user.getUserPushYn() && user.getUserPushKey() != null && !user.getUserPushKey().equals("")) {
+                log.info("message night start");
+                messageFireBase();
+            }
+        }
     }
 }

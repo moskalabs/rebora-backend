@@ -9,5 +9,5 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TheaterRepository extends JpaRepository<Theater, Long> , TheaterCustom, TheaterAdmin {
-
+    List<Theater> getTheatersByCinemaId(Long cinemaId);
 }

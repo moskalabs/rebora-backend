@@ -57,8 +57,11 @@ public class CancelWaitRecruitmentConfig {
     public Step cancelWaitRecruitmentJobStop() {
         log.info("********** 메인 배너 생성 배치 confirmRecruitmentJobStep **********");
         return stepBuilderFactory.get("cancelWaitRecruitmentJobStep")  // 2_1
-                .<Recruitment, Recruitment>chunk(10).reader(cancelWaitRecruitmentReader())// 2_2
-                .processor(cancelWaitRecruitmentProcessor()).writer(cancelWaitRecruitmentWriter()).build();
+                .<Recruitment, Recruitment>chunk(10)
+                .reader(cancelWaitRecruitmentReader())// 2_2
+                .processor(cancelWaitRecruitmentProcessor())
+                .writer(cancelWaitRecruitmentWriter())
+                .build();
     }
 
     @Bean
@@ -78,11 +81,12 @@ public class CancelWaitRecruitmentConfig {
                 Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
 
                 Theater theater = recruitment.getTheater();
-                theater.addRecruitment(null);
+                if (theater != null) {
+                    theater.addRecruitment(null);
+                    theaterRepository.save(theater);
+                }
 
                 bannerService.bannerDelete(banner);
-
-                theaterRepository.save(theater);
 
                 return recruitment;
             }

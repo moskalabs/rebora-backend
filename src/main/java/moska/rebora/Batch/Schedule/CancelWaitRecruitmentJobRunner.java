@@ -21,7 +21,7 @@ public class CancelWaitRecruitmentJobRunner extends JobRunner{
 
         JobDetail jobDetail = buildJobDetail(CancelWaitRecruitmentSchJob.class, "cancelWaitRecruitmentJob", "batch", new HashMap());
         //Trigger trigger = buildJobTrigger("0 0/30 * * * ?"); // 30초마다 실행
-        Trigger trigger = buildJobTrigger("0 0/5 * * * ?"); // 30분마다 실행
+        Trigger trigger = buildJobTrigger("0 0/5 * * * ?"); // 5분마다 실행
 
         try{
             scheduler.scheduleJob(jobDetail, trigger);

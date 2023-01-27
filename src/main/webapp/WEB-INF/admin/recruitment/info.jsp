@@ -54,7 +54,7 @@
                             <table class="table align-middle text-left">
                                 <tbody>
                                 <tr>
-                                    <th class="border-end태" scope="row" style="width: 25%;">영화 이름</th>
+                                    <th class="border-end" scope="row" style="width: 25%;">영화 이름</th>
                                     <td style="width: 80%;">
                                         <p>${recruitment.content.movieName}</p>
                                     </td>
@@ -116,7 +116,7 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                                 <label for="CANCEL">
-                                                    전체 이용가
+                                                    모집 취소
                                                 </label>
                                             </div>
                                             <div class="icheck-primary d-inline">
@@ -201,7 +201,7 @@
                                                                id="recruitmentExposeYnTrue">
                                                     </c:otherwise>
                                                 </c:choose>
-                                                <label for="COMPLETED">노출</label>
+                                                <label for="recruitmentExposeYnTrue">노출</label>
                                             </div>
                                             <div class="icheck-primary d-inline">
                                                 <c:choose>
@@ -216,7 +216,7 @@
                                                                id="recruitmentExposeYnFalse">
                                                     </c:otherwise>
                                                 </c:choose>
-                                                <label for="COMPLETED">비노출</label>
+                                                <label for="recruitmentExposeYnFalse">비노출</label>
                                             </div>
                                         </div>
                                     </td>
@@ -243,7 +243,7 @@
                         </div>
                         <div style="display:flex; width: 100%; height:40px; justify-content:flex-end">
                             <button type="button" class="btn btn-success mr-3" onclick="saveRecruitment()">
-                                &nbsp;수정&nbsp;
+                                &nbsp;저장&nbsp;
                             </button>
                             <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;
                             </button>
@@ -256,6 +256,7 @@
 </div>
 <%@include file="../include/footer.jsp" %>
 <script>
+
     $(document).ready(function () {
         let token = localStorage.getItem("token");
         if (token == null || token === "") {
@@ -298,7 +299,7 @@
     })
 
     function goToList() {
-        location.href = "<%=CURRENT_SERVER%>/admin/movie/list";
+        location.href = "<%=CURRENT_SERVER%>/admin/recruitment/list";
     }
 
     function cancelSave() {
@@ -310,7 +311,7 @@
             cancelButtonText : '취소',
         }).then((result) => {
             if (result.isConfirmed) {
-                location.reload();
+                goToList();
             } else {
                 return false;
             }

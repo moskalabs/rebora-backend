@@ -108,7 +108,7 @@
                             <div class="btn-group btn-group-toggle">
                                 <c:choose>
                                     <c:when test="${param.theaterCinemaBrandName == 'CGV' || param.theaterCinemaBrandName == '' || param.theaterCinemaBrandName == null}">
-                                        <label class="btn btn-primary active">
+                                        <label class="btn bg-purple focus active">
                                             <input type="radio" class="btn-check" name="theaterCinemaBrandName"
                                                    value="CGV"
                                                    id="CGV"
@@ -117,7 +117,7 @@
                                         </label>
                                     </c:when>
                                     <c:otherwise>
-                                        <label class="btn btn-primary">
+                                        <label class="btn bg-purple">
                                             <input type="radio" class="btn-check" name="theaterCinemaBrandName"
                                                    value="CGV"
                                                    id="CGV"
@@ -129,7 +129,7 @@
                                 </c:choose>
                                 <c:choose>
                                     <c:when test="${param.theaterCinemaBrandName == '롯데시네마'}">
-                                        <label class="btn btn-primary active">
+                                        <label class="btn bg-purple focus active">
                                             <input type="radio" class="btn-check" name="theaterCinemaBrandName"
                                                    value="롯데시네마"
                                                    id="롯데시네마"
@@ -138,7 +138,7 @@
                                         </label>
                                     </c:when>
                                     <c:otherwise>
-                                        <label class="btn btn-primary">
+                                        <label class="btn bg-purple">
                                             <input type="radio" class="btn-check" onclick="onClickBrand(this.value)"
                                                    name="theaterCinemaBrandName" value="롯데시네마" id="롯데시네마"
                                                    autocomplete="off">
@@ -148,7 +148,7 @@
                                 </c:choose>
                                 <c:choose>
                                     <c:when test="${param.theaterCinemaBrandName == '메가박스'}">
-                                        <label class="btn btn-primary">
+                                        <label class="btn bg-purple focus active">
                                             <input type="radio" class="btn-check" name="theaterCinemaBrandName"
                                                    value="메가박스"
                                                    id="메가박스"
@@ -157,7 +157,7 @@
                                         </label>
                                     </c:when>
                                     <c:otherwise>
-                                        <label class="btn btn-primary">
+                                        <label class="btn bg-purple">
                                             <input type="radio" class="btn-check" onclick="onClickBrand(this.value)"
                                                    name="theaterCinemaBrandName" value="메가박스" id="메가박스"
                                                    autocomplete="off">

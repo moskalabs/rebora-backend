@@ -7,6 +7,7 @@ import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Repository.BannerRepository;
 import moska.rebora.Banner.Service.BannerService;
 import moska.rebora.Common.BaseResponse;
+import moska.rebora.Common.Service.PushService;
 import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
@@ -58,6 +59,8 @@ public class CancelRecruitmentConfig {
     JobBuilderFactory jobBuilderFactory;
 
     StepBuilderFactory stepBuilderFactory;
+
+    PushService pushService;
 
     @Bean
     public Job cancelRecruitmentJob(
@@ -136,6 +139,7 @@ public class CancelRecruitmentConfig {
                     User user = userRecruitment.getUser();
                     notificationSubject = "찜한 모집의 모집이 취소되었습니다.";
                     notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, user);
+                    pushService.sendUserPush(user, notificationSubject, notificationContent);
                 }
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CANCEL);
 

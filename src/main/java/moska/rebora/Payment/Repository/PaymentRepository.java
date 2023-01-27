@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Long>, PaymentRepositoryCustom, PaymentAdminRepository {
 
     Optional<Payment> getPaymentByUserRecruitment(UserRecruitment userRecruitment);
+
+    Optional<Payment> getPaymentById(String paymentId);
 }

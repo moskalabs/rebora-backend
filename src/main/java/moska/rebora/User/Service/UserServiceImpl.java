@@ -73,7 +73,9 @@ public class UserServiceImpl implements UserService {
      * @return UserLoginDto
      */
     @Override
-    public UserLoginDto login(@Param("userEmail") String userEmail, @Param("password") String password) {
+    public UserLoginDto login(@Param("userEmail") String userEmail,
+                              @Param("password") String password,
+                              @Param("userPushKey") String userPushKey) {
         User user = userRepository.getUserByUserEmail(userEmail);
 
         if (user == null) {
@@ -83,6 +85,13 @@ public class UserServiceImpl implements UserService {
         if (!user.getUserUseYn()) {
             throw new NullPointerException("탈퇴된 회원입니다.");
         }
+
+        if (user.getUserSnsKind() != null) {
+            throw new DuplicateElementException("SNS으로 회원가입한 회원입니다. 가입한 SNS : " + user.getUserSnsKind());
+        }
+
+        user.changePushKey(userPushKey);
+        userRepository.save(user);
 
         return UserLoginDto.builder()
                 .token(createToken(userEmail, password))
@@ -123,6 +132,10 @@ public class UserServiceImpl implements UserService {
             userEmailAuth = userEmailAuthService.checkUserEmailAuth(userEmail, authKey, EmailAuthKind.SIGNUP);
             //비밀번호 인코딩
             String bcryptPassword = passwordEncoder.encode(password);
+            UserSnsKind snsKind = null;
+            if (userSnsKind != null) {
+                snsKind = UserSnsKind.valueOf(userSnsKind);
+            }
 
             //유저 객체 생성
             User user = User.builder()
@@ -135,14 +148,16 @@ public class UserServiceImpl implements UserService {
                     .userPushNightYn(userPushNightYn)
                     .userName(userName)
                     .userPushKey(userPushKey)
-                    .userSnsKind(UserSnsKind.valueOf(userSnsKind))
+                    .userSnsKind(snsKind)
                     .userSnsId(userSnsId)
                     .build();
 
             userRepository.save(user);
 
             userEmailAuth.expireAuth();
+
             userEmailAuthRepository.save(userEmailAuth);
+
             return UserLoginDto.builder()
                     .token(createToken(userEmail, password))
                     .result(true)
@@ -286,7 +301,7 @@ public class UserServiceImpl implements UserService {
         //유저 사용 여부
         if (!user.getUserUseYn()) {
             return false;
-            
+
             //탈퇴 및 휴면 계정 여부
         } else if (user.getUserGrade().equals(UserGrade.WITHDRAWAL) || user.getUserGrade().equals(UserGrade.DORMANCY)) {
             return false;

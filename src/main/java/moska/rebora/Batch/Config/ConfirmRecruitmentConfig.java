@@ -2,6 +2,7 @@ package moska.rebora.Batch.Config;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Common.Service.PushService;
 import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Enum.PaymentMethod;
 import moska.rebora.Enum.PaymentStatus;
@@ -54,6 +55,8 @@ public class ConfirmRecruitmentConfig {
 
     StepBuilderFactory stepBuilderFactory;
 
+    PushService pushService;
+
     @Bean
     public Job confirmRecruitmentJob(
             Step confirmRecruitmentJobStep
@@ -91,6 +94,7 @@ public class ConfirmRecruitmentConfig {
         return new ItemProcessor<Recruitment, Recruitment>() {
             @Override
             public Recruitment process(Recruitment recruitment) throws Exception {
+                LocalDateTime now = LocalDateTime.now();
                 log.info("********** 상영 확정 배치 confirmRecruitmentProcessor **********");
 
                 Movie movie = recruitment.getMovie();

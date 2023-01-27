@@ -53,8 +53,8 @@ public class RecruitmentBatchImpl implements RecruitmentBatch {
 
         return queryFactory.select(recruitment)
                 .from(recruitment)
-                .join(recruitment.theater, theater).fetchJoin()
-                .join(recruitment.movie, movie).fetchJoin()
+                .leftJoin(recruitment.theater, theater).fetchJoin()
+                .leftJoin(recruitment.movie, movie).fetchJoin()
                 .where(
                         recruitment.recruitmentStatus.eq(RecruitmentStatus.WAIT),
                         recruitment.regDate.lt(baseTime)
@@ -87,11 +87,8 @@ public class RecruitmentBatchImpl implements RecruitmentBatch {
     }
 
     BooleanExpression recruitmentToday() {
-        LocalDateTime startTime = LocalDate.now().atStartOfDay();
-        LocalDateTime endTime = LocalDate.now().atTime(LocalTime.MAX);
-        log.info("startTime={}", startTime);
-        log.info("endTime={}", endTime);
-        return recruitment.recruitmentEndDate.between(startTime, endTime);
+        LocalDateTime now = LocalDate.now().atTime(LocalTime.MAX);
+        return recruitment.recruitmentEndDate.loe(now);
     }
 
     BooleanExpression getFinishMovie(LocalDateTime nowTime) {

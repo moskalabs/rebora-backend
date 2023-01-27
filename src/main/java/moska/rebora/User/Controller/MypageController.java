@@ -105,9 +105,11 @@ public class MypageController {
     })
     public BaseResponse updatePushYn(
             @PathVariable Long userId,
-            @RequestParam("userPushYn") Boolean userPushYn) {
+            @RequestParam("userPushYn") Boolean userPushYn,
+            @RequestParam(required = false, defaultValue = "") String userPushKey
+    ) {
         BaseResponse baseResponse = new BaseResponse();
-        mypageService.updatePushYn(userId, userPushYn, SecurityContextHolder.getContext().getAuthentication().getName());
+        mypageService.updatePushYn(userId, userPushYn, SecurityContextHolder.getContext().getAuthentication().getName(), userPushKey);
         baseResponse.setResult(true);
         return baseResponse;
     }
@@ -121,9 +123,11 @@ public class MypageController {
     })
     public BaseResponse updatePushNightYn(
             @PathVariable Long userId,
-            @RequestParam("userPushYn") Boolean userPushNightYn) {
+            @RequestParam("userPushYn") Boolean userPushNightYn,
+            @RequestParam(required = false, defaultValue = "") String userPushKey
+    ) {
         BaseResponse baseResponse = new BaseResponse();
-        mypageService.updatePushNightYn(userId, userPushNightYn, SecurityContextHolder.getContext().getAuthentication().getName());
+        mypageService.updatePushNightYn(userId, userPushNightYn, SecurityContextHolder.getContext().getAuthentication().getName(), userPushKey);
         baseResponse.setResult(true);
         return baseResponse;
     }

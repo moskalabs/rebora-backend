@@ -191,6 +191,36 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th class="border-end" scope="row">장르</th>
+                                    <td>
+                                        <div class="form-group clearfix"
+                                             style="width: 100%; display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr; grid-auto-rows:40px; font-size:15px; gap: 5px">
+                                            <c:forEach var="cinema" items="${response.content.cinemaMovieDtoList}"
+                                                       varStatus="status">
+                                                <div class="icheck-primary d-inline">
+                                                    <c:choose>
+                                                        <c:when test="${cinema.cinemaYn}">
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   name="cinema"
+                                                                   value="${cinema.cinemaId}"
+                                                                   id="${cinema.cinemaId}" checked>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <input class="custom-control-input" type="checkbox"
+                                                                   name="cinema"
+                                                                   value="${cinema.cinemaId}"
+                                                                   id="${cinema.cinemaId}">
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                    <label style="font-size: 12px;" for="${cinema.cinemaId}">
+                                                            ${cinema.brandName} ${cinema.regionName} ${cinema.cinemaName}
+                                                    </label>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th class="border-end" scope="row" style="width: 20%;">영화 상세 링크</th>
                                     <td style="width: 80%;">
                                         <input type="text" value="${response.content.movieDetailLink}" style="width:80%"
@@ -267,7 +297,7 @@
                             </button>
                         </div>
                         <div style="display:flex; width: 100%; height:40px; justify-content:flex-end">
-                            <button type="button" class="btn btn-success mr-3" onclick="saveMovie()">&nbsp;수정&nbsp;
+                            <button type="button" class="btn btn-success mr-3" onclick="saveMovie()">&nbsp;저장&nbsp;
                             </button>
                             <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;
                             </button>
@@ -336,7 +366,7 @@
             cancelButtonText : '취소',
         }).then((result) => {
             if (result.isConfirmed) {
-                location.reload();
+                goToList();
             } else {
                 return false;
             }
@@ -349,6 +379,7 @@
         let movieRating = $('input:radio[name=movieRating]:checked').val();
         let movieDirector = $("#movieDirector").val();
         let movieStarRating = $("#movieStarRating").val();
+
         let category = [];
         $("input:checkbox[name='category']").each(function (index, value) {
             if (value.checked) {
@@ -356,6 +387,15 @@
                 category.push(value.value)
             }
         })
+
+        let cinema = [];
+        $("input:checkbox[name='cinema']").each(function (index, value) {
+            if (value.checked) {
+                console.log(value.value)
+                cinema.push(value.value)
+            }
+        })
+
         let movieRunningTime = $("#movieRunningTime").val();
         let movieDetailLink = $("#movieDetailLink").val();
         let moviePopularCount = $("#moviePopularCount").val();
@@ -386,6 +426,10 @@
 
         if (category != "") {
             formData.append("category", category);
+        }
+
+        if (cinema != "") {
+            formData.append("cinema", cinema);
         }
 
         if (movieDetailLink != "") {
@@ -425,7 +469,7 @@
                     title: "완료",
                     text : "저장이 완료되었습니다."
                 }).then(() => {
-                    location.reload();
+                    goToList();
                 })
             } else {
                 Swal.fire({

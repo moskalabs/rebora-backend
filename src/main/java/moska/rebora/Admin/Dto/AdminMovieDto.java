@@ -2,6 +2,7 @@ package moska.rebora.Admin.Dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import moska.rebora.Cinema.Dto.CinemaMovieDto;
 import moska.rebora.Common.Entity.Category;
 import moska.rebora.Enum.MovieRating;
 import moska.rebora.Movie.Dto.MoviePageDto;
@@ -36,6 +37,8 @@ public class AdminMovieDto {
 
     @Schema(description = "영화 카테고리 리스트")
     private List<AdminMovieCategoryDto> categoryList;
+    @Schema(description = "극장 영화 리스트")
+    private List<CinemaMovieDto> cinemaMovieDtoList;
 
     public AdminMovieDto(MoviePageDto moviePageDto) {
         this.id = moviePageDto.getId();
@@ -51,7 +54,6 @@ public class AdminMovieDto {
         this.convertStartRation = moviePageDto.getConvertStartRation();
     }
 
-    public AdminMovieDto(){
-
+    public AdminMovieDto() {
     }
 }

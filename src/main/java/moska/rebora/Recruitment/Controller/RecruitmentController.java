@@ -145,7 +145,6 @@ public class RecruitmentController {
         recruitmentService.createRecruitment(recruitmentId, userRecruitmentPeople, userEmail, merchantUid, impUid);
         baseResponse.setResult(true);
 
-
         return baseResponse;
     }
 
@@ -170,9 +169,9 @@ public class RecruitmentController {
             @RequestParam(value = "bannerMainText", required = false) String bannerMainText
     ) {
         BaseInfoResponse<ReserveRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
-        JSONObject jsonObject = new JSONObject();
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        baseInfoResponse.setResult(true);
         baseInfoResponse.setContent(recruitmentService.reserveRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText));
 
         return baseInfoResponse;

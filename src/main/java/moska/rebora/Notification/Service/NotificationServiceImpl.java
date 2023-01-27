@@ -1,6 +1,7 @@
 package moska.rebora.Notification.Service;
 
 import moska.rebora.Common.Service.AsyncTaskService;
+import moska.rebora.Common.Service.PushService;
 import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Notification.Entity.Notification;
@@ -33,6 +34,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Resource(name = "asyncTaskService")
     AsyncTaskService asyncTaskService;
 
+    @Autowired
+    PushService pushService;
+
     @Override
     public void createNotificationRecruitment(
             @Param("notificationSubject") String notificationSubject,
@@ -55,6 +59,8 @@ public class NotificationServiceImpl implements NotificationService {
                     .build();
 
             notificationList.add(notification);
+
+            pushService.sendUserPush(u, notificationSubject, notificationContent);
         });
 
         notificationRepository.saveAll(notificationList);
@@ -76,6 +82,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .recruitment(recruitment)
                 .user(user)
                 .build();
+
+        pushService.sendUserPush(user, notificationSubject, notificationContent);
 
         notificationRepository.save(notification);
     }
@@ -112,6 +120,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .payment(payment)
                 .build();
 
+        pushService.sendUserPush(user, notificationSubject, notificationContent);
+
         notificationRepository.save(notification);
     }
 
@@ -145,7 +155,7 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie,Payment payment, Boolean paymentEndYn) {
+    public void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie, Payment payment, Boolean paymentEndYn) {
         String content = createNotificationContent(
                 movie.getMovieName(),
                 theater.getTheaterStartDatetime(),
@@ -164,6 +174,8 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(user)
                 .payment(payment)
                 .build();
+
+        pushService.sendUserPush(user, subject, content);
 
         notificationRepository.save(notification);
     }

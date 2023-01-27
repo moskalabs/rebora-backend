@@ -20,6 +20,7 @@ public class UserSearchCondition {
     private String orderByMovie;
     private String category;
     private String theaterRegion;
+    private String cinemaBrand;
     private Long movieId;
     private Boolean userRecruitmentWish;
     private Boolean userMovieWish;

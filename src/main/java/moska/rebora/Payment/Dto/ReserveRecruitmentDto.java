@@ -7,4 +7,5 @@ public class ReserveRecruitmentDto {
 
     private Long recruitmentId;
     private String merchantUid;
+    private Integer theaterPrice;
 }

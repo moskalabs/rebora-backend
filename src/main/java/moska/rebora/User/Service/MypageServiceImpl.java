@@ -104,7 +104,9 @@ public class MypageServiceImpl implements MypageService {
     @Override
     public void updatePushYn(@Param("userId") Long userId,
                              @Param("userPushYn") Boolean userPushYn,
-                             @Param("userEmail") String userEmail) {
+                             @Param("userEmail") String userEmail,
+                             @Param("userPushKey") String userPushKey
+    ) {
 
         Optional<User> userOptional = userRepository.findById(userId);
 
@@ -114,7 +116,7 @@ public class MypageServiceImpl implements MypageService {
         User user = userOptional.get();
 
         if (user.getUserEmail().equals(userEmail)) {
-            user.changePushYn(userPushYn);
+            user.changePushYn(userPushYn, userPushKey);
             userRepository.save(user);
         } else {
             throw new JwtException("옳바르지 않은 접근입니다.");
@@ -122,7 +124,7 @@ public class MypageServiceImpl implements MypageService {
     }
 
     @Override
-    public void updatePushNightYn(Long userId, Boolean userPushNightYn, String userEmail) {
+    public void updatePushNightYn(Long userId, Boolean userPushNightYn, String userEmail, String userPushKey) {
         Optional<User> userOptional = userRepository.findById(userId);
 
         if (userOptional.isEmpty()) {
@@ -132,7 +134,7 @@ public class MypageServiceImpl implements MypageService {
         User user = userOptional.get();
 
         if (user.getUserEmail().equals(userEmail)) {
-            user.changePushNightYn(userPushNightYn);
+            user.changePushNightYn(userPushNightYn, userPushKey);
             userRepository.save(user);
         } else {
             throw new JwtException("옳바르지 않은 접근입니다.");

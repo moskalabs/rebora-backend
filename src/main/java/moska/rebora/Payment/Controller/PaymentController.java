@@ -47,7 +47,6 @@ public class PaymentController {
     /**
      * customerUId 생성
      *
-     * @param userId        유저 아이디
      * @param recruitmentId 모집 아이디
      * @return BaseInfoResponse<CustomerUIdDto>
      */

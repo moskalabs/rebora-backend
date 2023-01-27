@@ -23,6 +23,10 @@
             display: none;
         }
 
+        #movieCsvFile {
+            display: none;
+        }
+
         .label-file {
             display: inline-block;
             font-weight: 400;
@@ -66,8 +70,33 @@
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            <div class="card-body" style="display: flex; flex-direction: column;">
+                                <h4>엑셀파일 업로드 주의사항</h4>
+                                <ul>
+                                    <li><p><b>형식에 맞는 데이터가 입력되어야 데이터가 제대로 입력 됩니다.</b></p></li>
+                                    <li><p>엑셀 파일을 먼저 다운로드하고 형식에 맞게 입력 하신 다음 업로드 하면 됩니다.</p></li>
+                                    <li><p>엑셀파일 업로드 후 <b>영화 이미지 등록까지 완료 되어야 영화가 노출됩니다.</b></p></li>
+                                    <li><p>이미지 파일 업로드 시 <b>:</b>가 있는 영화 제목의 경우 <b>^</b>로 치환해서 넣어주시면 됩니다.</p></li>
+                                    <li>
+                                        <p>이미지 이름은 포스터는 <b>영화이름_poster.png</b> 배너는 <b>영화이름_banner.png</b> 모집글의 경우 <b>영화이름_info.png</b>로
+                                            변경한 다음
+                                            폴더를 업로드 하시면 됩니다.</p></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="content-header">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
                             <div class="card-body" style="display: flex; flex-direction: row;">
-                                <button type="button" class="btn btn-secondary">전체 누적 카운팅 리셋</button>
+                                <button type="button" onclick="movieCountResultAll()" class="btn btn-secondary">전체 누적
+                                    카운팅 리셋
+                                </button>
                                 <div class="ml-4" style="display:flex; width:130px;">
                                     <select class="custom-select" aria-label="Default select example"
                                             id="searchCondition">
@@ -125,8 +154,17 @@
                                 <button type="button" class="btn btn-secondary ml-3" onclick="goToCreateMovie()">
                                     영화 등록
                                 </button>
-                                <label style="margin: 0" class="ml-3" for="movieImageFile">
-                                    <div class="label-file">
+                                <button type="button" class="btn btn-secondary ml-3" onclick="downloadCsvFile()">
+                                    엑셀파일 다운로드
+                                </button>
+                                <label style="margin: 0;" class="ml-3" for="movieCsvFile">
+                                    <div class="label-file" style="height: 40px; display: flex; align-items: center">
+                                        엑셀파일 업로드
+                                    </div>
+                                </label>
+                                <input type="file" name="movieImageFile" id="movieCsvFile" accept="text/csv">
+                                <label style="margin: 0;" class="ml-3" for="movieImageFile">
+                                    <div class="label-file" style="height: 40px; display: flex; align-items: center">
                                         영화 이미지 등록
                                     </div>
                                 </label>
@@ -352,6 +390,98 @@
     const movieImageFile = document.querySelector('#movieImageFile');
     movieImageFile.addEventListener("change", uploadImageFile)
 
+    const movieCsvFile = document.querySelector('#movieCsvFile');
+    movieCsvFile.addEventListener("change", uploadCsvFile)
+
+    function uploadCsvFile() {
+        Swal.fire({
+            title            : "파일 업로드",
+            html             : "파일을 업로드 하시겠습니까? <br> 이미지가 업로드 되어야 업로드가 완료 됩니다.",
+            confirmButton    : true,
+            showCancelButton : true,
+            confirmButtonText: "확인",
+            cancelButtonText : "취소"
+        }).then((data) => {
+            if (data.isConfirmed) {
+                let formData = new FormData();
+                let file = $('input#movieCsvFile')[0].files[0]
+                if (file !== undefined) {
+                    formData.append("file", file);
+                } else {
+                    Swal.fire({
+                        title: "오류",
+                        text : "파일을 선택해 주세요",
+                    }).then(() => {
+                        return false;
+                    })
+                }
+
+                let token = localStorage.getItem("token");
+                if (token == null || token === "") {
+                    Swal.fire({
+                        title: "오류",
+                        text : "토큰이 만료되었습니다.",
+                    }).then(() => {
+                        location.href = "<%=CURRENT_SERVER%>/admin/login";
+                    })
+                }
+
+                $.ajax({
+                    url        : "<%=CURRENT_SERVER%>/admin/movie/uploadCsvFile",
+                    headers    : {
+                        "token": token
+                    },
+                    enctype    : 'multipart/form-data',
+                    data       : formData,
+                    processData: false,
+                    contentType: false,
+                    method     : "POST",
+                }).done(function (data) {
+                    if (data.result === true) {
+                        Swal.fire({
+                            title: "완료",
+                            text : "CSV 파일 저장이 완료 되었습니다.",
+                        }).then(() => {
+                            location.reload();
+                        })
+                    }
+                })
+            } else {
+                return false;
+            }
+        })
+    }
+
+    function downloadCsvFile() {
+
+        let token = localStorage.getItem("token");
+        if (token == null || token === "") {
+            Swal.fire({
+                title: "오류",
+                text : "토큰이 만료되었습니다.",
+            }).then(() => {
+                location.href = "<%=CURRENT_SERVER%>/admin/login";
+            })
+        }
+
+        $.ajax({
+            url      : "<%=CURRENT_SERVER%>/admin/movie/downloadCsvFile",
+            headers  : {
+                "token": token
+            },
+            cache    : false,
+            xhrFields: {
+                responseType: "blob",
+            },
+        }).done(function (data) {
+            let blob = new Blob([data], {type: "application/octetstream"});
+            let link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = "movieCsv.csv";
+            link.click();
+        })
+    }
+
     function uploadImageFile() {
         let formData = new FormData();
 
@@ -403,7 +533,7 @@
                 processData: false,
                 contentType: false,
                 method     : "POST",
-                error : function (data){
+                error      : function (data) {
                     Swal.fire({
                         title: "오류",
                         html : data.responseJSON.message,

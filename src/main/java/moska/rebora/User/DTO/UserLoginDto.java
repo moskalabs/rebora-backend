@@ -30,6 +30,8 @@ public class UserLoginDto extends BaseResponse {
     private String userPushKey;
     @Schema(description = "유저 푸쉬 여부")
     private Boolean userPushYn;
+    @Schema(description = "유저 푸쉬 여부")
+    private Boolean userPushNightYn;
     @Schema(description = "유저 사용 여부")
     private Boolean userUseYn;
     @Schema(description = "유저 등급 NORMAL - 일반, ADMIN - 관리자")
@@ -60,6 +62,7 @@ public class UserLoginDto extends BaseResponse {
         userUseYn = user.getUserUseYn();
         userGrade = user.getUserGrade();
         userImage = user.getUserImage();
+        userPushNightYn = user.getUserPushNightYn();
         this.notificationCount = notificationCount;
     }
 

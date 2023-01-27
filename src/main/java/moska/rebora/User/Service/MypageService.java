@@ -21,11 +21,15 @@ public interface MypageService {
 
     void updatePushYn(@Param("userId") Long userId,
                       @Param("userPushYn") Boolean userPushYn,
-                      @Param("userEmail") String userEmail);
+                      @Param("userEmail") String userEmail,
+                      @Param("userPushKey") String userPushKey
+    );
 
     void updatePushNightYn(@Param("userId") Long userId,
                            @Param("userPushNightYn") Boolean userPushNightYn,
-                           @Param("userEmail") String userEmail);
+                           @Param("userEmail") String userEmail,
+                           @Param("userPushKey") String userPushKey
+    );
 
     BaseResponse changeMyInfo(Long userId, String userEmail, MypageUpdateDto mypageUpdateDto) throws SQLIntegrityConstraintViolationException;
 }

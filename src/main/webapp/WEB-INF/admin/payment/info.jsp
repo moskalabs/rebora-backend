@@ -166,6 +166,13 @@
                                            href="${payment.content.receiptUrl}">영수증 링크</a>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th class="border-end" scope="row" style="width: 25%;">결제 메모</th>
+                                    <td style="width: 80%;">
+                                        <textarea class="form-control" style="resize: none" rows="3" id="paymentMemo"
+                                                  placeholder="Enter ...">${payment.content.paymentMemo}</textarea>
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -183,7 +190,7 @@
                                                    var="paymentLogPaidAt" type="both"/>
                                     <fmt:parseDate value="${ paymentLog.regDate}" pattern="yyyy-MM-dd'T'HH:mm"
                                                    var="paymentLogRegDate" type="both"/>
-                                    <table class="table mt-4 align-middle text-left border-top">
+                                    <table class="table align-middle text-left border-top">
                                         <tbody>
                                         <tr>
                                             <th class="border-end" scope="row" style="width: 25%;">결제 상태</th>
@@ -241,9 +248,10 @@
                             <button type="button" class="btn btn-secondary" onclick="goToList()">&nbsp;목록&nbsp;</button>
                         </div>
                         <div style="display:flex; width: 100%; height:40px; justify-content:flex-end">
-                            <button type="button" class="btn btn-success mr-3" onclick="saveRecruitment()">&nbsp;수정&nbsp;
+                            <button type="button" class="btn btn-success mr-3" onclick="savePayment()">&nbsp;저장&nbsp;
                             </button>
-                            <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;</button>
+                            <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -293,6 +301,70 @@
             }
         })
     })
+
+    function goToList() {
+        window.history.back();
+    }
+
+    function savePayment() {
+        let token = localStorage.getItem("token");
+        if (token == null || token === "") {
+            Swal.fire({
+                title: "오류",
+                text : "토큰이 만료되었습니다.",
+            }).then(() => {
+                location.href = "<%=CURRENT_SERVER%>/admin/login";
+            })
+        }
+
+        let paymentMemo = $("#paymentMemo").val();
+        let paymentId = "${payment.content.paymentId}";
+
+        $.ajax({
+            url        : "<%=CURRENT_SERVER%>/admin/payment/updatePaymentInfo/" + paymentId,
+            headers    : {
+                "token": token
+            },
+            method     : "POST",
+            data       : {paymentMemo: paymentMemo},
+            dataType   : "json",
+            error      : function (data) {
+                if (!data.responseJSON.result) {
+                    Swal.fire({
+                        title: "오류",
+                        text : data.message
+                    }).then(() => {
+                        return false;
+                    })
+                }
+            }
+        }).done(function (data) {
+            if (data.result) {
+                Swal.fire({
+                    title: "완료",
+                    text : "저장이 완료되었습니다."
+                }).then(() => {
+                    location.reload();
+                })
+            }
+        })
+    }
+
+    function cancelSave() {
+        Swal.fire({
+            title            : "취소",
+            text             : "저장을 취소하시겠습니까?",
+            showCancelButton : true,
+            confirmButtonText: '확인',
+            cancelButtonText : '취소',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                goToList();
+            } else {
+                return false;
+            }
+        })
+    }
 </script>
 </body>
 </html>

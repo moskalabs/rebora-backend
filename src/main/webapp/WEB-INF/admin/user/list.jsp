@@ -213,8 +213,13 @@
                                 </div>
                                 <div class="ml-3"
                                      style="display:flex; flex-direction:column; text-align:left; height:100%; justify-content:flex-end; width: 80px;">
-                                    <p class="mb-1"> &nbsp; </p>
+                                    <p class="mb-1"> &nbsp;</p>
                                     <button type="button" onclick="searchUser()" class="btn btn-secondary mb-2" style="width: 80px;">&nbsp;검색&nbsp;</button>
+                                </div>
+                                <div class="ml-3"
+                                     style="display:flex; flex-direction:column; text-align:left; height:100%; justify-content:flex-end; width: 140px;">
+                                    <p class="mb-1"> &nbsp;</p>
+                                    <button type="button" onclick="createUser()" class="btn btn-secondary mb-2" style="width: 140px;">&nbsp;회원 등록&nbsp;</button>
                                 </div>
                             </div>
                         </div>
@@ -528,6 +533,10 @@
 
     function goToUserInfo(userId) {
         location.href = "<%=CURRENT_SERVER%>/admin/user/info?userId=" + userId;
+    }
+
+    function createUser(){
+        location.href = "<%=CURRENT_SERVER%>/admin/user/info?userId";
     }
 
     //추가 개발하애함

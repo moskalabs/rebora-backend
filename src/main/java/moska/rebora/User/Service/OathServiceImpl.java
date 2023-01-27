@@ -2,16 +2,24 @@ package moska.rebora.User.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mchange.util.DuplicateElementException;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.Jwts;
 import lombok.AllArgsConstructor;
 import moska.rebora.Config.JwtAuthToken;
 import moska.rebora.Config.JwtAuthTokenProvider;
 import moska.rebora.Config.PasswordAuthAuthenticationManager;
 import moska.rebora.Config.PasswordAuthAuthenticationToken;
+import moska.rebora.Enum.UserGrade;
 import moska.rebora.Notification.Repository.NotificationRepository;
+import moska.rebora.User.DTO.ApplePublicKeyDto;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Repository.UserRepository;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import lombok.extern.slf4j.Slf4j;
@@ -20,24 +28,29 @@ import moska.rebora.User.DTO.UserLoginDto;
 import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigInteger;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static moska.rebora.Common.CommonConst.NAVER_TOKEN_ME_URL;
-import static moska.rebora.Common.CommonConst.NAVER_TOKEN_URL;
+import static moska.rebora.Common.CommonConst.*;
 
 @Service
 @Slf4j
@@ -50,88 +63,138 @@ public class OathServiceImpl implements OathService {
     private PasswordAuthAuthenticationManager authenticationManager;
     private JwtAuthTokenProvider jwtAuthTokenProvider;
 
+    PasswordEncoder passwordEncoder;
+
     private static final Date expiredDate = Date.from(LocalDateTime.now().plusYears(1L).atZone(ZoneId.systemDefault()).toInstant());
 
     @Override
-    public UserLoginDto login(String authToken, UserSnsKind userSnsKind) {
+    public UserLoginDto login(String authToken, UserSnsKind userSnsKind, @Param("userPushKey") String userPushKey) {
 
         HashMap<Object, Object> prmMap = new HashMap<Object, Object>();
-
-        User user = new User();
         UserLoginDto userLoginDto = new UserLoginDto();
         String userSnsId = "";
-        String userName = "";
         String userEmail = "";
 
-        switch (userSnsKind) {
-            case NAVER: {
-                prmMap = getNaverUserInfo(authToken);
-                userEmail = String.valueOf(prmMap.get("userEmail"));
-                userName = String.valueOf(prmMap.get("userName"));
-                userSnsId = String.valueOf(prmMap.get("snsId"));
+        if (userSnsKind.equals(UserSnsKind.NAVER)) {
+            prmMap = getNaverUserInfo(authToken);
+            userEmail = String.valueOf(prmMap.get("userEmail"));
+            userSnsId = String.valueOf(prmMap.get("snsId"));
+            log.info("token={}", authToken);
+            log.info("네이버 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
 
-                log.info("네이버 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserName={} snsUserSnsId={}", userEmail, userName, userSnsId);
+            Optional<User> optionalUser = userRepository.getUserByUserEmailAndUserSnsId(userEmail, userSnsId);
 
-                user = userRepository.getUserByUserEmail(userEmail);
-                break;
-            }
-            case KAKAO: {
-                prmMap = getKaKaoUserInfo(authToken);
-                userEmail = String.valueOf(prmMap.get("user_email"));
-                userSnsId = String.valueOf(prmMap.get("snsId"));
-                log.info("카카오 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
-                user = userRepository.getUserByUserEmail(userEmail);
-                break;
+            if (optionalUser.isEmpty()) {
+                userLoginDto.setResult(true);
+                userLoginDto.setErrorCode("500");
+                userLoginDto.setUserEmail(userEmail);
+                userLoginDto.setUserSnsId(userSnsId);
+                userLoginDto.setUserSnsKind(UserSnsKind.NAVER);
+                userLoginDto.setMessage("유저정보가 존재하지 않습니다. 회원가입 하시겠습니까?");
+            } else {
+                User user = optionalUser.get();
+                user.changePushKey(userPushKey);
+                userRepository.save(user);
+                userLoginDto = getUserLoginDto(user, userSnsKind);
             }
         }
 
-        return getUserLoginDto(user, userSnsKind, userSnsId);
-    }
+        if (userSnsKind.equals(UserSnsKind.KAKAO)) {
+            prmMap = getKaKaoUserInfo(authToken);
+            userEmail = String.valueOf(prmMap.get("userEmail"));
+            userSnsId = String.valueOf(prmMap.get("snsId"));
 
-    @Override
-    public UserLoginDto appleLogin(String userEmail, String clientId) {
-        UserLoginDto userLoginDto = new UserLoginDto();
-        User user = new User();
-        if (userEmail == null) {
-            Optional<User> userOptional = userRepository.getUserByUserSnsKindAndUserSnsId(UserSnsKind.APPLE, clientId);
-            if (userOptional.isPresent()) {
-                user = userOptional.get();
+            log.info("카카오 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
+
+            Optional<User> optionalUser = userRepository.getUserByUserEmailAndUserSnsId(userEmail, userSnsId);
+            if (optionalUser.isEmpty()) {
+                userLoginDto.setResult(true);
+                userLoginDto.setErrorCode("500");
+                userLoginDto.setUserEmail(userEmail);
+                userLoginDto.setUserSnsId(userSnsId);
+                userLoginDto.setUserSnsKind(UserSnsKind.KAKAO);
+                userLoginDto.setMessage("유저정보가 존재하지 않습니다. 회원가입 하시겠습니까?");
+            } else {
+                User user = optionalUser.get();
+                user.changePushKey(userPushKey);
+                userRepository.save(user);
+                userLoginDto = getUserLoginDto(user, userSnsKind);
             }
-        } else {
-            user = userRepository.getUserByUserEmail(userEmail);
         }
 
-        return getUserLoginDto(user, UserSnsKind.APPLE, clientId);
+        if (userSnsKind.equals(UserSnsKind.APPLE)) {
+            log.info("애플 로그인 Start");
+            log.info("token={}", authToken);
+            prmMap = getAppleUserInfo(authToken);
+            userEmail = String.valueOf(prmMap.get("userEmail"));
+            userSnsId = String.valueOf(prmMap.get("snsId"));
+            log.info("애플 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
+            Optional<User> optionalUser = userRepository.getUserByUserSnsKindAndUserSnsId(UserSnsKind.APPLE, userSnsId);
+
+            if (optionalUser.isEmpty()) {
+                userLoginDto.setResult(true);
+                userLoginDto.setErrorCode("500");
+                userLoginDto.setUserEmail(userEmail);
+                userLoginDto.setUserSnsId(userSnsId);
+                userLoginDto.setUserSnsKind(UserSnsKind.APPLE);
+                userLoginDto.setMessage("유저정보가 존재하지 않습니다. 회원가입 하시겠습니까?");
+            } else {
+                User user = optionalUser.get();
+                user.changePushKey(userPushKey);
+                userRepository.save(user);
+                userLoginDto = getUserLoginDto(user, userSnsKind);
+            }
+            log.info("애플 로그인 End");
+        }
+        return userLoginDto;
     }
 
-    public UserLoginDto getUserLoginDto(User user, UserSnsKind userSnsKind, String userSnsId) {
-        UserLoginDto userLoginDto = new UserLoginDto();
+    public HashMap<Object, Object> getAppleUserInfo(String idToken) {
+        HashMap<Object, Object> prmMap = new HashMap<Object, Object>();
+        ApplePublicKeyDto applePublicKeyDto = new ApplePublicKeyDto();
+        String[] decodeArray = idToken.split("\\.");
+        String header = new String(Base64.getDecoder().decode(decodeArray[0]));
+        JSONParser jsonParser = new JSONParser();
+        try {
+            JSONObject appleJson = (JSONObject) jsonParser.parse(header);
+            List<ApplePublicKeyDto> applePublicKeyDtoList = getPublicAppleKeys();
+            for (ApplePublicKeyDto publicKeyDto : applePublicKeyDtoList) {
+                String appleKid = appleJson.get("kid").toString();
+                if (appleKid.equals(publicKeyDto.getKid())) {
+                    applePublicKeyDto = publicKeyDto;
+                    break;
+                }
+            }
 
-        if (user == null) {
-            throw new NullPointerException("해당하는 유저가 없습니다. 회원가입 해주세요");
-        } else if (user.getUserSnsKind() == null) {
-            user.addUserSns(userSnsKind, userSnsId);
-            userLoginDto = UserLoginDto
-                    .builder()
-                    .user(user)
-                    .result(false)
-                    .errorCode("409")
-                    .message("이미 가입된 아이디가 있습니다 연동하시겠습니까?.")
-                    .build();
+            Claims userInfo = Jwts.parser().setSigningKey(getPublicKey(applePublicKeyDto)).parseClaimsJws(idToken).getBody();
+            String id = userInfo.get("sub").toString();
+            String email = userInfo.get("email").toString();
+            prmMap.put("userEmail", email);
+            prmMap.put("snsId", id);
 
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        return prmMap;
+    }
+
+    public UserLoginDto getUserLoginDto(User user, UserSnsKind userSnsKind) {
+
+        //일반 유저인 경우
+        if (user.getUserSnsKind() == null) {
+            throw new DuplicateElementException("SNS로 가입하지 않은 일반 유저입니다.");
+            //SNS 종류가 다를 경우
         } else if (user.getUserSnsKind() != userSnsKind) {
-            throw new DuplicateElementException("이미 가입된 SNS 아이디가 존재합니다. 다시 로그인 해주세요");
+            throw new DuplicateElementException("이미 가입된 SNS 아이디가 존재합니다. 다시 로그인 해주세요. 가입된 SNS : " + user.getUserSnsKind());
         } else {
-            userLoginDto = UserLoginDto
-                    .builder()
+
+            return UserLoginDto.builder()
                     .user(user)
                     .result(true)
-                    .token(createToken(user.getUserEmail()))
-                    .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(user.getUserEmail()))
-                    .build();
+                    .token(createToken(user.getUserEmail(), userSnsKind.name()))
+                    .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(user.getUserEmail())).build();
         }
-
-        return userLoginDto;
     }
 
     public HashMap<Object, Object> getNaverUserInfo(String accessToken) {
@@ -156,9 +219,47 @@ public class OathServiceImpl implements OathService {
         } catch (ParseException e) {
             log.error(e.getMessage());
             return null;
-        } catch (HttpClientErrorException e) {
-            throw new JwtException("인증되지 않은 사용자입니다.");
         }
+    }
+
+    public PublicKey getPublicKey(ApplePublicKeyDto applePublicKeyDto) {
+        try {
+
+            byte[] nBytes = Base64.getUrlDecoder().decode(applePublicKeyDto.getN());
+            byte[] eBytes = Base64.getUrlDecoder().decode(applePublicKeyDto.getE());
+
+            BigInteger n = new BigInteger(1, nBytes);
+            BigInteger e = new BigInteger(1, eBytes);
+
+            RSAPublicKeySpec publicKeySpec = new RSAPublicKeySpec(n, e);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            return keyFactory.generatePublic(publicKeySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<ApplePublicKeyDto> getPublicAppleKeys() {
+        List<ApplePublicKeyDto> applePublicKeyDtoList = new ArrayList<>();
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+            ResponseEntity<String> response = restTemplate.exchange("https://appleid.apple.com/auth/keys", HttpMethod.GET, request, String.class);
+            JSONParser jsonParser = new JSONParser();
+            JSONObject jsonObj = (JSONObject) jsonParser.parse(response.getBody());
+            JSONArray jsonArray = (JSONArray) jsonObj.get("keys");
+            log.info("response={}", jsonObj);
+            for (Object o : jsonArray) {
+                ApplePublicKeyDto applePublicKeyDto = new ApplePublicKeyDto((JSONObject) o);
+                applePublicKeyDtoList.add(applePublicKeyDto);
+            }
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        } catch (HttpClientErrorException e) {
+            throw new RuntimeException("네이버 로그인에 실패했습니다. 다시 시도해주세요");
+        }
+        return applePublicKeyDtoList;
     }
 
     public HashMap<Object, Object> getKaKaoUserInfo(String accessToken) {
@@ -171,24 +272,22 @@ public class OathServiceImpl implements OathService {
             MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 
             HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-            ResponseEntity<String> response = restTemplate.exchange(NAVER_TOKEN_ME_URL, HttpMethod.GET, request, String.class);
+            ResponseEntity<String> response = restTemplate.exchange(KAKAO_TOKEN_ME_URL, HttpMethod.GET, request, String.class);
 
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObj = (JSONObject) jsonParser.parse(response.getBody());
             JSONObject kakaoAccount = (JSONObject) jsonObj.get("kakao_account");
-            JSONObject profile = (JSONObject) kakaoAccount.get("profile");
 
             prmMap.put("snsId", jsonObj.get("id"));
             prmMap.put("connectedAt", jsonObj.get("connected_at"));
-            prmMap.put("user_name", profile.get("nickname"));
-            prmMap.put("user_email", kakaoAccount.get("email"));
+            prmMap.put("userEmail", kakaoAccount.get("email"));
 
             return prmMap;
         } catch (ParseException e) {
             log.error(e.getMessage());
             return null;
         } catch (HttpClientErrorException e) {
-            throw new JwtException("인증되지 않은 사용자입니다.");
+            throw new RuntimeException("카카오 로그인에 실패했습니다. 다시 시도해주세요");
         }
     }
 
@@ -209,31 +308,9 @@ public class OathServiceImpl implements OathService {
         return prmMap;
     }
 
-    @Override
-    public UserLoginDto syncUser(String userEmail, String userSnsKind, String userSnsId) {
-        User user = userRepository.getUserByUserEmail(userEmail);
-        user.addUserSns(UserSnsKind.valueOf(userSnsKind), userSnsId);
-        userRepository.save(user);
-        
-        UserLoginDto userLoginDto = UserLoginDto.builder()
-                .user(user)
-                .result(true)
-                .token(createToken(user.getUserEmail()))
-                .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(user.getUserEmail()))
-                .build();
+    public String createToken(String userEmail, String password) {
 
-        return userLoginDto;
-    }
-
-    /**
-     * 토큰 발행
-     *
-     * @param userEmail 유저이메일
-     * @return String
-     */
-    public String createToken(String userEmail) {
-
-        PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(userEmail, "");
+        PasswordAuthAuthenticationToken token = new PasswordAuthAuthenticationToken(userEmail, password);
         Authentication authentication = authenticationManager.authenticate(token);
         PasswordAuthAuthenticationToken authToken = (PasswordAuthAuthenticationToken) authentication;
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -243,8 +320,53 @@ public class OathServiceImpl implements OathService {
         claims.put("role", authToken.getRole());
         claims.put("userEmail", authToken.getUserEmail());
 
-        JwtAuthToken jwtAuthToken = jwtAuthTokenProvider.createAuthToken(authentication.getName(), String.valueOf(authentication.getAuthorities()), claims, expiredDate);
+        JwtAuthToken jwtAuthToken = jwtAuthTokenProvider.createAuthToken(
+                authentication.getName(),
+                String.valueOf(authentication.getAuthorities()),
+                claims,
+                expiredDate
+        );
 
         return jwtAuthToken.getToken(jwtAuthToken);
+    }
+
+    @Override
+    @Transactional
+    public UserLoginDto signUpSns(
+            String userEmail,
+            String userName,
+            String userNickname,
+            UserSnsKind userSnsKind,
+            String userSnsId,
+            Boolean userPushYn,
+            Boolean userPushNightYn,
+            String userPushKey
+    ) {
+
+        String bcryptPassword = passwordEncoder.encode(userSnsKind.name());
+
+        User user = User
+                .builder()
+                .userUseYn(true)
+                .password(bcryptPassword)
+                .userGrade(UserGrade.NORMAL)
+                .userPushYn(userPushYn)
+                .userPushNightYn(userPushNightYn)
+                .userNickname(userNickname)
+                .userName(userName)
+                .userSnsId(userSnsId)
+                .userEmail(userEmail)
+                .userSnsKind(userSnsKind)
+                .userPushKey(userPushKey)
+                .build();
+
+        userRepository.save(user);
+
+        return UserLoginDto.builder()
+                .token(createToken(userEmail, userSnsKind.name()))
+                .result(true)
+                .user(user)
+                .notificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(userEmail))
+                .build();
     }
 }

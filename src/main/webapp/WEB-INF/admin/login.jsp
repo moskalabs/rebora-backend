@@ -9,7 +9,7 @@
 <html>
 
 <head>
-    <title>Rebora Admin</title>
+    <title>리보라 관리자 페이지</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
@@ -34,7 +34,7 @@
         </div>
         <div class="col input-group mb-3 mt-2">
             <span class="input-group-text">비밀번호</span>
-            <input type="text" class="form-control" id="password" placeholder="비밀번호를 입력해 주세요" aria-label="패스워드">
+            <input type="password" class="form-control" id="password" placeholder="비밀번호를 입력해 주세요" aria-label="패스워드">
         </div>
         <div class="col mx-auto mb-3 mt-3">
             <button type="button" onclick="onclickLogin()" class="btn btn-light btn-lg">로그인</button>
