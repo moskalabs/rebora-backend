@@ -46,9 +46,9 @@ public class CommentController {
      * @return BaseResponse
      */
     @Tag(name = "댓글")
-    @PostMapping("/createComment/{recruitmentId}")
+    @PostMapping("/createComment")
     public BaseResponse createComment(
-            @PathVariable Long recruitmentId,
+            @RequestParam Long recruitmentId,
             @RequestParam String commentContent
     ) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -60,6 +60,12 @@ public class CommentController {
         return baseResponse;
     }
 
+    /**
+     * 댓글 삭제
+     *
+     * @param commentId 댓글 아이디
+     * @return BaseResponse
+     */
     @Tag(name = "댓글")
     @DeleteMapping("/deleteComment/{commentId}")
     public BaseResponse deleteComment(

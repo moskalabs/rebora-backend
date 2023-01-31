@@ -101,7 +101,6 @@ public class RepayFailureConfig {
                 payment = paymentService.getBatchPayment(user, recruitment, payment, theater, userRecruitment, movie);
 
                 String notificationContent = notificationService.createNotificationContent(
-                        movie.getMovieName(),
                         theater.getTheaterStartDatetime(),
                         theater.getTheaterDay(),
                         theater.getTheaterCinemaBrandName(),
@@ -110,7 +109,7 @@ public class RepayFailureConfig {
                 );
 
                 if (payment.getPaymentStatus() == PaymentStatus.COMPLETE) {
-                    notificationService.createNotificationPayment(notificationSubject, notificationContent, NotificationKind.CONFORMATION, user, recruitment, payment);
+                    notificationService.createNotificationPayment(notificationSubject, notificationContent, NotificationKind.CONFORMATION, movie.getMovieName(), user, recruitment, payment);
                     PaymentLog paymentLog = PaymentLog.builder()
                             .payment(payment)
                             .paymentCardNumber(payment.getPaymentCardNumber())
@@ -135,7 +134,7 @@ public class RepayFailureConfig {
                             .payment(payment)
                             .paymentLogContent(payment.getPaymentContent())
                             .build();
-                    notificationService.createNotificationPayment(notificationSubject, payment.getPaymentContent(), NotificationKind.CONFORMATION, user, recruitment, payment);
+                    notificationService.createNotificationPayment(notificationSubject, payment.getPaymentContent(), NotificationKind.CONFORMATION, movie.getMovieName(), user, recruitment, payment);
                     paymentLogRepository.save(paymentLog);
                 }
 

@@ -2,7 +2,8 @@ package moska.rebora.Common;
 
 public class CommonConst {
     public static final String LOCALHOST = "http://localhost:8080";
-    public static final String DEV_SERVER = "http://13.125.27.234:8080";
+    //public static final String DEV_SERVER = "http://13.125.27.234:8080";
+    public static final String DEV_SERVER = "http://dev.re-bora.com";
     public static final String PRD_SERVER = "https://m.re-bora.com";
     public static final String CURRENT_SERVER = DEV_SERVER;
 

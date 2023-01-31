@@ -107,15 +107,23 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                                         .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
                                 ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))
                                         .from(recruiterUser)
-                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname")
+                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname"),
+                                payment.paymentAmount,
+                                payment.paymentStatus,
+                                payment.paidAt,
+                                payment.paymentMethod,
+                                payment.id.as("paymentId")
                         ))
                 .from(userRecruitment)
                 .leftJoin(userRecruitment.user, user)
                 .leftJoin(userRecruitment.recruitment, recruitment)
                 .leftJoin(recruitment.movie, movie)
                 .leftJoin(recruitment.theater, theater)
-                .where(user.userUseYn.eq(true),
+                .leftJoin(userRecruitment.payment, payment)
+                .where(
+                        user.userUseYn.eq(true),
                         recruitment.recruitmentExposeYn.eq(true),
+                        isUserRecruitmentYn(userSearchCondition.getUserRecruitmentYn()),
                         userEmailEq(userEmail),
                         createByMe(userEmail, userSearchCondition.isCreateByMe()),
                         isWishes(userSearchCondition.getUserRecruitmentWish())
@@ -131,10 +139,11 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
 
         JPAQuery<Long> total = queryFactory.select(userRecruitment.id.count())
                 .from(userRecruitment)
-                .innerJoin(userRecruitment.user, user)
-                .innerJoin(userRecruitment.recruitment, recruitment)
+                .leftJoin(userRecruitment.user, user)
+                .leftJoin(userRecruitment.recruitment, recruitment)
                 .where(user.userUseYn.eq(true),
                         recruitment.recruitmentExposeYn.eq(true),
+                        isUserRecruitmentYn(userSearchCondition.getUserRecruitmentYn()),
                         userEmailEq(userEmail),
                         createByMe(userEmail, userSearchCondition.isCreateByMe()),
                         isWishes(userSearchCondition.getUserRecruitmentWish())
@@ -248,6 +257,10 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
     //유저 이메일 일치
     private BooleanExpression userEmailEq(String userEmail) {
         return hasText(userEmail) ? user.userEmail.eq(userEmail) : null;
+    }
+
+    private BooleanExpression isUserRecruitmentYn(Boolean userRecruitmentYn) {
+        return userRecruitmentYn != null ? userRecruitment.userRecruitmentYn.eq(userRecruitmentYn) : null;
     }
 
     //내가 모집한 게시물

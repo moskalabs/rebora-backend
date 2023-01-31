@@ -48,6 +48,8 @@ public interface PaymentService {
 
     JSONObject getPaymentByMerchantUid(String impUid);
 
+    JSONObject refundPayment(String merchantUid);
+
     Payment createPayment(
             Integer amount,
             String cardNumber,

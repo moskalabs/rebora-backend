@@ -88,7 +88,6 @@ public class PaymentController {
     /**
      * 주문 번호 생성
      *
-     * @param userId                유저 아이디
      * @param recruitmentId         모집 아이디
      * @param userRecruitmentPeople 유저 모집 신청 인원
      * @return BaseResponse
@@ -105,6 +104,35 @@ public class PaymentController {
         BaseInfoResponse<MerchantUidDto> baseInfoResponse = new BaseInfoResponse<>();
         baseInfoResponse.setResult(true);
         baseInfoResponse.setContent(paymentService.createMerchantUid(user.getId(), recruitmentId, userRecruitmentPeople));
+
+        return baseInfoResponse;
+    }
+
+    @GetMapping("/getNewRecruitmentMerchantUid")
+    public BaseInfoResponse<MerchantUidDto> getRecruitmentMerchantUid() {
+
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.getUserByUserEmail(userEmail);
+
+        if (user == null) {
+            throw new NullPointerException("유저가 존재하지 않습니다. 다시 시도해주세요.");
+        }
+
+        BaseInfoResponse<MerchantUidDto> baseInfoResponse = new BaseInfoResponse<>();
+        MerchantUidDto merchantUidDto = new MerchantUidDto();
+        baseInfoResponse.setResult(true);
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(user.getId());
+        stringBuilder.append("_");
+        stringBuilder.append("newRecruitment");
+        stringBuilder.append("_");
+        stringBuilder.append(now);
+        merchantUidDto.setMerchantUid(stringBuilder.toString());
+
+        baseInfoResponse.setContent(merchantUidDto);
+
 
         return baseInfoResponse;
     }

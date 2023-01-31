@@ -37,8 +37,6 @@ public class CommonServiceImpl implements CommonService {
                                    Long recruitmentId,
                                    Long movieId) {
 
-        LocalDateTime now = LocalDateTime.now();
-
         List<User> userList = userMovieRepository.getUserListByMovie(movieId);
         Recruitment recruitment = recruitmentRepository.getRecruitmentById(recruitmentId);
 

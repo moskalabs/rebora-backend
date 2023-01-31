@@ -82,7 +82,7 @@ public class OathServiceImpl implements OathService {
             log.info("token={}", authToken);
             log.info("네이버 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
 
-            Optional<User> optionalUser = userRepository.getUserByUserEmailAndUserSnsId(userEmail, userSnsId);
+            Optional<User> optionalUser = Optional.ofNullable(userRepository.getUserByUserEmail(userEmail));
 
             if (optionalUser.isEmpty()) {
                 userLoginDto.setResult(true);
@@ -106,7 +106,7 @@ public class OathServiceImpl implements OathService {
 
             log.info("카카오 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
 
-            Optional<User> optionalUser = userRepository.getUserByUserEmailAndUserSnsId(userEmail, userSnsId);
+            Optional<User> optionalUser = Optional.ofNullable(userRepository.getUserByUserEmail(userEmail));
             if (optionalUser.isEmpty()) {
                 userLoginDto.setResult(true);
                 userLoginDto.setErrorCode("500");
@@ -129,7 +129,7 @@ public class OathServiceImpl implements OathService {
             userEmail = String.valueOf(prmMap.get("userEmail"));
             userSnsId = String.valueOf(prmMap.get("snsId"));
             log.info("애플 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
-            Optional<User> optionalUser = userRepository.getUserByUserSnsKindAndUserSnsId(UserSnsKind.APPLE, userSnsId);
+            Optional<User> optionalUser = Optional.ofNullable(userRepository.getUserByUserEmail(userEmail));
 
             if (optionalUser.isEmpty()) {
                 userLoginDto.setResult(true);

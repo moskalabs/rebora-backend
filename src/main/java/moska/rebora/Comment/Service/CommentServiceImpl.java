@@ -3,6 +3,7 @@ package moska.rebora.Comment.Service;
 import moska.rebora.Comment.Dto.CommentDto;
 import moska.rebora.Comment.Entity.Comment;
 import moska.rebora.Comment.Repository.CommentRepository;
+import moska.rebora.Enum.UserGrade;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.User.Entity.User;
@@ -52,11 +53,11 @@ public class CommentServiceImpl implements CommentService {
         User user = userRepository.getUserByUserEmail(userEmail);
         Recruitment recruitment = recruitmentRepository.getRecruitmentById(recruitmentId);
 
-        if(user == null){
+        if (user == null) {
             throw new NullPointerException("존재하지 않는 유저입니다 \n다시 시도해주세요");
         }
 
-        if(recruitment == null){
+        if (recruitment == null) {
             throw new NullPointerException("존재하지 않는 모집입니다 \n다시 시도해주세요");
         }
 
@@ -81,11 +82,15 @@ public class CommentServiceImpl implements CommentService {
         User commentUser = comment.getUser();
 
         if (!Objects.equals(user.getId(), commentUser.getId())) {
-            throw new NullPointerException("작성자가 일치하지 않습니다.");
+            if (user.getUserGrade().equals(UserGrade.ADMIN)) {
+                comment.deleteComment();
+                commentRepository.save(comment);
+            } else {
+                throw new RuntimeException("관리자 및 본인만 삭제 가능합니다.");
+            }
+        } else {
+            comment.deleteComment();
+            commentRepository.save(comment);
         }
-
-        comment.deleteComment();
-
-        commentRepository.save(comment);
     }
 }

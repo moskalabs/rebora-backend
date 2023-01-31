@@ -33,6 +33,7 @@ public class CommentCustomImpl implements CommentCustom {
                         comment.commentContent,
                         comment.regDate,
                         comment.modDate,
+                        user.id.as("userId"),
                         user.userNickname,
                         user.userImage
                 )).from(comment)

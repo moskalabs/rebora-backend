@@ -14,14 +14,16 @@ public class CommentDto {
     private LocalDateTime regDate;
     private LocalDateTime modDate;
     private String userNickname;
+    private Long userId;
     private String userImage;
 
-    public CommentDto(Long commentId, String commentContent, LocalDateTime regDate, LocalDateTime modDate, String userNickname, String userImage) {
+    public CommentDto(Long commentId, String commentContent, LocalDateTime regDate, LocalDateTime modDate, String userNickname, Long userId, String userImage) {
         this.commentId = commentId;
         this.commentContent = commentContent;
         this.regDate = regDate;
         this.modDate = modDate;
         this.userNickname = userNickname;
+        this.userId = userId;
         this.userImage = userImage;
     }
 }

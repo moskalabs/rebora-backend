@@ -380,7 +380,6 @@ class ReboraApplicationTests {
     @Test
     public void notiTest() {
         log.info("notification={}", notificationService.createNotificationContent(
-                "이웃집 토토로",
                 LocalDateTime.now(),
                 "수",
                 "메가박스",
@@ -677,7 +676,6 @@ class ReboraApplicationTests {
             log.info("user={}", user.getId());
 
             String notificationContent = notificationService.createNotificationContent(
-                    movie.getMovieName(),
                     theater.getTheaterStartDatetime(),
                     theater.getTheaterDay(),
                     theater.getTheaterCinemaBrandName(),

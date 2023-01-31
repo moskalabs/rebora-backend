@@ -1,6 +1,7 @@
 package moska.rebora.Movie.Controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.Movie.Service.MovieService;
@@ -18,9 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/movie")
 @Tag(name = "영화")
+@AllArgsConstructor
 public class MovieController {
-
-    @Autowired
     MovieService movieService;
 
     /**

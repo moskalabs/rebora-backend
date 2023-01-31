@@ -108,7 +108,6 @@ public class ConfirmRecruitmentConfig {
 
                     User user = userRecruitment.getUser();
                     String notificationContent = notificationService.createNotificationContent(
-                            movie.getMovieName(),
                             theater.getTheaterStartDatetime(),
                             theater.getTheaterDay(),
                             theater.getTheaterCinemaBrandName(),
@@ -117,7 +116,7 @@ public class ConfirmRecruitmentConfig {
                     );
 
                     String notificationSubject = "찜한 모집의 상영이 확정되었습니다.";
-                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CONFORMATION, recruitment, user);
+                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CONFORMATION, recruitment, movie.getMovieName(), user);
                 }
 
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CONFIRMATION);

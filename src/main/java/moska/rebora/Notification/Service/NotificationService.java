@@ -17,6 +17,7 @@ import java.util.List;
 public interface NotificationService {
 
     void createNotificationRecruitment(
+            @Param("movieName") String movieName,
             @Param("notificationSubject") String notificationSubject,
             @Param("notificationContent") String notificationContent,
             @Param("notificationKind") NotificationKind notificationKind,
@@ -29,6 +30,7 @@ public interface NotificationService {
             @Param("notificationContent") String notificationContent,
             @Param("notificationKind") NotificationKind notificationKind,
             @Param("recruitment") Recruitment recruitment,
+            @Param("movieName") String movieName,
             @Param("user") User user
     );
 
@@ -36,13 +38,13 @@ public interface NotificationService {
             @Param("notificationSubject") String notificationSubject,
             @Param("notificationContent") String notificationContent,
             @Param("notificationKind") NotificationKind notificationKind,
+            @Param("movieName") String movieName,
             @Param("user") User user,
             @Param("recruitment") Recruitment recruitment,
             @Param("payment") Payment payment
     );
 
     String createNotificationContent(
-            @Param("movieName") String movieName,
             @Param("theaterStartDate") LocalDateTime theaterStartDate,
             @Param("theaterDay") String theaterDay,
             @Param("theaterBrand") String theaterBrand,
@@ -55,5 +57,5 @@ public interface NotificationService {
             @Param("userEmail") String userEmail
     );
 
-    void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie,Payment payment, Boolean paymentEndYn);
+    void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie, Payment payment, Boolean paymentEndYn);
 }

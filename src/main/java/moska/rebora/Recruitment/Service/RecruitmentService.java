@@ -7,11 +7,13 @@ import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Payment.Dto.ReserveRecruitmentDto;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
+import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.UserRecruitment;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 
@@ -27,21 +29,26 @@ public interface RecruitmentService {
             @Param("commentPageable") Pageable commentPageable
     );
 
-    void createRecruitment(
-            @Param("recruitmentId") Long recruitmentId,
+    Recruitment createRecruitment(
             @Param("userRecruitmentPeople") Integer userRecruitmentPeople,
             @Param("userEmail") String userEmail,
+            @Param("movieId") Long movieId,
+            @Param("theaterId") Long theaterId,
+            @Param("recruitmentIntroduce") String recruitmentIntroduce,
+            @Param("bannerYn") Boolean bannerYn,
+            @Param("bannerSubText") String bannerSubText,
+            @Param("bannerMainText") String bannerMainText,
             @Param("merchantUid") String merchantUid,
             @Param("impUid") String impUid
     );
 
-    ReserveRecruitmentDto reserveRecruitment(@Param("movieId") Long movieId,
-                                             @Param("theaterId") Long theaterId,
-                                             @Param("userEmail") String userEmail,
-                                             @Param("recruitmentIntroduce") String recruitmentIntroduce,
-                                             @Param("bannerYn") Boolean bannerYn,
-                                             @Param("bannerSubText") String bannerSubText,
-                                             @Param("bannerMainText") String bannerMainText);
+//    ReserveRecruitmentDto reserveRecruitment(@Param("movieId") Long movieId,
+//                                             @Param("theaterId") Long theaterId,
+//                                             @Param("userEmail") String userEmail,
+//                                             @Param("recruitmentIntroduce") String recruitmentIntroduce,
+//                                             @Param("bannerYn") Boolean bannerYn,
+//                                             @Param("bannerSubText") String bannerSubText,
+//                                             @Param("bannerMainText") String bannerMainText);
 
     void cancelReserve(@Param("recruitmentId") Long recruitmentId);
 

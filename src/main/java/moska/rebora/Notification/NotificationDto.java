@@ -21,4 +21,5 @@ public class NotificationDto {
     private Integer paymentAmount;
     private LocalDateTime regDate;
     private LocalDateTime modDate;
+    private String movieName;
 }

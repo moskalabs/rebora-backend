@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.User.Entity.User;
 
@@ -69,12 +70,18 @@ UserRecruitmentListDto {
     private List<UserImageListDto> userImageList;
     @Schema(description = "모집 참여 인원")
     private Integer recruitmentPeople;
+    private Integer paymentAmount;
+    private PaymentStatus paymentStatus;
+    private LocalDateTime paidAt;
+    private String paymentMethod;
+    private String paymentId;
+
 
     public void addUserImage(List<UserImageListDto> userImageList) {
         this.userImageList = userImageList;
     }
 
-    public UserRecruitmentListDto(Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, String movieName, String movieImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople) {
+    public UserRecruitmentListDto(Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, String movieName, String movieImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople, Integer paymentAmount, PaymentStatus paymentStatus, LocalDateTime paidAt, String paymentMethod, String paymentId) {
         this.userRecruitmentId = userRecruitmentId;
         this.userRecruitmentWish = userRecruitmentWish;
         this.userRecruitmentYn = userRecruitmentYn;
@@ -97,5 +104,10 @@ UserRecruitmentListDto {
         this.recruiterNickname = recruiterNickname;
         this.recruiterUserImage = recruiterUserImage;
         this.recruitmentPeople = recruitmentPeople;
+        this.paymentAmount = paymentAmount;
+        this.paymentStatus = paymentStatus;
+        this.paidAt = paidAt;
+        this.paymentMethod = paymentMethod;
+        this.paymentId = paymentId;
     }
 }

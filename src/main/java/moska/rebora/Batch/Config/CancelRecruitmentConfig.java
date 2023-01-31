@@ -112,7 +112,6 @@ public class CancelRecruitmentConfig {
 
                 String notificationSubject = "참여한 모집이 취소되었습니다.";
                 String notificationContent = notificationService.createNotificationContent(
-                        movie.getMovieName(),
                         theater.getTheaterStartDatetime(),
                         theater.getTheaterDay(),
                         theater.getTheaterCinemaBrandName(),
@@ -133,13 +132,13 @@ public class CancelRecruitmentConfig {
                     bannerService.bannerDelete(banner);
                 }
 
-                notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, userList);
+                notificationService.createNotificationRecruitment(movie.getMovieName(), notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, userList);
 
                 for (UserRecruitment userRecruitment : userWishRecruitmentList) {
                     User user = userRecruitment.getUser();
                     notificationSubject = "찜한 모집의 모집이 취소되었습니다.";
-                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, user);
-                    pushService.sendUserPush(user, notificationSubject, notificationContent);
+                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, movie.getMovieName(), user);
+                    pushService.sendUserPush(user , notificationSubject, notificationContent);
                 }
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CANCEL);
 

@@ -20,7 +20,7 @@ public class Comment extends BaseEntity {
     @Column(name = "comment_id", nullable = false)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(length = 1000,nullable = false)
     private String commentContent;
 
     @Column

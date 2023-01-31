@@ -71,12 +71,13 @@ public class MypageServiceImpl implements MypageService {
      */
     @Override
     public Page<UserRecruitmentListDto> getParticipationHistory(Pageable pageable) {
+
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserSearchCondition userSearchCondition = new UserSearchCondition();
+        userSearchCondition.setUserRecruitmentYn(true);
         userSearchCondition.setTheaterStartDatetime(false);
-        Page<UserRecruitmentListDto> userRecruitmentListDtoPage = userRecruitmentRepository.getUserRecruitmentList(userEmail, pageable, userSearchCondition);
 
-        return userRecruitmentListDtoPage;
+        return userRecruitmentRepository.getUserRecruitmentList(userEmail, pageable, userSearchCondition);
     }
 
     /**
@@ -173,7 +174,7 @@ public class MypageServiceImpl implements MypageService {
                 password = passwordEncoder.encode(mypageUpdateDto.getChangePassword());
             }
 
-            if(mypageUpdateDto.getFile() != null){
+            if (mypageUpdateDto.getFile() != null) {
                 MultipartFile file = mypageUpdateDto.getFile();
                 String originalFileName = file.getOriginalFilename(); //원본 파일 이름
                 String ext = FilenameUtils.getExtension(originalFileName); //확장자
@@ -181,7 +182,7 @@ public class MypageServiceImpl implements MypageService {
                 fileUrl = fileUploadService.uploadImage(file, newFileName); //파일 Url
             }
 
-            if(fileUrl == null){
+            if (fileUrl == null) {
                 fileUrl = "";
             }
 

@@ -9,21 +9,21 @@ import java.time.LocalDateTime;
 
 @Data
 public class UserSearchCondition {
-
-    private boolean createByMe;
-    private RecruitmentStatus recruitmentStatus;
-    private Boolean theaterStartDatetime;
     private String searchWord;
     private String searchCondition;
+    private boolean createByMe;
+
     private UserGrade userGrade;
     private UserSnsKind userSnsKind;
+    private Boolean userRecruitmentWish;
+    private Boolean userMovieWish;
+    private RecruitmentStatus recruitmentStatus;
+    private Boolean theaterStartDatetime;
+    private Long movieId;
     private String orderByMovie;
     private String category;
     private String theaterRegion;
     private String cinemaBrand;
-    private Long movieId;
-    private Boolean userRecruitmentWish;
-    private Boolean userMovieWish;
     private LocalDateTime finishTime;
-
+    private Boolean userRecruitmentYn;
 }

@@ -16,7 +16,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notification extends BaseEntity{
+public class Notification extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +27,10 @@ public class Notification extends BaseEntity{
     @Column
     @Comment("알림 제목")
     private String notificationSubject;
+
+    @Column
+    @Comment("영화 이름")
+    private String movieName;
 
     @Column
     @Comment("알림 내용")
@@ -55,18 +59,28 @@ public class Notification extends BaseEntity{
     @JoinColumn(name = "user_id")
     private User user;
 
-    public void readNotification(){
+    public void readNotification() {
         this.notificationReadYn = true;
     }
 
     @Builder
-    public Notification(String notificationSubject, String notificationContent, NotificationKind notificationKind, Boolean notificationReadYn, Payment payment, Recruitment recruitment, User user) {
+    public Notification(
+            String notificationSubject,
+            String notificationContent,
+            NotificationKind notificationKind,
+            Boolean notificationReadYn,
+            Payment payment,
+            Recruitment recruitment,
+            User user,
+            String movieName
+    ) {
         this.notificationSubject = notificationSubject;
         this.notificationContent = notificationContent;
         this.notificationKind = notificationKind;
         this.notificationReadYn = notificationReadYn;
         this.payment = payment;
         this.recruitment = recruitment;
+        this.movieName = movieName;
         this.user = user;
     }
 }

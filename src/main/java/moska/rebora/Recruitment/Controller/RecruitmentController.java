@@ -7,7 +7,9 @@ import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Payment.Dto.ReserveRecruitmentDto;
+import moska.rebora.Recruitment.Dto.CreateRecruitmentDto;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
+import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Service.RecruitmentService;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -125,30 +127,47 @@ public class RecruitmentController {
     }
 
     /**
-     * 모집 신청
+     * 모집 생성
      *
-     * @param recruitmentId         모집 아이디
-     * @param userRecruitmentPeople 신청 인원
-     * @return BaseResponse
+     * @param userRecruitmentPeople 모집 신청 인원
+     * @param movieId               영화 아이디
+     * @param theaterId             상영관 아이디
+     * @param recruitmentIntroduce  모집 소개
+     * @param bannerYn              배너 유무
+     * @param bannerSubText         배너 서브 텍스트
+     * @param bannerMainText        배너 메인 텍스트
+     * @param merchantUid           상품 유아이디
+     * @param impUid                결제 유아이디
+     * @return BaseInfoResponse<ReserveRecruitmentDto>
      */
     @Tag(name = "모집")
-    @PostMapping("/createRecruitment/{recruitmentId}")
-    public BaseResponse createRecruitment(
-            @PathVariable Long recruitmentId,
+    @PostMapping("/createRecruitment")
+    public BaseInfoResponse<CreateRecruitmentDto> createRecruitment(
             @RequestParam Integer userRecruitmentPeople,
+            @RequestParam Long movieId,
+            @RequestParam Long theaterId,
+            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
+            @RequestParam("bannerYn") Boolean bannerYn,
+            @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
+            @RequestParam(value = "bannerMainText", required = false) String bannerMainText,
             @RequestParam String merchantUid,
             @RequestParam String impUid
     ) {
-        BaseResponse baseResponse = new BaseResponse();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        recruitmentService.createRecruitment(recruitmentId, userRecruitmentPeople, userEmail, merchantUid, impUid);
-        baseResponse.setResult(true);
+        BaseInfoResponse<CreateRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
+        CreateRecruitmentDto createRecruitmentDto  = new CreateRecruitmentDto();
 
-        return baseResponse;
+        Recruitment recruitment = recruitmentService.createRecruitment(userRecruitmentPeople, userEmail, movieId, theaterId, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, merchantUid, impUid);
+
+        baseInfoResponse.setResult(true);
+        createRecruitmentDto.setRecruitmentId(recruitment.getId());
+        baseInfoResponse.setContent(createRecruitmentDto);
+
+        return baseInfoResponse;
     }
 
-    /**
+    /*
      * 모집 예약
      *
      * @param movieId              영화 아이디
@@ -159,23 +178,23 @@ public class RecruitmentController {
      * @param bannerMainText       배너 메인 텍스트
      * @return JSONObject
      */
-    @PostMapping("/reserveRecruitment")
-    public BaseInfoResponse<ReserveRecruitmentDto> reserveRecruitment(
-            @RequestParam Long movieId,
-            @RequestParam Long theaterId,
-            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
-            @RequestParam("bannerYn") Boolean bannerYn,
-            @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
-            @RequestParam(value = "bannerMainText", required = false) String bannerMainText
-    ) {
-        BaseInfoResponse<ReserveRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
-
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        baseInfoResponse.setResult(true);
-        baseInfoResponse.setContent(recruitmentService.reserveRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText));
-
-        return baseInfoResponse;
-    }
+//    @PostMapping("/reserveRecruitment")
+//    public BaseInfoResponse<ReserveRecruitmentDto> reserveRecruitment(
+//            @RequestParam Long movieId,
+//            @RequestParam Long theaterId,
+//            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
+//            @RequestParam("bannerYn") Boolean bannerYn,
+//            @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
+//            @RequestParam(value = "bannerMainText", required = false) String bannerMainText
+//    ) {
+//        BaseInfoResponse<ReserveRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
+//
+//        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+//        baseInfoResponse.setResult(true);
+//        baseInfoResponse.setContent(recruitmentService.reserveRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText));
+//
+//        return baseInfoResponse;
+//    }
 
     /**
      * 모집 취소

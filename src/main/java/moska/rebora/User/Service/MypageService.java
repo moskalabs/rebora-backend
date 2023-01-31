@@ -4,6 +4,7 @@ import moska.rebora.Common.BaseResponse;
 import moska.rebora.User.DTO.MypageInfoDto;
 import moska.rebora.User.DTO.MypageUpdateDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
+import moska.rebora.User.DTO.UserSearchCondition;
 import net.minidev.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

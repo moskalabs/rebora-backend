@@ -59,7 +59,6 @@ public class MypageController {
     @Operation(summary = "내가 참여한 모집 가져오기  ", description = "내가 참여한 모집 가져오기 모든 상태의 모집 가져오기")
     @GetMapping("/getParticipationHistory")
     public UserRecruitmentDtoListResponse getParticipationHistory(Pageable pageable) {
-
         UserRecruitmentDtoListResponse userRecruitmentDtoListResponse = new UserRecruitmentDtoListResponse();
         userRecruitmentDtoListResponse.setResult(true);
         userRecruitmentDtoListResponse.setUserRecruitmentList(mypageService.getParticipationHistory(pageable));
@@ -105,7 +104,7 @@ public class MypageController {
     })
     public BaseResponse updatePushYn(
             @PathVariable Long userId,
-            @RequestParam("userPushYn") Boolean userPushYn,
+            @RequestParam Boolean userPushYn,
             @RequestParam(required = false, defaultValue = "") String userPushKey
     ) {
         BaseResponse baseResponse = new BaseResponse();
@@ -117,13 +116,9 @@ public class MypageController {
     @Tag(name = "마이페이지")
     @Operation(summary = "야간 푸쉬 여부 업데이트")
     @PutMapping("/updatePushNightYn/{userId}")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "userId", value = "유저 아이디", required = false),
-            @ApiImplicitParam(name = "userPushNightYn", value = "야간 푸쉬 여부", required = false),
-    })
     public BaseResponse updatePushNightYn(
             @PathVariable Long userId,
-            @RequestParam("userPushYn") Boolean userPushNightYn,
+            @RequestParam Boolean userPushNightYn,
             @RequestParam(required = false, defaultValue = "") String userPushKey
     ) {
         BaseResponse baseResponse = new BaseResponse();
@@ -166,13 +161,25 @@ public class MypageController {
             @ApiImplicitParam(name = "changePassword", value = "비밀번호 변경", required = false),
             @ApiImplicitParam(name = "file", value = "유저 이미지", required = false)
     })
-    @PutMapping("/changeMyInfo/{userId}")
+    @PostMapping("/changeMyInfo/{userId}")
     public BaseResponse changeMyInfo(@PathVariable Long userId,
                                      @RequestParam(defaultValue = "", required = false) String userNickname,
                                      @RequestParam(defaultValue = "", required = false) String currentPassword,
                                      @RequestParam(defaultValue = "", required = false) String changePassword,
                                      @RequestParam(required = false) MultipartFile file
     ) throws SQLIntegrityConstraintViolationException {
+        if(userNickname == null){
+            userNickname = "";
+        }
+
+        if(currentPassword == null){
+            currentPassword = "";
+        }
+
+        if(changePassword == null){
+            changePassword = "";
+        }
+
         MypageUpdateDto mypageUpdateDto = new MypageUpdateDto();
         mypageUpdateDto.setFile(file);
         mypageUpdateDto.setChangePassword(changePassword);
@@ -181,3 +188,5 @@ public class MypageController {
         return mypageService.changeMyInfo(userId, SecurityContextHolder.getContext().getAuthentication().getName(), mypageUpdateDto);
     }
 }
+
+

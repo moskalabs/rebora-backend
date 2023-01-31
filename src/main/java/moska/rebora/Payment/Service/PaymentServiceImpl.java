@@ -427,6 +427,7 @@ public class PaymentServiceImpl implements PaymentService {
         return userRecruitment;
     }
 
+    @Override
     public JSONObject refundPayment(String merchantUid) {
 
         log.info("impUid={}", merchantUid);
@@ -775,8 +776,9 @@ public class PaymentServiceImpl implements PaymentService {
         //알림 생성
         notificationService.createNotificationPayment(
                 "모집 참여가 완료되었습니다.",
-                notificationService.createNotificationContent(movie.getMovieName(), theater.getTheaterStartDatetime(), theater.getTheaterDay(), theater.getTheaterCinemaBrandName(), theater.getTheaterCinemaName(), theater.getTheaterName()),
+                notificationService.createNotificationContent(theater.getTheaterStartDatetime(), theater.getTheaterDay(), theater.getTheaterCinemaBrandName(), theater.getTheaterCinemaName(), theater.getTheaterName()),
                 NotificationKind.CONFORMATION,
+                movie.getMovieName(),
                 user,
                 recruitment,
                 payment
@@ -944,6 +946,8 @@ public class PaymentServiceImpl implements PaymentService {
             JSONObject result = (JSONObject) jsonParser.parse(response.body());
             Long code = (Long) result.get("code");
             String message = (String) result.get("message"); //에러 메세지
+
+            log.info("결제 완료 code={} message={} statusCode={}", code, message, response.statusCode());
 
             if (code != 0L) {
                 throw new RuntimeException(message);

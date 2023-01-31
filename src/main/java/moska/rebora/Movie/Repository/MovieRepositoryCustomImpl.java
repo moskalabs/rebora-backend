@@ -5,6 +5,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.Entity.Category;
 import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -24,6 +25,7 @@ import static moska.rebora.Movie.Entity.QMovieCategory.movieCategory;
 import static moska.rebora.User.Entity.QUserMovie.userMovie;
 import static org.springframework.util.StringUtils.hasText;
 
+@Slf4j
 public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
@@ -56,6 +58,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                         userMovie.id.as("userMovieId")
                 ))
                 .from(movie)
+
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .leftJoin(movie.movieCategoryList, movieCategory)
                 .leftJoin(movieCategory.category, category)
@@ -71,19 +74,20 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         long total = queryFactory
                 .select(movie.count())
                 .from(movie)
-                .where(getCategory(searchCondition.getCategory()),
+                .where(
+                        getCategory(searchCondition.getCategory()),
                         getSearchWord(searchCondition.getSearchWord())
                 )
-                .join(movie.movieCategoryList, movieCategory)
-                .join(movieCategory.category, category)
-                .groupBy(movie.movieName)
+                .leftJoin(movie.movieCategoryList, movieCategory)
+                .leftJoin(movieCategory.category, category)
                 .fetchFirst();
 
-        content.forEach(m -> {
-            m.setConvertStartRation(convertStarRating(m.getMovieStarRating()));
-            m.setCategoryList(getCateGory(m.getId()));
-        });
-
+        if (!content.isEmpty()) {
+            content.forEach(m -> {
+                m.setConvertStartRation(convertStarRating(m.getMovieStarRating()));
+                m.setCategoryList(getCateGory(m.getId()));
+            });
+        }
         return new PageImpl<>(content, pageable, total);
     }
 

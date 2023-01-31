@@ -1,5 +1,6 @@
 package moska.rebora.Notification.Service;
 
+import lombok.AllArgsConstructor;
 import moska.rebora.Common.Service.AsyncTaskService;
 import moska.rebora.Common.Service.PushService;
 import moska.rebora.Enum.NotificationKind;
@@ -26,19 +27,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class NotificationServiceImpl implements NotificationService {
 
-    @Autowired
     NotificationRepository notificationRepository;
 
-    @Resource(name = "asyncTaskService")
-    AsyncTaskService asyncTaskService;
-
-    @Autowired
     PushService pushService;
 
     @Override
     public void createNotificationRecruitment(
+            @Param("movieName") String movieName,
             @Param("notificationSubject") String notificationSubject,
             @Param("notificationContent") String notificationContent,
             @Param("notificationKind") NotificationKind notificationKind,
@@ -55,12 +53,14 @@ public class NotificationServiceImpl implements NotificationService {
                     .notificationContent(notificationContent)
                     .notificationKind(notificationKind)
                     .recruitment(recruitment)
+                    .movieName(movieName)
+                    .notificationReadYn(false)
                     .user(u)
                     .build();
 
             notificationList.add(notification);
 
-            pushService.sendUserPush(u, notificationSubject, notificationContent);
+            pushService.sendUserPush(u, notificationSubject, movieName + " " + notificationContent);
         });
 
         notificationRepository.saveAll(notificationList);
@@ -72,6 +72,7 @@ public class NotificationServiceImpl implements NotificationService {
             String notificationContent,
             NotificationKind notificationKind,
             Recruitment recruitment,
+            String movieName,
             User user) {
 
         Notification notification = Notification
@@ -80,10 +81,11 @@ public class NotificationServiceImpl implements NotificationService {
                 .notificationContent(notificationContent)
                 .notificationKind(notificationKind)
                 .recruitment(recruitment)
+                .notificationReadYn(false)
                 .user(user)
                 .build();
 
-        pushService.sendUserPush(user, notificationSubject, notificationContent);
+        pushService.sendUserPush(user, notificationSubject, movieName + " " + notificationContent);
 
         notificationRepository.save(notification);
     }
@@ -95,7 +97,7 @@ public class NotificationServiceImpl implements NotificationService {
         List<NotificationDto> notificationDtoList = notificationDtoPage.getContent();
 
         List<Long> readNotificationIdList = notificationDtoList.stream().map(NotificationDto::getNotificationId).collect(Collectors.toList());
-        ;
+
         notificationRepository.readNotifications(readNotificationIdList);
 
         return notificationDtoPage;
@@ -106,9 +108,11 @@ public class NotificationServiceImpl implements NotificationService {
             String notificationSubject,
             String notificationContent,
             NotificationKind notificationKind,
+            String movieName,
             User user,
             Recruitment recruitment,
-            Payment payment) {
+            Payment payment
+    ) {
 
         Notification notification = Notification
                 .builder()
@@ -116,18 +120,19 @@ public class NotificationServiceImpl implements NotificationService {
                 .notificationContent(notificationContent)
                 .notificationKind(notificationKind)
                 .recruitment(recruitment)
+                .movieName(movieName)
+                .notificationReadYn(false)
                 .user(user)
                 .payment(payment)
                 .build();
 
-        pushService.sendUserPush(user, notificationSubject, notificationContent);
+        pushService.sendUserPush(user, notificationSubject, movieName + " " + notificationContent);
 
         notificationRepository.save(notification);
     }
 
     @Override
     public String createNotificationContent(
-            String movieName,
             LocalDateTime theaterStartDate,
             String theaterDay,
             String theaterBrand,
@@ -139,8 +144,6 @@ public class NotificationServiceImpl implements NotificationService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM월 dd일");
 
         stringBuilder
-                .append(movieName)
-                .append(" ")
                 .append(theaterStartDate.format(formatter))
                 .append(" (")
                 .append(theaterDay)
@@ -156,26 +159,29 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void createPaymentEndNotification(Recruitment recruitment, Theater theater, User user, Movie movie, Payment payment, Boolean paymentEndYn) {
+
         String content = createNotificationContent(
-                movie.getMovieName(),
                 theater.getTheaterStartDatetime(),
                 theater.getTheaterDay(),
                 theater.getTheaterCinemaBrandName(),
                 theater.getTheaterCinemaName(),
                 theater.getTheaterName()
         );
+
         String subject = "모집 신청한 " + movie.getMovieName() + "의 결재가" + (paymentEndYn ? "완료되었습니다." : "실패했습니다");
         Notification notification = Notification
                 .builder()
+                .movieName(movie.getMovieName())
                 .notificationSubject(subject)
                 .notificationContent(content)
                 .notificationKind(NotificationKind.CONFORMATION)
                 .recruitment(recruitment)
+                .notificationReadYn(false)
                 .user(user)
                 .payment(payment)
                 .build();
 
-        pushService.sendUserPush(user, subject, content);
+        pushService.sendUserPush(user, subject, movie.getMovieName() + " " + content);
 
         notificationRepository.save(notification);
     }

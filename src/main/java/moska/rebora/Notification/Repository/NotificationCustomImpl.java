@@ -38,13 +38,15 @@ public class NotificationCustomImpl implements NotificationCustom {
                         notification.modDate,
                         recruitment.id.as("recruitmentId"),
                         payment.paymentStatus,
-                        payment.paymentAmount
+                        payment.paymentAmount,
+                        notification.movieName
                 ))
                 .from(notification)
                 .join(notification.user, user)
                 .leftJoin(notification.recruitment, recruitment)
                 .leftJoin(notification.payment, payment)
                 .where(user.userEmail.eq(userEmail))
+                .orderBy(notification.regDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
