@@ -153,10 +153,14 @@ public class RecruitmentController {
             @RequestParam String merchantUid,
             @RequestParam String impUid
     ) {
+
+        log.info("모집 생성 Request userRecruitmentPeople={} movieId={} theaterId={} recruitmentIntroduce={} bannerYn={} bannerSubText={} bannerMainText={} merchantUid={} impUid={}",
+                userRecruitmentPeople, movieId, theaterId, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, merchantUid, impUid);
+
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         BaseInfoResponse<CreateRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
-        CreateRecruitmentDto createRecruitmentDto  = new CreateRecruitmentDto();
+        CreateRecruitmentDto createRecruitmentDto = new CreateRecruitmentDto();
 
         Recruitment recruitment = recruitmentService.createRecruitment(userRecruitmentPeople, userEmail, movieId, theaterId, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, merchantUid, impUid);
 

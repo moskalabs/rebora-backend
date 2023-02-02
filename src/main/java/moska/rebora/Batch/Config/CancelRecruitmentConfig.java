@@ -132,12 +132,14 @@ public class CancelRecruitmentConfig {
                     bannerService.bannerDelete(banner);
                 }
 
-                notificationService.createNotificationRecruitment(movie.getMovieName(), notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, userList);
+                //모집 취소 알림
+                notificationService.createNotificationRecruitment(movie.getMovieName(), notificationSubject, notificationContent, NotificationKind.HISTORY, recruitment, userList);
 
+                //짬헌 모집 알림
                 for (UserRecruitment userRecruitment : userWishRecruitmentList) {
                     User user = userRecruitment.getUser();
-                    notificationSubject = "찜한 모집의 모집이 취소되었습니다.";
-                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CANCEL, recruitment, movie.getMovieName(), user);
+                    notificationSubject = "찜한 모집이 취소되었습니다.";
+                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.WISH_RECRUITMENT, recruitment, movie.getMovieName(), user);
                     pushService.sendUserPush(user , notificationSubject, notificationContent);
                 }
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CANCEL);

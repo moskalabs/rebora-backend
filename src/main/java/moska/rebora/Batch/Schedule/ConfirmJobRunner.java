@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 @Component
 @AllArgsConstructor
-public class ConfirmJobRunner extends JobRunner{
+public class ConfirmJobRunner extends JobRunner {
 
     private Scheduler scheduler;
 
@@ -26,7 +26,7 @@ public class ConfirmJobRunner extends JobRunner{
         Trigger trigger = buildJobTrigger("0 0 0 * * ?"); // 30초마다 실행
         //Trigger trigger = buildJobTrigger("0/30 * * * * ?"); // 30초마다 실행
 
-        try{
+        try {
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             e.printStackTrace();

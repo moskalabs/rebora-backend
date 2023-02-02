@@ -52,7 +52,7 @@
     </style>
 </head>
 
-<body class="hold-transition sidebar-mini">
+<body class="hold-transition sidebar-mini" style="min-width: 1140px;">
 <div class="wrapper">
     <%@include file="../include/sidebar.jsp" %>
     <div class="content-wrapper" style="overflow-y: auto">

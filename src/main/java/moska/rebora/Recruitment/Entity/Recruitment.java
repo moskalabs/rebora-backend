@@ -65,7 +65,7 @@ public class Recruitment extends BaseEntity {
     }
 
     public void minusRecruitmentPeople(Integer recruitmentPeople) {
-        this.recruitmentPeople -= recruitmentPeople;
+        this.recruitmentPeople = recruitmentPeople;
     }
 
     public void updateRecruitmentPeople(Integer recruitmentPeople) {

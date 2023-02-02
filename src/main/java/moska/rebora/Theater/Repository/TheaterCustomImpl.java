@@ -8,6 +8,7 @@ import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Entity.QMovie;
 import moska.rebora.Movie.Repository.MovieRepository;
@@ -136,8 +137,10 @@ public class TheaterCustomImpl implements TheaterCustom {
                         movie.id.eq(movieId),
                         theater.theaterStartDatetime.goe(startDate),
                         theater.theaterEndDatetime.loe(endDate),
-                        theater.theaterRegion.eq(theaterRegion)
+                        theater.theaterRegion.eq(theaterRegion),
+                        theater.recruitment.isNull().or(theater.recruitment.recruitmentStatus.eq(RecruitmentStatus.RECRUITING)).or(theater.recruitment.recruitmentStatus.eq(RecruitmentStatus.CONFIRMATION))
                 )
+                .orderBy(theater.recruitment.id.asc().nullsFirst())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .fetch();
@@ -152,7 +155,8 @@ public class TheaterCustomImpl implements TheaterCustom {
                         movie.id.eq(movieId),
                         theater.theaterStartDatetime.goe(startDate),
                         theater.theaterEndDatetime.loe(endDate),
-                        theater.theaterRegion.eq(theaterRegion)
+                        theater.theaterRegion.eq(theaterRegion),
+                        theater.recruitment.isNull().or(theater.recruitment.recruitmentStatus.eq(RecruitmentStatus.RECRUITING)).or(theater.recruitment.recruitmentStatus.eq(RecruitmentStatus.CONFIRMATION))
                 );
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchFirst);

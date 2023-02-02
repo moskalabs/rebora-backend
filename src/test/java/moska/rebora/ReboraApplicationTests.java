@@ -935,7 +935,7 @@ class ReboraApplicationTests {
                                         .body("이미 주문이 이루어진 건입니다. (동일한 merchant_uid로 결제 또는 취소된 기록이 있습니다)")
                                         .image(null)
                                         .build())
-                                .token("eu3IsGgqT_KeqobTg0lirc:APA91bGYOyjsUq0xXxhogos3Z-BXu7Q8pGzxW9zM34DZVjabyXJORekoFJBL96NRtGkHwqtWlsOKnkBkZsIicd2EQRlbE1GFtahlgQ0oMU9pf3n62ad9AOykoebITB2_T3veBKSrGkG3")
+                                .token("fMmBcLdJTmeVkqLsQSLgVC:APA91bGKIcfd3EBY7yepn2TyuyFzM1Y0WDrM4yLFq-yqgao2zupfp6JfZTR5M9RbqmzxMGWOgqhKdf--FY6rS1pFcQupsMtCAsp9r3PB2CCX0DQ4CVbC3ApgSC3zZGBxidwB2UpkDhdT")
                                 .build()
                 )
                 .validate_only(false)
@@ -975,5 +975,14 @@ class ReboraApplicationTests {
                 messageFireBase();
             }
         }
+    }
+
+    @Test
+    @Transactional
+    void paymentGet(){
+        UserRecruitment userRecruitment = userRecruitmentRepository.findById(1L).get();
+        Optional<Payment> optionalPayment = paymentRepository.getPaymentByUserRecruitment(userRecruitment);
+
+        log.info("isEmpty={}" , optionalPayment.isEmpty());
     }
 }

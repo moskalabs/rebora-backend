@@ -2,6 +2,7 @@ package moska.rebora.Movie.Controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.Movie.Service.MovieService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/movie")
 @Tag(name = "영화")
 @AllArgsConstructor
+@Slf4j
 public class MovieController {
     MovieService movieService;
 
@@ -33,9 +35,11 @@ public class MovieController {
     @Tag(name = "영화")
     @GetMapping("/getList")
     public BasePageResponse<MoviePageDto> getList(
-            @PageableDefault(size = 9,page = 0, sort = "moviePopularCount", direction = Sort.Direction.ASC) Pageable pageable,
+            @PageableDefault(size = 9, page = 0, sort = "moviePopularCount", direction = Sort.Direction.ASC) Pageable pageable,
             @RequestParam(defaultValue = "all") String category
     ) {
+        log.info("sort={} category={} size={}, page={}", pageable.getSort(), category, pageable.getPageSize(), pageable.getOffset());
+
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserSearchCondition userSearchCondition = new UserSearchCondition();
         userSearchCondition.setCategory(category);
@@ -46,7 +50,7 @@ public class MovieController {
     /**
      * 영화 검색 가져오기
      *
-     * @param pageable 페이징
+     * @param pageable   페이징
      * @param searchWord 검색어
      * @return BasePageResponse
      */

@@ -7,12 +7,14 @@ import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Payment.Entity.Payment;
 import moska.rebora.Recruitment.Entity.Recruitment;
+import moska.rebora.User.Entity.UserRecruitment;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Payment.Entity.QPayment.payment;
@@ -52,5 +54,19 @@ public class PaymentRepositoryCustomImpl implements PaymentRepositoryCustom {
                         recruitment.recruitmentEndDate.between(beforeDate, now)
                 )
                 .fetch();
+    }
+
+    @Override
+    public Optional<Payment> getPaymentByUserRecruitment(UserRecruitment userRecruitments) {
+
+        if(userRecruitments.getPayment() == null){
+            return Optional.empty();
+        }else{
+            return Optional.ofNullable(queryFactory
+                    .select(payment)
+                    .from(payment)
+                    .where(payment.id.eq(userRecruitments.getPayment().getId()))
+                    .fetchOne());
+        }
     }
 }

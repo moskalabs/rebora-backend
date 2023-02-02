@@ -101,10 +101,16 @@ public class WishController {
         return basePageResponse;
     }
 
+    /**
+     * 찜한 영화 목록 가져오기
+     *
+     * @param pageable 페이징
+     * @return BasePageResponse<MoviePageDto>
+     */
     @Tag(name = "찜하기")
     @Operation(summary = "찜한 영화 리스트 가져오기")
     @GetMapping("/getMovieList")
-    public BasePageResponse<MoviePageDto> getMovieList(@PageableDefault Pageable pageable){
+    public BasePageResponse<MoviePageDto> getMovieList(@PageableDefault Pageable pageable) {
 
         BasePageResponse<MoviePageDto> basePageResponse = new BasePageResponse<>();
         basePageResponse.setResult(true);

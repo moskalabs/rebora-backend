@@ -116,7 +116,7 @@ public class ConfirmRecruitmentConfig {
                     );
 
                     String notificationSubject = "찜한 모집의 상영이 확정되었습니다.";
-                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.CONFORMATION, recruitment, movie.getMovieName(), user);
+                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.WISH_RECRUITMENT, recruitment, movie.getMovieName(), user);
                 }
 
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CONFIRMATION);

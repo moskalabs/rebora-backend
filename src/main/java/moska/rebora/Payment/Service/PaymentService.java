@@ -48,7 +48,7 @@ public interface PaymentService {
 
     JSONObject getPaymentByMerchantUid(String impUid);
 
-    JSONObject refundPayment(String merchantUid);
+    JSONObject refundPayment(String impUid);
 
     Payment createPayment(
             Integer amount,

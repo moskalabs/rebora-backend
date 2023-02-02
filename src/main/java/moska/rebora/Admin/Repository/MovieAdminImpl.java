@@ -36,22 +36,24 @@ public class MovieAdminImpl implements MovieAdmin {
                         movie.movieImage,
                         movie.movieRunningTime,
                         movie.moviePopularCount
-                )).distinct()
+                ))
                 .from(movie)
                 .leftJoin(movie.cinemaBrandMovieList, brandMovie)
                 .leftJoin(brandMovie.brand, brand)
                 .where(getSearchWord(searchCondition.getSearchWord(), searchCondition.getSearchCondition()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .groupBy(movie.movieName)
                 .orderBy(movie.moviePopularCount.desc())
                 .fetch();
 
         long total = queryFactory
-                .select(movie.countDistinct())
+                .select(movie.count())
                 .from(movie)
                 .leftJoin(movie.cinemaBrandMovieList, brandMovie)
                 .leftJoin(brandMovie.brand, brand)
                 .where(getSearchWord(searchCondition.getSearchWord(), searchCondition.getSearchCondition()))
+                .groupBy(movie.movieName)
                 .fetchFirst();
 
 //        content.forEach(m -> {

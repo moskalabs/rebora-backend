@@ -38,7 +38,7 @@ public class MypageController {
     UserService userService;
 
     /**
-     * 마이페이지 개수 가져오기
+     * 마이페이지 메인화면 정보
      *
      * @return JSONObject
      */
@@ -113,6 +113,14 @@ public class MypageController {
         return baseResponse;
     }
 
+    /**
+     * 야간 푸쉬 여부 업데이트
+     *
+     * @param userId          유저 아이디
+     * @param userPushNightYn 유저 야간 푸쉬 여부
+     * @param userPushKey     유저 푸쉬 키
+     * @return BaseResponse
+     */
     @Tag(name = "마이페이지")
     @Operation(summary = "야간 푸쉬 여부 업데이트")
     @PutMapping("/updatePushNightYn/{userId}")
@@ -168,15 +176,16 @@ public class MypageController {
                                      @RequestParam(defaultValue = "", required = false) String changePassword,
                                      @RequestParam(required = false) MultipartFile file
     ) throws SQLIntegrityConstraintViolationException {
-        if(userNickname == null){
+        
+        if (userNickname == null) {
             userNickname = "";
         }
 
-        if(currentPassword == null){
+        if (currentPassword == null) {
             currentPassword = "";
         }
 
-        if(changePassword == null){
+        if (changePassword == null) {
             changePassword = "";
         }
 

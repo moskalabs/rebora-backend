@@ -50,5 +50,7 @@ public class UserDto extends BaseResponse {
         userUseYn = user.getUserUseYn();
         userGrade = user.getUserGrade();
         userImage = user.getUserImage();
+        userSnsKind = user.getUserSnsKind();
+        userSnsId = user.getUserSnsId();
     }
 }

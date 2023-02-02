@@ -22,6 +22,7 @@ import java.util.List;
 import static moska.rebora.Common.Entity.QCategory.category;
 import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Movie.Entity.QMovieCategory.movieCategory;
+import static moska.rebora.User.Entity.QUser.user;
 import static moska.rebora.User.Entity.QUserMovie.userMovie;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -58,21 +59,23 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                         userMovie.id.as("userMovieId")
                 ))
                 .from(movie)
-
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
+                .leftJoin(userMovie.user, user)
                 .leftJoin(movie.movieCategoryList, movieCategory)
                 .leftJoin(movieCategory.category, category)
                 .groupBy(movie.movieName)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .where(getCategory(searchCondition.getCategory()),
+                .where(
+                        getCategory(searchCondition.getCategory()),
                         getSearchWord(searchCondition.getSearchWord())
                 )
-                .orderBy(ORDERS.toArray(OrderSpecifier[]::new))
+                .orderBy(
+                        ORDERS.toArray(OrderSpecifier[]::new))
                 .fetch();
 
         long total = queryFactory
-                .select(movie.count())
+                .select(movie.countDistinct())
                 .from(movie)
                 .where(
                         getCategory(searchCondition.getCategory()),
@@ -108,15 +111,19 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
             switch (order.getProperty()) {
                 case "moviePopularCount":
                     ORDERS.add(new OrderSpecifier(direction, movie.moviePopularCount));
+                    ORDERS.add(new OrderSpecifier(Order.DESC, movie.movieStarRating));
                     break;
                 case "movieName":
                     ORDERS.add(new OrderSpecifier(direction, movie.movieName));
+                    ORDERS.add(new OrderSpecifier(Order.DESC, movie.movieStarRating));
                     break;
                 case "movieStarRating":
                     ORDERS.add(new OrderSpecifier(direction, movie.movieStarRating));
+                    ORDERS.add(new OrderSpecifier(Order.DESC, movie.movieStarRating));
                     break;
                 default:
                     ORDERS.add(new OrderSpecifier(Order.DESC, movie.regDate));
+                    ORDERS.add(new OrderSpecifier(Order.DESC, movie.movieStarRating));
                     break;
             }
         }

@@ -163,41 +163,57 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             @Param("merchantUid") String merchantUid,
             @Param("impUid") String impUid
     ) {
-        JSONObject response = new JSONObject();
-
         User user = userRepository.getUserByUserEmail(userEmail);
         Optional<Theater> optionalTheater = theaterRepository.findById(theaterId);
         Optional<Movie> movieOptional = movieRepository.findById(movieId);
 
         if (optionalTheater.isEmpty()) {
-            JSONObject jsonObject = paymentService.refundPayment(merchantUid);
+            JSONObject jsonObject = paymentService.refundPayment(impUid);
             Long code = (Long) jsonObject.get("code");
             if (code != 0L) {
                 throw new NullPointerException("존재하지 않는 상영관입니다. 환불이 완료되지 않았습니다 관리자에게 문의해주세요");
             } else {
-                throw new NullPointerException("존재하지 않는 상영관입니다. 환불 완료되었습니다.");
+                JSONObject responseTheater = (JSONObject) jsonObject.get("response");
+                String status = (String) responseTheater.get("status");
+                if (status.equals("failed")) {
+                    throw new NullPointerException("존재하지 않는 상영관입니다. 환불이 완료되지 않았습니다 관리자에게 문의해주세요");
+                } else {
+                    throw new NullPointerException("존재하지 않는 상영관입니다. 환불 완료되었습니다.");
+                }
             }
         }
 
         Theater theater = optionalTheater.get();
 
         if (theater.getRecruitment() != null) {
-            JSONObject jsonObject = paymentService.refundPayment(merchantUid);
+            JSONObject jsonObject = paymentService.refundPayment(impUid);
             Long code = (Long) jsonObject.get("code");
             if (code != 0L) {
                 throw new NullPointerException("이미 모집된 상영관입니다. 환불이 완료되지 않았습니다 관리자에게 문의해주세요");
             } else {
-                throw new NullPointerException("이미 모집된 상영관입니다. 환불 완료되었습니다.");
+                JSONObject responseRecruitment = (JSONObject) jsonObject.get("response");
+                String status = (String) responseRecruitment.get("status");
+                if (status.equals("failed")) {
+                    throw new NullPointerException("이미 모집된 상영관입니다. 환불이 완료되지 않았습니다 관리자에게 문의해주세요");
+                } else {
+                    throw new NullPointerException("이미 모집된 상영관입니다. 환불 완료되었습니다.");
+                }
             }
         }
 
         if (movieOptional.isEmpty()) {
-            JSONObject jsonObject = paymentService.refundPayment(merchantUid);
+            JSONObject jsonObject = paymentService.refundPayment(impUid);
             Long code = (Long) jsonObject.get("code");
             if (code != 0L) {
                 throw new NullPointerException("존재하지 않는 영화입니다. 환불이 완료되지 않았습니다 관리자에게 문의해주세요");
             } else {
-                throw new NullPointerException("존재하지 않는 영화입니다. 환불 완료되었습니다.");
+                JSONObject responseMovie = (JSONObject) jsonObject.get("response");
+                String status = (String) responseMovie.get("status");
+                if (status.equals("failed")) {
+                    throw new NullPointerException("존재하지 않는 영화입니다. 환불이 완료되지 않았습니다 관리자에게 문의해주세요");
+                } else {
+                    throw new NullPointerException("존재하지 않는 영화입니다. 환불 완료되었습니다.");
+                }
             }
         }
 
@@ -226,7 +242,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         String content = user.getUserNickname() + "님의 모집 영화(" + movie.getMovieName() + ")의 " + userRecruitmentPeople + "명 즉시 결제";
 
         //결제
-        response = paymentService.getPaymentByMerchantUid(impUid);
+        JSONObject response = paymentService.getPaymentByMerchantUid(impUid);
 
         Long amount = (Long) response.get("amount"); //결제금액
         Long paidAt = (Long) response.get("paid_at"); //결제 시각
@@ -236,6 +252,12 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         String payMethod = (String) response.get("pay_method"); //결제 방법
         String pgProvider = (String) response.get("pg_provider"); //PG사
         String receiptUrl = (String) response.get("receipt_url"); //영수증 URL
+        String status = (String) response.get("status"); //결제 상태
+        String failReason = (String) response.get("fail_reason"); //실패 이유
+
+        if (status.equals("failed")) {
+            throw new RuntimeException("결제가 실패했습니다. 다시 시도해주세요. 실패 이유 : " + failReason);
+        }
 
         //결제 시기
         LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
@@ -268,7 +290,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         asyncTaskService.createNotificationRecruitment(
                 notificationSubject,
                 notificationContent,
-                NotificationKind.RECRUITING,
+                NotificationKind.WISH_MOVIE,
                 recruitment.getId(),
                 movie.getId()
         );
@@ -276,7 +298,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         notificationService.createNotificationPayment(
                 "모집의 결제가 완료되었습니다.",
                 notificationContent,
-                NotificationKind.RECRUITING,
+                NotificationKind.RECRUITMENT,
                 movie.getMovieName(),
                 user,
                 recruitment,
@@ -483,9 +505,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         userRecruitment.updateUserRecruitment(false, 0);
         userRecruitmentRepository.save(userRecruitment);
 
-        recruitment.minusRecruitmentPeople(userRecruitmentPeople);
+        recruitment.minusRecruitmentPeople((recruitment.getRecruitmentPeople() - userRecruitmentPeople));
         recruitmentRepository.save(recruitment);
     }
-
-
 }

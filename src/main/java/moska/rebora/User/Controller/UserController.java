@@ -215,6 +215,12 @@ public class UserController {
         return userEmailAuthService.validationEmailCode(userEmail, verifyNumber, emailAuthKind);
     }
 
+    /**
+     * 탈퇴하기
+     *
+     * @param userId 유저 아이디
+     * @return
+     */
     @Tag(name = "유저", description = "회원 탈퇴")
     @Operation(summary = "회원 탈퇴")
     @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true)

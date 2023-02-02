@@ -65,7 +65,9 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
 
     @Override
     public Long countMyRecruiter(@Param("userEmail") @Valid String userEmail) {
-        return queryFactory.select(recruitment.id.count())
+        return queryFactory.select(
+                        recruitment.id.count()
+                )
                 .from(recruitment)
                 .where(recruitment.createdBy.eq(userEmail))
                 .fetchOne();
@@ -115,7 +117,7 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                                 payment.id.as("paymentId")
                         ))
                 .from(userRecruitment)
-                .leftJoin(userRecruitment.user, user)
+                .join(userRecruitment.user, user)
                 .leftJoin(userRecruitment.recruitment, recruitment)
                 .leftJoin(recruitment.movie, movie)
                 .leftJoin(recruitment.theater, theater)

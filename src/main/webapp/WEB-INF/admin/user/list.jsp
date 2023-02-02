@@ -214,12 +214,16 @@
                                 <div class="ml-3"
                                      style="display:flex; flex-direction:column; text-align:left; height:100%; justify-content:flex-end; width: 80px;">
                                     <p class="mb-1"> &nbsp;</p>
-                                    <button type="button" onclick="searchUser()" class="btn btn-secondary mb-2" style="width: 80px;">&nbsp;검색&nbsp;</button>
+                                    <button type="button" onclick="searchUser()" class="btn btn-secondary mb-2"
+                                            style="width: 80px;">&nbsp;검색&nbsp;
+                                    </button>
                                 </div>
                                 <div class="ml-3"
                                      style="display:flex; flex-direction:column; text-align:left; height:100%; justify-content:flex-end; width: 140px;">
                                     <p class="mb-1"> &nbsp;</p>
-                                    <button type="button" onclick="createUser()" class="btn btn-secondary mb-2" style="width: 140px;">&nbsp;회원 등록&nbsp;</button>
+                                    <button type="button" onclick="createUser()" class="btn btn-secondary mb-2"
+                                            style="width: 140px;">&nbsp;회원 등록&nbsp;
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -331,14 +335,17 @@
                                                     <td>
                                                         <button type="button"
                                                                 class="btn btn-secondary ms-3 btn-secondary"
-                                                                onclick="onclickUserUse(${user.userId}, false)">&nbsp;비활성&nbsp;
+                                                                onclick="
+                                                                        onclickUserUse(${user.userId}, false)">&nbsp;비활성&nbsp;
                                                         </button>
                                                     </td>
                                                 </c:when>
                                                 <c:when test="${user.userUseYn == false}">
                                                     <td>
                                                         <button type="button" class="btn btn-secondary ms-3 btn-primary"
-                                                                onclick="onclickUserUse(${user.userId}, true)">&nbsp;활성&nbsp;
+                                                                onclick="
+                                                                        onclickUserUse(${user.userId}, true)
+                                                                        ">&nbsp;활성&nbsp;
                                                         </button>
                                                     </td>
                                                 </c:when>
@@ -457,6 +464,7 @@
     }
 
     function onclickUserUse(userId, userUseYn) {
+        event.stopPropagation();
         Swal.fire({
             title            : "취소",
             text             : "해당 유저를 " + (userUseYn ? "활성" : "비활성") + " 하시겠습니까?",
@@ -535,7 +543,7 @@
         location.href = "<%=CURRENT_SERVER%>/admin/user/info?userId=" + userId;
     }
 
-    function createUser(){
+    function createUser() {
         location.href = "<%=CURRENT_SERVER%>/admin/user/info?userId";
     }
 

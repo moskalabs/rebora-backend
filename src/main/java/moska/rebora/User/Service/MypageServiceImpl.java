@@ -90,9 +90,9 @@ public class MypageServiceImpl implements MypageService {
     public Page<UserRecruitmentListDto> getMyRecruiter(Pageable pageable) {
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserSearchCondition userSearchCondition = new UserSearchCondition();
+        userSearchCondition.setUserRecruitmentYn(true);
         userSearchCondition.setCreateByMe(true);
-        Page<UserRecruitmentListDto> userRecruitmentListDtoPage = userRecruitmentRepository.getUserRecruitmentList(userEmail, pageable, userSearchCondition);
-        return userRecruitmentListDtoPage;
+        return userRecruitmentRepository.getUserRecruitmentList(userEmail, pageable, userSearchCondition);
     }
 
     /**

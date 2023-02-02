@@ -169,20 +169,37 @@ public class NotificationServiceImpl implements NotificationService {
         );
 
         String subject = "모집 신청한 " + movie.getMovieName() + "의 결재가" + (paymentEndYn ? "완료되었습니다." : "실패했습니다");
-        Notification notification = Notification
-                .builder()
-                .movieName(movie.getMovieName())
-                .notificationSubject(subject)
-                .notificationContent(content)
-                .notificationKind(NotificationKind.CONFORMATION)
-                .recruitment(recruitment)
-                .notificationReadYn(false)
-                .user(user)
-                .payment(payment)
-                .build();
 
-        pushService.sendUserPush(user, subject, movie.getMovieName() + " " + content);
+        if(paymentEndYn){
+            Notification notification = Notification
+                    .builder()
+                    .movieName(movie.getMovieName())
+                    .notificationSubject(subject)
+                    .notificationContent(content)
+                    .notificationKind(NotificationKind.RECRUITMENT)
+                    .recruitment(recruitment)
+                    .notificationReadYn(false)
+                    .user(user)
+                    .payment(payment)
+                    .build();
 
-        notificationRepository.save(notification);
+            pushService.sendUserPush(user, subject, movie.getMovieName() + " " + content);
+            notificationRepository.save(notification);
+        }else{
+            Notification notification = Notification
+                    .builder()
+                    .movieName(movie.getMovieName())
+                    .notificationSubject(subject)
+                    .notificationContent(content)
+                    .notificationKind(NotificationKind.HISTORY)
+                    .recruitment(recruitment)
+                    .notificationReadYn(false)
+                    .user(user)
+                    .payment(payment)
+                    .build();
+
+            pushService.sendUserPush(user, subject, movie.getMovieName() + " " + content);
+            notificationRepository.save(notification);
+        }
     }
 }

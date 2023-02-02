@@ -340,7 +340,7 @@
                                                     </c:otherwise>
                                                 </c:choose>
                                                 <label class="form-check-label" for="WITHDRAWAL">
-                                                    휴면
+                                                    탈퇴
                                                 </label>
                                             </div>
                                         </div>
