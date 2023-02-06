@@ -1,6 +1,7 @@
 package moska.rebora.User.Service;
 
 import com.mchange.util.DuplicateElementException;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import moska.rebora.Common.Util;
 import moska.rebora.Enum.EmailAuthKind;
@@ -20,18 +21,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 @Service
-@NoArgsConstructor
+@AllArgsConstructor
 public class UserEmailServiceImpl implements UserEmailAuthService {
 
-    @Autowired
     UserEmailAuthRepository userEmailAuthRepository;
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     PasswordEncoder passwordEncoder;
-
-    @Autowired
     Util util;
 
     /**
@@ -47,10 +42,14 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
         Optional<UserEmailAuth> userEmailAuthOptional =
                 userEmailAuthRepository.getUserEmailAuthByEmailAndExpireYnAndEmailAuthKind(userEmail, true, emailAuthKind);
 
+        //이메일 인증 받은 적이 없을 경우
         if (userEmailAuthOptional.isEmpty()) {
             throw new NullPointerException("이메일 인증이 옳바르지 않습니다. 다시 시도해주세요");
+
+
         } else {
             UserEmailAuth userEmailAuth = userEmailAuthOptional.get();
+            //이메일 인증이 올바르지 않을 경우
             if (!passwordEncoder.matches(userEmail, authKey)) {
                 throw new CredentialsExpiredException("이메일 인증이 옳바르지 않습니다. 인증을 다시 시도해주세요");
             }
@@ -146,11 +145,14 @@ public class UserEmailServiceImpl implements UserEmailAuthService {
         UserEmailDto userEmailDto = new UserEmailDto();
         Optional<UserEmailAuth> userEmailAuthOptional = userEmailAuthRepository.getUserEmailAuthByEmailAndExpireYnAndEmailAuthKind(userEmail, true, emailAuthKind);
 
+        //이메일 인증이 없을 경우
         if (userEmailAuthOptional.isEmpty()) {
             throw new NullPointerException("인증 도중 오류가 발생하였습니다. 메일 인증을 다시 시도해주세요.");
         }
 
         UserEmailAuth userEmailAuth = userEmailAuthOptional.get();
+
+        //이메일 인증 비밀번호 맞는지 매칭
         if (passwordEncoder.matches(verifyNumber, userEmailAuth.getVerifyNumber())) {
 
             String authKey = passwordEncoder.encode(userEmail);

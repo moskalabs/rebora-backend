@@ -1,5 +1,6 @@
 package moska.rebora.User.Service;
 
+import lombok.AllArgsConstructor;
 import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Repository.MovieRepository;
@@ -22,25 +23,17 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class WishServiceImpl implements WishService {
 
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     RecruitmentRepository recruitmentRepository;
-
-    @Autowired
     UserRecruitmentRepository userRecruitmentRepository;
-
-    @Autowired
     MovieRepository movieRepository;
-
-    @Autowired
     UserMovieRepository userMovieRepository;
 
     /**
-     * 모집 좋아요
+     * 모집 찜 변경
      *
      * @param userRecruitmentId   유저_모집 PK
      * @param recruitmentId       모집 PK
@@ -52,10 +45,15 @@ public class WishServiceImpl implements WishService {
 
         User user = userRepository.getUserByUserEmail(userEmail);
         UserRecruitment userRecruitment;
+
+        //유저 모집이 없을 경우 유저 모집 생성
         if (userRecruitmentId == null) {
             Recruitment recruitment = recruitmentRepository.getRecruitmentById(recruitmentId);
             Optional<UserRecruitment> recruitmentOptional = userRecruitmentRepository.getUserRecruitmentByUserAndRecruitment(user, recruitment);
+
+            //유저 모집이 없을 경우 유저 모집 생성
             if (recruitmentOptional.isEmpty()) {
+
                 userRecruitment = UserRecruitment.builder()
                         .userRecruitmentWish(true)
                         .userRecruitmentYn(false)
@@ -65,11 +63,15 @@ public class WishServiceImpl implements WishService {
 
                 userRecruitmentRepository.save(userRecruitment);
             } else {
+
+                //유저 모집 찜 변경
                 userRecruitment = recruitmentOptional.get();
                 userRecruitment.changeWish(userRecruitmentWish);
                 userRecruitmentRepository.save(userRecruitment);
             }
         } else {
+
+            //유저 모집 찜 변경
             userRecruitment = userRecruitmentRepository.getReferenceById(userRecruitmentId);
             userRecruitment.changeWish(userRecruitmentWish);
             userRecruitmentRepository.save(userRecruitment);
@@ -86,12 +88,16 @@ public class WishServiceImpl implements WishService {
      */
     @Override
     public void wishMovie(Long userMovieId, Long movieId, String userEmail, Boolean userMovieWish) {
+
         User user = userRepository.getUserByUserEmail(userEmail);
         UserMovie userMovie;
 
+        //유저 영화가 없을 경우
         if (userMovieId == null) {
             Movie movie = movieRepository.getMovieById(movieId);
             Optional<UserMovie> checkUserMovieOption = userMovieRepository.getUserMovieByUserAndMovie(user, movie);
+
+            //유저 영화가 없을 경우
             if (checkUserMovieOption.isEmpty()) {
                 userMovie = UserMovie
                         .builder()
@@ -102,11 +108,15 @@ public class WishServiceImpl implements WishService {
 
                 userMovieRepository.save(userMovie);
             } else {
+
+                //유저 영화 찜 변경
                 userMovie = checkUserMovieOption.get();
                 userMovie.changeWish(userMovieWish);
                 userMovieRepository.save(userMovie);
             }
         } else {
+
+            //유저 영화 찜 변경
             userMovie = userMovieRepository.getReferenceById(userMovieId);
             userMovie.changeWish(userMovieWish);
             userMovieRepository.save(userMovie);
@@ -124,7 +134,7 @@ public class WishServiceImpl implements WishService {
     public Page<UserRecruitmentListDto> getRecruitmentList(Pageable pageable, String userEmail) {
 
         UserSearchCondition userSearchCondition = new UserSearchCondition();
-        userSearchCondition.setUserRecruitmentWish(true);
+        userSearchCondition.setUserRecruitmentWish(true); //찜한 것 만 가져오기
 
         return userRecruitmentRepository.getUserRecruitmentList(userEmail, pageable, userSearchCondition);
     }
@@ -132,16 +142,16 @@ public class WishServiceImpl implements WishService {
     /**
      * 찜 목록 영화 리스트 가져오기
      *
-     * @param pageable 페이징
+     * @param pageable  페이징
      * @param userEmail 유저 이메이
      * @return Page<MoviePageDto>
      */
     @Override
     public Page<MoviePageDto> getMovieList(@Param("pageable") Pageable pageable,
-                                    @Param("userEmail") String userEmail){
+                                           @Param("userEmail") String userEmail) {
 
         UserSearchCondition userSearchCondition = new UserSearchCondition();
-        userSearchCondition.setUserMovieWish(true);
+        userSearchCondition.setUserMovieWish(true); //찜한 것 만 가져오기
         return userMovieRepository.getUserMovieList(userSearchCondition, userEmail, pageable);
     }
 }

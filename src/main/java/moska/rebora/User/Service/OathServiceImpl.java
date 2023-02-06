@@ -62,11 +62,18 @@ public class OathServiceImpl implements OathService {
     private NotificationRepository notificationRepository;
     private PasswordAuthAuthenticationManager authenticationManager;
     private JwtAuthTokenProvider jwtAuthTokenProvider;
-
     PasswordEncoder passwordEncoder;
 
     private static final Date expiredDate = Date.from(LocalDateTime.now().plusYears(1L).atZone(ZoneId.systemDefault()).toInstant());
 
+    /**
+     * SNS 로그인
+     *
+     * @param authToken   토큰
+     * @param userSnsKind SNS 종류
+     * @param userPushKey 유저 푸쉬 키
+     * @return UserLoginDto
+     */
     @Override
     public UserLoginDto login(String authToken, UserSnsKind userSnsKind, @Param("userPushKey") String userPushKey) {
 
@@ -75,77 +82,67 @@ public class OathServiceImpl implements OathService {
         String userSnsId = "";
         String userEmail = "";
 
+        //SNS 종류가 네이버 일 경우
         if (userSnsKind.equals(UserSnsKind.NAVER)) {
+            log.info("네이버 로그인 Start");
+            //토큰으로 유저 정보 가져오기
             prmMap = getNaverUserInfo(authToken);
             userEmail = String.valueOf(prmMap.get("userEmail"));
             userSnsId = String.valueOf(prmMap.get("snsId"));
             log.info("token={}", authToken);
             log.info("네이버 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
-
-            Optional<User> optionalUser = Optional.ofNullable(userRepository.getUserByUserEmail(userEmail));
-
-            if (optionalUser.isEmpty()) {
-                userLoginDto.setResult(true);
-                userLoginDto.setErrorCode("500");
-                userLoginDto.setUserEmail(userEmail);
-                userLoginDto.setUserSnsId(userSnsId);
-                userLoginDto.setUserSnsKind(UserSnsKind.NAVER);
-                userLoginDto.setMessage("유저정보가 존재하지 않습니다. 회원가입 하시겠습니까?");
-            } else {
-                User user = optionalUser.get();
-                user.changePushKey(userPushKey);
-                userRepository.save(user);
-                userLoginDto = getUserLoginDto(user, userSnsKind);
-            }
+            //login 데이터 만들기
+            userLoginDto = snsLogin(userEmail, userSnsId, userPushKey, UserSnsKind.NAVER);
+            log.info("네이버 로그인 End");
         }
 
         if (userSnsKind.equals(UserSnsKind.KAKAO)) {
+            log.info("카카오 로그인 Start");
+            //토큰으로 유저 정보 가져오기
             prmMap = getKaKaoUserInfo(authToken);
             userEmail = String.valueOf(prmMap.get("userEmail"));
             userSnsId = String.valueOf(prmMap.get("snsId"));
-
+            //login 데이터 만들기
             log.info("카카오 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
-
-            Optional<User> optionalUser = Optional.ofNullable(userRepository.getUserByUserEmail(userEmail));
-            if (optionalUser.isEmpty()) {
-                userLoginDto.setResult(true);
-                userLoginDto.setErrorCode("500");
-                userLoginDto.setUserEmail(userEmail);
-                userLoginDto.setUserSnsId(userSnsId);
-                userLoginDto.setUserSnsKind(UserSnsKind.KAKAO);
-                userLoginDto.setMessage("유저정보가 존재하지 않습니다. 회원가입 하시겠습니까?");
-            } else {
-                User user = optionalUser.get();
-                user.changePushKey(userPushKey);
-                userRepository.save(user);
-                userLoginDto = getUserLoginDto(user, userSnsKind);
-            }
+            userLoginDto = snsLogin(userEmail, userSnsId, userPushKey, UserSnsKind.KAKAO);
+            log.info("카카오 로그인 End");
         }
 
         if (userSnsKind.equals(UserSnsKind.APPLE)) {
             log.info("애플 로그인 Start");
             log.info("token={}", authToken);
+            //토큰으로 유저 정보 가져오기
             prmMap = getAppleUserInfo(authToken);
             userEmail = String.valueOf(prmMap.get("userEmail"));
             userSnsId = String.valueOf(prmMap.get("snsId"));
             log.info("애플 SNS 유저 아이디 결과 snsLoginUserEmail={} snsUserSnsId={}", userEmail, userSnsId);
-            Optional<User> optionalUser = Optional.ofNullable(userRepository.getUserByUserEmail(userEmail));
-
-            if (optionalUser.isEmpty()) {
-                userLoginDto.setResult(true);
-                userLoginDto.setErrorCode("500");
-                userLoginDto.setUserEmail(userEmail);
-                userLoginDto.setUserSnsId(userSnsId);
-                userLoginDto.setUserSnsKind(UserSnsKind.APPLE);
-                userLoginDto.setMessage("유저정보가 존재하지 않습니다. 회원가입 하시겠습니까?");
-            } else {
-                User user = optionalUser.get();
-                user.changePushKey(userPushKey);
-                userRepository.save(user);
-                userLoginDto = getUserLoginDto(user, userSnsKind);
-            }
+            //login 데이터 만들기
+            userLoginDto = snsLogin(userEmail, userSnsId, userPushKey, UserSnsKind.APPLE);
             log.info("애플 로그인 End");
         }
+        return userLoginDto;
+    }
+
+    public UserLoginDto snsLogin(String userEmail, String userSnsId, String userPushKey, UserSnsKind userSnsKind) {
+
+        UserLoginDto userLoginDto = new UserLoginDto();
+        Optional<User> optionalUser = Optional.ofNullable(userRepository.getUserByUserEmail(userEmail));
+
+        //유저 정보가 없을 경우 회원가입으로 안내
+        if (optionalUser.isEmpty()) {
+            userLoginDto.setResult(true);
+            userLoginDto.setErrorCode("500");
+            userLoginDto.setUserEmail(userEmail);
+            userLoginDto.setUserSnsId(userSnsId);
+            userLoginDto.setUserSnsKind(userSnsKind);
+            userLoginDto.setMessage("유저정보가 존재하지 않습니다. 회원가입 하시겠습니까?");
+        } else {
+            User user = optionalUser.get();
+            user.changePushKey(userPushKey);
+            userRepository.save(user);
+            userLoginDto = getUserLoginDto(user, userSnsKind);
+        }
+
         return userLoginDto;
     }
 

@@ -30,6 +30,8 @@ public class AdminMovieDto {
     private String movieDetailLink;
     @Schema(description = "영화 상영시간")
     private Integer movieRunningTime;
+    @Schema(description = "영화 상영시간")
+    private Integer moviePrice;
     @Schema(description = "영화 모집된 횟수")
     private Integer moviePopularCount;
     @Schema(description = "영화 평점 변환")
@@ -52,6 +54,7 @@ public class AdminMovieDto {
         this.movieRunningTime = moviePageDto.getMovieRunningTime();
         this.moviePopularCount = moviePageDto.getMoviePopularCount();
         this.convertStartRation = moviePageDto.getConvertStartRation();
+        this.moviePrice = moviePageDto.getMoviePrice();
     }
 
     public AdminMovieDto() {

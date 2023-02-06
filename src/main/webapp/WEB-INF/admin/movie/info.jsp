@@ -153,6 +153,14 @@
                                                                    aria-describedby="emailHelp"></td>
                                 </tr>
                                 <tr>
+                                    <th class="border-end" scope="row" style="width: 20%;">영화 가격</th>
+                                    <td style="width: 80%;"><input type="text"
+                                                                   value="${response.content.moviePrice}"
+                                                                   style="width:100px"
+                                                                   class="form-control mb-2" id="moviePrice"
+                                                                   aria-describedby="emailHelp"></td>
+                                </tr>
+                                <tr>
                                     <th class="border-end" scope="row" style="width: 20%;">평점</th>
                                     <td style="width: 80%;"><input type="text"
                                                                    value="${response.content.convertStartRation}"
@@ -379,6 +387,7 @@
         let movieRating = $('input:radio[name=movieRating]:checked').val();
         let movieDirector = $("#movieDirector").val();
         let movieStarRating = $("#movieStarRating").val();
+        let moviePrice = $("#moviePrice").val();
 
         let category = [];
         $("input:checkbox[name='category']").each(function (index, value) {
@@ -404,6 +413,7 @@
         let changeMovieRecruitmentImage = $('input#changeMovieRecruitmentImage')[0].files[0]
 
         let formData = new FormData();
+
         if (movieName != "") {
             formData.append("movieName", movieName);
         }
@@ -442,6 +452,10 @@
 
         if (changeMovieImage != undefined) {
             formData.append("changeMovieImage", changeMovieImage);
+        }
+
+        if (moviePrice != "") {
+            formData.append("moviePrice", moviePrice);
         }
 
         if (changeMovieBannerImage != undefined) {

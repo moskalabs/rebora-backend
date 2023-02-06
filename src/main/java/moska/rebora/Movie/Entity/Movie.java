@@ -104,7 +104,8 @@ public class Movie extends BaseEntity {
             Integer movieStarRating,
             String movieDetailLink,
             Integer moviePopularCount,
-            Integer movieRunningTime
+            Integer movieRunningTime,
+            Integer moviePrice
     ) {
         this.movieName = movieName;
         this.movieRating = MovieRating.valueOf(movieRating);
@@ -113,6 +114,7 @@ public class Movie extends BaseEntity {
         this.movieDetailLink = movieDetailLink;
         this.moviePopularCount = moviePopularCount;
         this.movieRunningTime = movieRunningTime;
+        this.moviePrice = moviePrice;
     }
 
     public void addImage(

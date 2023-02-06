@@ -1,6 +1,7 @@
 package moska.rebora.User.Service;
 
 import com.mchange.util.DuplicateElementException;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Common.Util;
@@ -36,30 +37,23 @@ import java.util.Map;
 
 @Service
 @Slf4j
+@AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private PasswordAuthAuthenticationManager authenticationManager;
 
-    @Autowired
     private JwtAuthTokenProvider jwtAuthTokenProvider;
 
-    @Autowired
     private UserEmailAuthRepository userEmailAuthRepository;
 
-    @Autowired
     private UserEmailAuthService userEmailAuthService;
 
-    @Autowired
     PasswordEncoder passwordEncoder;
 
-    @Autowired
     NotificationRepository notificationRepository;
 
-    @Autowired
     Util util;
 
 
@@ -78,18 +72,22 @@ public class UserServiceImpl implements UserService {
                               @Param("userPushKey") String userPushKey) {
         User user = userRepository.getUserByUserEmail(userEmail);
 
+        //없는 유저 일 경우
         if (user == null) {
-            throw new NullPointerException("아이디가 일치하지 않습니다. \n입력하신 내용을 다시 확인해 주세요.");
+            throw new NullPointerException("존재하지 않는 아이디 입니다. \n입력하신 내용을 다시 확인해 주세요.");
         }
 
+        //탈퇴된 회원 일 경우
         if (!user.getUserUseYn()) {
             throw new NullPointerException("탈퇴된 회원입니다.");
         }
 
+        //SNS 가입으로 된 회원 일 경우
         if (user.getUserSnsKind() != null) {
             throw new DuplicateElementException("SNS으로 회원가입한 회원입니다. 가입한 SNS : " + user.getUserSnsKind());
         }
 
+        //푸쉬 키 변경
         user.changePushKey(userPushKey);
         userRepository.save(user);
 
@@ -129,10 +127,14 @@ public class UserServiceImpl implements UserService {
 
         UserEmailAuth userEmailAuth = null;
         try {
+
+            //인증 받아오기
             userEmailAuth = userEmailAuthService.checkUserEmailAuth(userEmail, authKey, EmailAuthKind.SIGNUP);
+
             //비밀번호 인코딩
             String bcryptPassword = passwordEncoder.encode(password);
             UserSnsKind snsKind = null;
+
             if (userSnsKind != null) {
                 snsKind = UserSnsKind.valueOf(userSnsKind);
             }
@@ -170,9 +172,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * 유저 이메일로 정보 가져오기
+     *
+     * @param userEmail 유저 이메일
+     * @return UserDto
+     */
     public UserDto getUserInfoByUserEmail(@Param("userEmail") @Valid String userEmail) {
 
         UserDto userDto = new UserDto(userRepository.getUserByUserEmail(userEmail));
+
+        //유저 알림 카운트 가져오기
         userDto.setNotificationCount(notificationRepository.countNotificationByNotificationReadYnFalseAndUserUserEmail(userEmail));
         return userDto;
     }
@@ -187,13 +197,19 @@ public class UserServiceImpl implements UserService {
     @Override
     public BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail, @Param("emailAuthKind") EmailAuthKind emailAuthKind) {
 
+        //인증 번호 생성
         String verifyNumber = util.createRandomString(6);
         BaseResponse baseResponse = new BaseResponse();
         try {
+
+            //비밀번호 찾기 일 경우
             if (emailAuthKind == EmailAuthKind.PASSWORD) {
                 userEmailAuthService.sendPasswordEmail(userEmail, verifyNumber);
                 baseResponse.setResult(true);
+
+                //회원 가입 일 경우
             } else {
+                //이미 가입된 아이디 일 경우
                 if (userRepository.countUSerByUserEmail(userEmail) >= 1) {
                     throw new DuplicateElementException("이미 가입된 아이디 입니다. \n로그인을 진행해주세요.");
                 } else {
@@ -219,10 +235,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public BaseResponse checkRedundancyNickname(@Param("userNickname") String userNickname) {
         BaseResponse baseResponse = new BaseResponse();
+
         int userCount = userRepository.countUserByUserNickname(userNickname);
         try {
+
+            //중복된 닉네임이 있을 없을 경우
             if (userCount == 0) {
                 baseResponse.setResult(true);
+                //중복된 닉네임이 있을 있을 경우
             } else {
                 throw new SQLIntegrityConstraintViolationException("이미 존재하는 유저 이름입니다.");
             }
@@ -245,6 +265,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public BaseResponse changePassword(String userEmail, String password, @Param("authKey") String authKey) {
 
+        //인증 검증
         UserEmailAuth userEmailAuth = userEmailAuthService.checkUserEmailAuth(userEmail, authKey, EmailAuthKind.PASSWORD);
 
         User user = userRepository.getUserByUserEmail(userEmail);

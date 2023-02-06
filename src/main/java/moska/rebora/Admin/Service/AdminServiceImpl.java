@@ -159,6 +159,12 @@ public class AdminServiceImpl implements AdminService {
         }
     }
 
+    /**
+     * 관리자 영화 상세보기
+     *
+     * @param movieId 영화 아이디
+     * @return BaseInfoResponse<AdminMovieDto>
+     */
     @Override
     public BaseInfoResponse<AdminMovieDto> getMovieInfo(Long movieId) {
         BaseInfoResponse<AdminMovieDto> baseInfoResponse = new BaseInfoResponse<>();
@@ -254,20 +260,21 @@ public class AdminServiceImpl implements AdminService {
             String cinema,
             String movieDetailLink,
             Integer movieRunningTime,
+            Integer moviePrice,
             Integer moviePopularCount,
             MultipartFile changeMovieImage,
             MultipartFile changeMovieBannerImage,
             MultipartFile changeMovieRecruitmentImage) {
 
         if (movieId == null) {
-            createMovie(movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePopularCount, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
+            createMovie(movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePrice, moviePopularCount, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
         } else {
-            updateMovie(movieId, movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePopularCount, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
+            updateMovie(movieId, movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePopularCount, moviePrice, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
         }
     }
 
     @Transactional
-    void createMovie(String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
+    void createMovie(String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePrice, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
 
         int convertMovieStarRating = 0;
         String[] startRatingList = movieStarRating.split("\\.");
@@ -280,7 +287,16 @@ public class AdminServiceImpl implements AdminService {
             }
         }
 
-        Movie movie = Movie.builder().movieName(movieName).movieRating(MovieRating.valueOf(movieRating)).movieDirector(movieDirector).movieDetailLink(movieDetailLink).movieRunningTime(movieRunningTime).movieStarRating(convertMovieStarRating).moviePopularCount(moviePopularCount).build();
+        Movie movie = Movie.builder()
+                .movieName(movieName)
+                .movieRating(MovieRating.valueOf(movieRating))
+                .movieDirector(movieDirector)
+                .movieDetailLink(movieDetailLink)
+                .movieRunningTime(movieRunningTime)
+                .moviePrice(moviePrice)
+                .movieStarRating(convertMovieStarRating)
+                .moviePopularCount(moviePopularCount)
+                .build();
 
         movieRepository.save(movie);
 
@@ -324,7 +340,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Transactional
-    void updateMovie(Long movieId, String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
+    void updateMovie(Long movieId, String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePrice, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
         Movie movie = movieRepository.getMovieById(movieId);
         int convertMovieStarRating = 0;
         String[] startRatingList = movieStarRating.split("\\.");
@@ -349,7 +365,7 @@ public class AdminServiceImpl implements AdminService {
             movie.changeMovieRecruitmentImage(uploadMovieImage(changeMovieRecruitmentImage, movieId, "info"));
         }
 
-        movie.updateMovie(movieName, movieRating, movieDirector, convertMovieStarRating, movieDetailLink, moviePopularCount, movieRunningTime);
+        movie.updateMovie(movieName, movieRating, movieDirector, convertMovieStarRating, movieDetailLink, moviePopularCount, movieRunningTime, moviePrice);
         movieRepository.save(movie);
 
 

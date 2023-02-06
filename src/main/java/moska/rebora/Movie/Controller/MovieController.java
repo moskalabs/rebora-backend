@@ -40,6 +40,8 @@ public class MovieController {
     ) {
         log.info("sort={} category={} size={}, page={}", pageable.getSort(), category, pageable.getPageSize(), pageable.getOffset());
 
+
+
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserSearchCondition userSearchCondition = new UserSearchCondition();
         userSearchCondition.setCategory(category);

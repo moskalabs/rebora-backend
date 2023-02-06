@@ -64,6 +64,7 @@ public interface AdminService {
             @Param("cinema") String cinema,
             @Param("movieDetailLink") String movieDetailLink,
             @Param("movieRunningTime") Integer movieRunningTime,
+            @Param("moviePrice") Integer moviePrice,
             @Param("moviePopularCount") Integer moviePopularCount,
             @Param("changeMovieImage") MultipartFile changeMovieImage,
             @Param("changeMovieBannerImage") MultipartFile changeMovieBannerImage,

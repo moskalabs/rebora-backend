@@ -30,6 +30,13 @@ public class OathController {
 
     OathService oathService;
 
+    /**
+     * 네이버 로그인
+     *
+     * @param authToken   토큰
+     * @param userPushKey 유저 푸쉬 키
+     * @return UserLoginDto
+     */
     @PostMapping("/naverLogin")
     public UserLoginDto naverLogin(
             @RequestParam String authToken,
@@ -42,6 +49,13 @@ public class OathController {
         return userLoginDto;
     }
 
+    /**
+     * 카카오 로그인
+     *
+     * @param authToken   토큰
+     * @param userPushKey 유저 푸쉬 키
+     * @return UserLoginDto
+     */
     @PostMapping("/kakaoLogin")
     public UserLoginDto kakaoLogin(
             @RequestParam String authToken,
@@ -50,6 +64,13 @@ public class OathController {
         return oathService.login(authToken, UserSnsKind.KAKAO, userPushKey);
     }
 
+    /**
+     * 애플 로그인
+     *
+     * @param idToken     아이디 토큰
+     * @param userPushKey 유저 푸쉬 키
+     * @return UserLoginDto
+     */
     @PostMapping("/appleLogin")
     public UserLoginDto appleLogin(
             @RequestParam String idToken,
@@ -58,6 +79,13 @@ public class OathController {
         return oathService.login(idToken, UserSnsKind.APPLE, userPushKey);
     }
 
+    /**
+     * 애플 안드로이드 콜백
+     *
+     * @param body 파라미터 받기
+     * @return ResponseEntity<Object>
+     * @throws URISyntaxException URL 통신 오류
+     */
     @CrossOrigin(origins = "https://appleid.apple.com")
     @PostMapping(value = "/appleCallback", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public ResponseEntity<Object> appleCallback(EchoAppleLogin body) throws URISyntaxException {
@@ -68,9 +96,21 @@ public class OathController {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(new URI(callback));
         return new ResponseEntity<>(httpHeaders, HttpStatus.TEMPORARY_REDIRECT);
-
     }
 
+    /**
+     * SNS 회원가입
+     *
+     * @param userEmail       유저 이메일
+     * @param userName        유저 이름
+     * @param userNickname    유저 닉네임
+     * @param userSnsKind     유저 SNS 종류
+     * @param userSnsId       유저 SNS Id
+     * @param userPushYn      유저 푸쉬 여부
+     * @param userPushNightYn 유저 푸쉬 야간 여부
+     * @param userPushKey     유저 푸쉬 키
+     * @return UserLoginDto
+     */
     @PostMapping("/signUpSns")
     public UserLoginDto signUpSns(
             @RequestParam String userEmail,
@@ -85,11 +125,20 @@ public class OathController {
         return oathService.signUpSns(userEmail, userName, userNickname, UserSnsKind.valueOf(userSnsKind), userSnsId, userPushYn, userPushNightYn, userPushKey);
     }
 
+    /**
+     * SNS 정보 가져오기
+     *
+     * @param userSnsKind 유저 SNS 종류
+     * @param authToken   토큰
+     * @return BaseInfoResponse<SnsInfo>
+     */
     @GetMapping("/getSnsInfo")
     public BaseInfoResponse<SnsInfo> getSnsInfo(
             String userSnsKind,
             String authToken
     ) {
+
+
 
         BaseInfoResponse<SnsInfo> baseInfoResponse = new BaseInfoResponse<>();
         SnsInfo snsInfo = new SnsInfo();

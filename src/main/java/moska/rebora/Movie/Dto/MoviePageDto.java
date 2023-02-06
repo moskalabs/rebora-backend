@@ -29,6 +29,8 @@ public class MoviePageDto{
     private String movieDetailLink;
     @Schema(description = "영화 상영시간")
     private Integer movieRunningTime;
+    @Schema(description = "영화 가격")
+    private Integer moviePrice;
     @Schema(description = "영화 모집된 횟수")
     private Integer moviePopularCount;
     @Schema(description = "영화 평점")

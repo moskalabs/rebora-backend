@@ -46,7 +46,7 @@ public class Util {
 
 
             Transport transport = getMailSession.getTransport("smtp");
-            transport.connect("kkp02052@gmail.com", password);
+            transport.connect("moskastudio3@gmail.com", password);
             transport.sendMessage(generateMailMessage, generateMailMessage.getAllRecipients());
             transport.close();
         } catch (AddressException e) {

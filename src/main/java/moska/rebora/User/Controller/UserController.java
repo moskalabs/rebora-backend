@@ -99,15 +99,15 @@ public class UserController {
     })
     UserLoginDto signUp(
             @RequestParam("userEmail") String userEmail,
-                        @RequestParam("password") String password,
-                        @RequestParam("userName") String userName,
-                        @RequestParam("userNickname") String userNickname,
-                        @RequestParam(value = "userPushYn", required = false) Boolean userPushYn,
-                        @RequestParam(value = "userPushNightYn", required = false) Boolean userPushNightYn,
-                        @RequestParam(value = "userPushKey", required = false) String userPushKey,
-                        @RequestParam(value = "authKey") String authKey,
-                        @RequestParam(value = "userSnsKind", required = false) String userSnsKind,
-                        @RequestParam(value = "userSnsId", required = false) String userSnsId
+            @RequestParam("password") String password,
+            @RequestParam("userName") String userName,
+            @RequestParam("userNickname") String userNickname,
+            @RequestParam(value = "userPushYn", required = false) Boolean userPushYn,
+            @RequestParam(value = "userPushNightYn", required = false) Boolean userPushNightYn,
+            @RequestParam(value = "userPushKey", required = false) String userPushKey,
+            @RequestParam(value = "authKey") String authKey,
+            @RequestParam(value = "userSnsKind", required = false) String userSnsKind,
+            @RequestParam(value = "userSnsId", required = false) String userSnsId
     ) throws SQLIntegrityConstraintViolationException {
         return userService.signUp(
                 userEmail,
@@ -198,9 +198,8 @@ public class UserController {
      * @param userEmail     유저 이메일
      * @param verifyNumber  인증번호
      * @param emailAuthKind 유저 인증 종류
-     * @return JSONObject
+     * @return UserEmailDto
      */
-
     @Tag(name = "유저")
     @Operation(summary = "인증이메일 검사")
     @PostMapping("/validationEmailCode")
@@ -219,7 +218,7 @@ public class UserController {
      * 탈퇴하기
      *
      * @param userId 유저 아이디
-     * @return
+     * @return BaseResponse
      */
     @Tag(name = "유저", description = "회원 탈퇴")
     @Operation(summary = "회원 탈퇴")
@@ -231,7 +230,6 @@ public class UserController {
         baseResponse.setResult(true);
 
         User user = userRepository.getUserById(userId);
-
 
         if (!user.getUserEmail().equals(SecurityContextHolder.getContext().getAuthentication().getName())) {
             throw new JwtException("옳바르지 않은 인증입니다.");

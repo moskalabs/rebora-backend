@@ -77,6 +77,7 @@ public class MovieAdminImpl implements MovieAdmin {
                         movie.movieRecruitmentImage,
                         movie.movieDetailLink,
                         movie.movieRunningTime,
+                        movie.moviePrice,
                         movie.moviePopularCount,
                         movie.movieStarRating
                 ))
