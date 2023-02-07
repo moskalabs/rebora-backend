@@ -421,6 +421,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminTheaterResponseDto getAdminTheaterPage(String theaterRegion, String theaterCinemaBrandName, LocalDate selectDate, Pageable pageable) {
+
         AdminTheaterResponseDto adminTheaterResponseDto = new AdminTheaterResponseDto();
         adminTheaterResponseDto.setResult(true);
         adminTheaterResponseDto.setPage(theaterRepository.getAdminPage(theaterRegion, theaterCinemaBrandName, selectDate, pageable));

@@ -137,9 +137,7 @@ public class OathController {
             String userSnsKind,
             String authToken
     ) {
-
-
-
+        
         BaseInfoResponse<SnsInfo> baseInfoResponse = new BaseInfoResponse<>();
         SnsInfo snsInfo = new SnsInfo();
 

@@ -33,10 +33,12 @@
     </style>
 </head>
 <c:set var="today" value="<%=new java.util.Date()%>"/>
-<c:set var="date"><fmt:formatDate value="${today}" pattern="yyyy-MM-dd"/></c:set>
-<fmt:parseDate value="${ param.selectDate }" pattern="yyyy-MM-dd"
+<c:set var="date">
+    <fmt:formatDate value="${today}" pattern="yyyy-MM"/>
+</c:set>
+<fmt:parseDate value="${ param.selectDate }" pattern="yyyy-MM"
                var="parseSelectDate" type="both"/>
-<c:set var="selectDate"><fmt:formatDate value="${parseSelectDate}" pattern="yyyy-MM-dd"/></c:set>
+<c:set var="selectDate"><fmt:formatDate value="${parseSelectDate}" pattern="yyyy-MM"/></c:set>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
     <input id="csvUpload" type="file" onchange="onchangeFileUpload()" accept="text/csv"/>
@@ -168,9 +170,9 @@
                             </div>
                         </div>
                         <div style="display:flex; width:33%; justify-content:center;">
-                            <input type="date" id="start" name="trip-start" onchange="onclickSelectDate(this.value)"
-                                   value="${selectDate != '' ? selectDate : date}" min="2022-01-01"
-                                   max="2099-12-30">
+                            <input type="month" id="start" name="trip-start" onchange="onclickSelectDate(this.value)"
+                                   value="${selectDate != '' ? selectDate : date}" min="2022-01"
+                                   max="2099-12">
                         </div>
                         <div style="display:flex; width:33%; justify-content:flex-end;">
                             <div class="btn-group" role="group" aria-label="Basic outlined example">
@@ -197,6 +199,7 @@
                                         <th scope="col" style="width:5%">번호</th>
                                         <th scope="col" style="width:15%">상영관</th>
                                         <th scope="col" style="width:7%">상영 시간</th>
+                                        <th scope="col" style="width:15%">상영 날짜</th>
                                         <th scope="col" style="width:15%">상영 시작/종료 시각</th>
                                         <th scope="col" style="width:8%">상영 가격</th>
                                         <th scope="col" style="width:8%">모집 상태</th>
@@ -209,13 +212,22 @@
                                         <fmt:parseDate value="${ theater.theaterStartTime }"
                                                        pattern="yyyy-MM-dd'T'HH:mm"
                                                        var="parseTheaterStartTime" type="both"/>
+                                        <fmt:parseDate value="${ theater.theaterStartTime }"
+                                                       pattern="yyyy-MM-dd"
+                                                       var="parseTheaterDate" type="both"/>
                                         <fmt:parseDate value="${ theater.theaterEndTime }" pattern="yyyy-MM-dd'T'HH:mm"
                                                        var="parseTheaterEndTime" type="both"/>
                                         <tr style="cursor:pointer" onclick="goToDetail(${theater.theaterId})">
                                             <th scope="row">${theaterList.page.pageable.offset + status.index + 1}</th>
                                             <td>${theater.theaterRegion} ${theater.theaterCinemaName} ${theater.theaterName}</td>
-                                            <td>${theater.theaterTime}분</td>
-                                            <td><fmt:formatDate pattern="HH:mm" value="${ parseTheaterStartTime }"/> ~
+                                            <td>
+                                                    ${theater.theaterTime}분
+                                            </td>
+                                            <td>
+                                                <fmt:formatDate pattern="yyyy년MM월dd일" value="${ parseTheaterStartTime }"/>
+                                            </td>
+                                            <td>
+                                                <fmt:formatDate pattern="HH:mm" value="${ parseTheaterStartTime }"/> ~
                                                 <fmt:formatDate
                                                         pattern="HH:mm" value="${ parseTheaterEndTime }"/></td>
                                             <td>${theater.theaterPrice}원</td>
@@ -339,7 +351,6 @@
     function onclickSelectDate(selectDate) {
         let cinemaBrandName = '${param.cinemaBrandName}';
         let theaterRegion = '${param.theaterRegion}';
-
         if (cinemaBrandName === '') {
             cinemaBrandName = "CGV";
         }

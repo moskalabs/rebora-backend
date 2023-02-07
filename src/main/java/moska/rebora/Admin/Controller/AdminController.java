@@ -160,7 +160,7 @@ public class AdminController {
         LocalDate date = LocalDate.now();
 
         if (!selectDate.equals("")) {
-            date = LocalDate.parse(selectDate);
+            date = LocalDate.parse(selectDate+"-01");
         }
 
         mav.addObject("theaterList", adminService.getAdminTheaterPage(theaterRegion, theaterCinemaBrandName, date, pageable));

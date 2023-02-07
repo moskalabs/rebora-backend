@@ -1,14 +1,17 @@
 package moska.rebora.Admin.Repository;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Admin.Dto.AdminRegionDto;
 import moska.rebora.Admin.Dto.AdminTheaterDto;
 import moska.rebora.Admin.Dto.QAdminTheaterDto;
-import moska.rebora.Theater.Dto.QTheaterPageDto;
-import moska.rebora.Theater.Dto.TheaterPageDto;
+import moska.rebora.Enum.RecruitmentStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
@@ -19,12 +22,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-import static moska.rebora.Cinema.Entity.QBrand.brand;
-import static moska.rebora.Cinema.Entity.QBrandMovie.brandMovie;
-import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
+import static moska.rebora.User.Entity.QUser.user;
 
+@Slf4j
 public class TheaterAdminImpl implements TheaterAdmin {
 
     private final JPAQueryFactory queryFactory;
@@ -35,8 +37,10 @@ public class TheaterAdminImpl implements TheaterAdmin {
 
     public Page<AdminTheaterDto> getAdminPage(String theaterRegion, String theaterCinemaBrandName, LocalDate selectDate, Pageable pageable) {
 
-        LocalDateTime startDate = selectDate.atStartOfDay();
-        LocalDateTime endDate = selectDate.atTime(LocalTime.MAX);
+        log.info("selectDate={}", selectDate);
+
+        LocalDateTime startMonthDate = selectDate.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime endMonthDate = selectDate.withDayOfMonth(selectDate.lengthOfMonth()).atTime(LocalTime.MAX);
 
         List<AdminTheaterDto> content = queryFactory.select(new QAdminTheaterDto(
                         theater.id.as("theaterId"),
@@ -59,10 +63,11 @@ public class TheaterAdminImpl implements TheaterAdmin {
                 .leftJoin(theater.recruitment, recruitment)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
+                .orderBy(recruitmentStatusOrderBy())
                 .where(
                         theater.theaterRegion.eq(theaterRegion),
                         theater.theaterCinemaBrandName.eq(theaterCinemaBrandName),
-                        theater.theaterStartDatetime.between(startDate, endDate)
+                        theater.theaterStartDatetime.between(startMonthDate, endMonthDate)
                 )
                 .fetch();
 
@@ -72,7 +77,7 @@ public class TheaterAdminImpl implements TheaterAdmin {
                 .where(
                         theater.theaterRegion.eq(theaterRegion),
                         theater.theaterCinemaBrandName.eq(theaterCinemaBrandName),
-                        theater.theaterStartDatetime.between(startDate, endDate)
+                        theater.theaterStartDatetime.between(startMonthDate, endMonthDate)
                 );
 
         return PageableExecutionUtils.getPage(content, pageable, total::fetchFirst);
@@ -81,23 +86,23 @@ public class TheaterAdminImpl implements TheaterAdmin {
     @Override
     public AdminTheaterDto getAdminDetail(Long theaterId) {
         return queryFactory.select(
-                new QAdminTheaterDto(
-                        theater.id.as("theaterId"),
-                        theater.theaterName,
-                        theater.theaterStartDatetime.as("theaterStartTime"),
-                        theater.theaterEndDatetime.as("theaterEndTime"),
-                        theater.theaterDay,
-                        theater.theaterRegion,
-                        theater.theaterPrice,
-                        theater.theaterCinemaBrandName,
-                        theater.theaterCinemaName,
-                        theater.theaterMaxPeople,
-                        theater.theaterMinPeople,
-                        theater.theaterTime,
-                        recruitment.id.as("recruitmentId"),
-                        recruitment.recruitmentStatus,
-                        recruitment.recruitmentPeople
-                ))
+                        new QAdminTheaterDto(
+                                theater.id.as("theaterId"),
+                                theater.theaterName,
+                                theater.theaterStartDatetime.as("theaterStartTime"),
+                                theater.theaterEndDatetime.as("theaterEndTime"),
+                                theater.theaterDay,
+                                theater.theaterRegion,
+                                theater.theaterPrice,
+                                theater.theaterCinemaBrandName,
+                                theater.theaterCinemaName,
+                                theater.theaterMaxPeople,
+                                theater.theaterMinPeople,
+                                theater.theaterTime,
+                                recruitment.id.as("recruitmentId"),
+                                recruitment.recruitmentStatus,
+                                recruitment.recruitmentPeople
+                        ))
                 .from(theater)
                 .leftJoin(theater.recruitment, recruitment)
                 .where(theater.id.eq(theaterId))
@@ -113,5 +118,15 @@ public class TheaterAdminImpl implements TheaterAdmin {
                 .from(theater)
                 .groupBy(theater.theaterRegion)
                 .fetch();
+    }
+
+    private OrderSpecifier<Integer> recruitmentStatusOrderBy() {
+        NumberExpression<Integer> cases = new CaseBuilder()
+                .when(recruitment.recruitmentStatus.eq(RecruitmentStatus.CONFIRMATION)).then(1)
+                .when(recruitment.recruitmentStatus.eq(RecruitmentStatus.RECRUITING)).then(2)
+                .when(recruitment.recruitmentStatus.eq(RecruitmentStatus.COMPLETED)).then(3)
+                .when(recruitment.recruitmentStatus.eq(RecruitmentStatus.CANCEL)).then(4)
+                .otherwise(5);
+        return new OrderSpecifier<>(Order.ASC, cases);
     }
 }
