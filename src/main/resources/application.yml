@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://rebora.cubzbc1hlyxy.ap-northeast-2.rds.amazonaws.com:3306/rebora?enabledTLSProtocols=TLSv1.2&characterEncoding=utf-8&autoReconnect=TRUE&rewriteBatchedStatements=true&serverTimezone=Asia/Seoul
+    url: jdbc:mysql://rebora.cubzbc1hlyxy.ap-northeast-2.rds.amazonaws.com:3306/rebora_dev?enabledTLSProtocols=TLSv1.2&characterEncoding=utf-8&autoReconnect=TRUE&rewriteBatchedStatements=true&serverTimezone=Asia/Seoul
     username: moskastudio
     password: moskastudio~!1
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -19,23 +19,34 @@ spring:
         default_batch_fetch_size: 100
         jdbc:
           batch_size: 500
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
   data:
     web:
       pageable:
         max-page-size: 100
   mvc:
     view:
-      prefix: /WEB-INF/views/
+      prefix: /WEB-INF/
       suffix: .jsp
+    path match:
+      matching-strategy: ant_path_matcher
   main:
     allow-circular-references: true
     allow-bean-definition-overriding: true
 
 
 logging:
+  exception-conversion-word: '%wEx'
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS} %clr(${LOG_LEVEL_PATTERN:-%5p}){green} %clr([%22thread]){magenta} %clr(%-40.40logger{39}){cyan} %clr(: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}){faint}'
   level:
     org.hibernate.SQL: debug
     org.hibernate.type: trace
+    org.springframework.web.filter.CommonsRequestLoggingFilter : DEBUG
 
 jwt:
   header: Authorization
@@ -46,14 +57,14 @@ server:
   error:
     include-exception: true
   ssl:
-    enabled: true
+    enabled: false
     key-store: classpath:m.re-bora.com.jks
     key-store-password: moska~!@1
     key-store-type: jks
-  port: 443
+  port: 8080
 mail:
-  username: kkp02052@gmail.com
-  password: jhbpwkcvougoljlx
+  username: moskastudio3@gmail.com
+  password: ldshulnzexdceelf
 
 cloud:
   aws:
@@ -67,4 +78,19 @@ cloud:
     s3:
       bucket: rebora
 
+sns:
+  login:
+    naver:
+      client-id: JSzbJqjUJalGWU8Ssh39
+      key: X1xn8OMLWd
 
+toss:
+  payments:
+    test:
+      client-key: test_ck_lpP2YxJ4K875ZWkNeDJVRGZwXLOb
+      authorization : dGVzdF9za183WFpZa0tMNE1yak1ESmQ3dlprVjB6SndsRVdSOg==
+
+import:
+  auth:
+    imp_key: 1552251027035377
+    imp_secret: FBVSWCbJTmWqda0ZpZbPZTuhFhLOWyIvTnybuyAmQWACvdZeszaUY7Pp4uLgbNy1RTo3BviNFmAb54f4
