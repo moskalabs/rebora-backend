@@ -2,14 +2,16 @@ package moska.rebora.Movie.Dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import moska.rebora.Common.Entity.Category;
 import moska.rebora.Enum.MovieRating;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @Schema(description = "영화 페이징 DTO")
-public class MoviePageDto{
+public class MoviePageDto {
 
     @Schema(description = "영화 아이디")
     private Long id;
@@ -37,6 +39,7 @@ public class MoviePageDto{
     private Integer movieStarRating;
     @Schema(description = "영화 평점 변환")
     private String convertStartRation;
+    private Boolean movieUseYn;
     @Schema(description = "유저_영화 아이디")
     private Long userMovieId;
     @Schema(description = "영화 찜 여부")

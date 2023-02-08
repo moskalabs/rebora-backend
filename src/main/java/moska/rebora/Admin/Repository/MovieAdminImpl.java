@@ -79,7 +79,8 @@ public class MovieAdminImpl implements MovieAdmin {
                         movie.movieRunningTime,
                         movie.moviePrice,
                         movie.moviePopularCount,
-                        movie.movieStarRating
+                        movie.movieStarRating,
+                        movie.movieUseYn
                 ))
                 .from(movie)
                 .where(movie.id.eq(movieId))

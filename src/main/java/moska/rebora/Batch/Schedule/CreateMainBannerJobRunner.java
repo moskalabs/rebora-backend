@@ -20,8 +20,7 @@ public class CreateMainBannerJobRunner extends JobRunner{
     protected void doRun(ApplicationArguments args) {
 
         JobDetail jobDetail = buildJobDetail(CreateMainBannerSchJob.class, "createMainBannerJob", "batch", new HashMap());
-        Trigger trigger = buildJobTrigger("0 0 15,12 * * ?"); // 30초마다 실행
-        //Trigger trigger = buildJobTrigger("0/30 * * * * ?"); // 30초마다 실행
+        Trigger trigger = buildJobTrigger("0 0 9,15 * * ?");
 
         try{
             scheduler.scheduleJob(jobDetail, trigger);

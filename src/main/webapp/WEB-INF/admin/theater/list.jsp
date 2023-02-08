@@ -408,10 +408,22 @@
                 "token": token
             },
             enctype    : 'multipart/form-data',
-            data       : formData,
+            data       : formData,ㄴ
             processData: false,
             contentType: false,
             method     : "POST",
+            error : function (data) {
+                if (!data.responseJSON.result) {
+                    let message = data.responseJSON.message;
+                    message = message.split(":")[1]
+                    Swal.fire({
+                        title: "오류",
+                        text: message,
+                    }).then(() => {
+                        return false;
+                    })
+                }
+            }
         }).done(function (data) {
             if (data.result === true) {
                 Swal.fire({

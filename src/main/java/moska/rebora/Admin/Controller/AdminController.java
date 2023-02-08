@@ -283,6 +283,7 @@ public class AdminController {
             @RequestParam(required = false) Integer movieRunningTime,
             @RequestParam(required = false) Integer moviePrice,
             @RequestParam(required = false) Integer moviePopularCount,
+            @RequestParam(required = false) Boolean movieUseYn,
             @RequestParam(required = false) MultipartFile changeMovieImage,
             @RequestParam(required = false) MultipartFile changeMovieBannerImage,
             @RequestParam(required = false) MultipartFile changeMovieRecruitmentImage
@@ -300,6 +301,7 @@ public class AdminController {
                 movieRunningTime,
                 moviePopularCount,
                 moviePrice,
+                movieUseYn,
                 changeMovieImage,
                 changeMovieBannerImage,
                 changeMovieRecruitmentImage

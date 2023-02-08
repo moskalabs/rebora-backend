@@ -290,6 +290,51 @@
                                         </div>
                                     </td>
                                 </tr>
+                                <tr>
+                                    <th class="border-end" scope="row" style="width: 25%;">영화 활성화 여부</th>
+                                    <td style="width: 100%; height: 60px; font-size:16px; align-items: center">
+                                        <div class="form-group clearfix" style="margin-bottom: 0; margin-top: 6px;">
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${response.content.movieUseYn == true}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="true"
+                                                               name="movieUseYn"
+                                                               id="movieUseY" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="true"
+                                                               name="movieUseYn"
+                                                               id="movieUseY">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="movieUseY">
+                                                    예
+                                                </label>
+                                            </div>
+                                            <div class="icheck-primary d-inline">
+                                                <c:choose>
+                                                    <c:when test="${response.content.movieUseYn == false}">
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="false"
+                                                               name="movieUseY"
+                                                               id="movieUseN" checked>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <input style="margin: 0" class="form-check-input" type="radio"
+                                                               value="false"
+                                                               name="movieUseN"
+                                                               id="movieUseN">
+                                                    </c:otherwise>
+                                                </c:choose>
+                                                <label class="form-check-label" for="movieUseN">
+                                                    아니요
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -388,6 +433,7 @@
         let movieDirector = $("#movieDirector").val();
         let movieStarRating = $("#movieStarRating").val();
         let moviePrice = $("#moviePrice").val();
+        let movieUseYn = $('input:radio[name=movieUseYn]:checked').val();
 
         let category = [];
         $("input:checkbox[name='category']").each(function (index, value) {
@@ -468,6 +514,10 @@
 
         if (movieId != "") {
             formData.append("movieId", ${param.movieId});
+        }
+
+        if (movieUseYn != undefined) {
+            formData.append("movieUseYn", movieUseYn);
         }
 
         $.ajax({

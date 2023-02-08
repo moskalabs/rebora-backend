@@ -16,6 +16,7 @@ import java.util.List;
 public class RecruitmentInfoDto {
     private String movieName;
     private String movieRecruitmentImage;
+    private String movieImage;
     private Integer movieRunningTime;
     private Long movieId;
 

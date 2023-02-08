@@ -1,5 +1,6 @@
 package moska.rebora.Admin.Service;
 
+import com.mchange.util.DuplicateElementException;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import io.jsonwebtoken.JwtException;
@@ -46,6 +47,7 @@ import moska.rebora.User.Repository.UserRepository;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -262,19 +264,20 @@ public class AdminServiceImpl implements AdminService {
             Integer movieRunningTime,
             Integer moviePrice,
             Integer moviePopularCount,
+            Boolean movieUseYn,
             MultipartFile changeMovieImage,
             MultipartFile changeMovieBannerImage,
             MultipartFile changeMovieRecruitmentImage) {
 
         if (movieId == null) {
-            createMovie(movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePrice, moviePopularCount, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
+            createMovie(movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePrice, moviePopularCount, movieUseYn, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
         } else {
-            updateMovie(movieId, movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePopularCount, moviePrice, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
+            updateMovie(movieId, movieName, movieRating, movieDirector, movieStarRating, category, cinema, movieDetailLink, movieRunningTime, moviePrice, moviePopularCount, movieUseYn, changeMovieImage, changeMovieBannerImage, changeMovieRecruitmentImage);
         }
     }
 
     @Transactional
-    void createMovie(String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePrice, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
+    void createMovie(String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePrice, Integer moviePopularCount, Boolean movieUseYn, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
 
         int convertMovieStarRating = 0;
         String[] startRatingList = movieStarRating.split("\\.");
@@ -296,6 +299,7 @@ public class AdminServiceImpl implements AdminService {
                 .moviePrice(moviePrice)
                 .movieStarRating(convertMovieStarRating)
                 .moviePopularCount(moviePopularCount)
+                .movieUseYn(movieUseYn)
                 .build();
 
         movieRepository.save(movie);
@@ -340,7 +344,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Transactional
-    void updateMovie(Long movieId, String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePrice, Integer moviePopularCount, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
+    void updateMovie(Long movieId, String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePrice, Integer moviePopularCount, Boolean movieUseYn, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
         Movie movie = movieRepository.getMovieById(movieId);
         int convertMovieStarRating = 0;
         String[] startRatingList = movieStarRating.split("\\.");
@@ -365,7 +369,7 @@ public class AdminServiceImpl implements AdminService {
             movie.changeMovieRecruitmentImage(uploadMovieImage(changeMovieRecruitmentImage, movieId, "info"));
         }
 
-        movie.updateMovie(movieName, movieRating, movieDirector, convertMovieStarRating, movieDetailLink, moviePopularCount, movieRunningTime, moviePrice);
+        movie.updateMovie(movieName, movieRating, movieDirector, convertMovieStarRating, movieDetailLink, moviePopularCount, movieRunningTime, moviePrice, movieUseYn);
         movieRepository.save(movie);
 
 
@@ -461,15 +465,37 @@ public class AdminServiceImpl implements AdminService {
                     continue;
                 }
 
+                log.info("지역={}, 극장 이름={}, 상영관 이름={}, 상영 브랜드={}, 상영 날짜={}, 상영 시작 시각={},상영 종료 시각={}, 러닝 타임={},최소 모집인원={}, 최대 모집인원={}, 상영 가격={}", line[0], line[1], line[2], line[3], line[4], line[5], line[6], line[7], line[8], line[9], line[10]);
+
                 LocalDateTime theaterStartTime = convertDateTime(line[4], line[5]);
+                LocalDateTime theaterEndTime = convertDateTime(line[4], line[5]);
                 Optional<Cinema> optionalCinema = cinemaRepository.getCinemaByCinemaNameAndRegionName(line[1], line[0]);
 
                 if (optionalCinema.isEmpty()) {
                     throw new NullPointerException("존재하지 않는 극장입니다. 극장을 먼저 생성해주세요");
                 }
 
-                log.info(line[7]);
-                Theater theater = Theater.builder().theaterRegion(line[0]).theaterCinemaName(line[1]).theaterName(line[2]).theaterCinemaBrandName(line[3]).brand(brandRepository.getBrandByBrandName(line[3])).theaterStartDatetime(theaterStartTime).theaterEndDatetime(convertDateTime(line[4], line[6])).theaterDay(theaterStartTime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA)).theaterTime(Integer.parseInt(line[7])).theaterMinPeople(Integer.parseInt(line[8])).theaterMaxPeople(Integer.parseInt(line[9])).theaterPrice(Integer.parseInt(line[10])).cinema(optionalCinema.get()).build();
+                Long theaterCount = theaterRepository.checkTheaterCsv(line[0], line[3], line[1], line[2], theaterStartTime, theaterEndTime);
+
+                if(theaterCount != 0L){
+                    throw new DuplicateElementException("이미 겹치거나 중복된 시간입니다.");
+                }
+
+                Theater theater = Theater.builder()
+                        .theaterRegion(line[0])
+                        .theaterCinemaName(line[1])
+                        .theaterName(line[2])
+                        .theaterCinemaBrandName(line[3])
+                        .brand(brandRepository.getBrandByBrandName(line[3]))
+                        .theaterStartDatetime(theaterStartTime)
+                        .theaterEndDatetime(theaterEndTime)
+                        .theaterDay(theaterStartTime.getDayOfWeek().getDisplayName(TextStyle.NARROW, Locale.KOREA))
+                        .theaterTime(Integer.parseInt(line[7]))
+                        .theaterMinPeople(Integer.parseInt(line[8]))
+                        .theaterMaxPeople(Integer.parseInt(line[9]))
+                        .theaterPrice(Integer.parseInt(line[10]))
+                        .cinema(optionalCinema.get())
+                        .build();
 
                 theaterList.add(theater);
             }
@@ -481,6 +507,7 @@ public class AdminServiceImpl implements AdminService {
         } catch (CsvValidationException e) {
             throw new RuntimeException("CSV 가져오던 도중 오류가 발생했습니다. 다시 시도해 주세요");
         } catch (IOException e) {
+            log.info("error={}", e.getMessage());
             throw new RuntimeException(e);
         }
 

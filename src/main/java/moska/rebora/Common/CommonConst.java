@@ -5,7 +5,7 @@ public class CommonConst {
     //public static final String DEV_SERVER = "http://13.125.27.234:8080";
     public static final String DEV_SERVER = "http://dev.re-bora.com";
     public static final String PRD_SERVER = "https://m.re-bora.com";
-    public static final String CURRENT_SERVER = DEV_SERVER;
+    public static final String CURRENT_SERVER = LOCALHOST;
 
     public static final Integer DEFAULT_PAGE_SIZE = 10;
 

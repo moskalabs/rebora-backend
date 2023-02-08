@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TheaterAdmin {
@@ -17,4 +18,13 @@ public interface TheaterAdmin {
     List<AdminRegionDto> getAdminRegion();
 
     AdminTheaterDto getAdminDetail(Long theaterId);
+
+    Long checkTheaterCsv(
+            String theaterRegion,
+            String theaterCinemaBrandName,
+            String theaterCinemaName,
+            String theaterName,
+            LocalDateTime theaterStartDatetime,
+            LocalDateTime theaterEndDatetime
+    );
 }

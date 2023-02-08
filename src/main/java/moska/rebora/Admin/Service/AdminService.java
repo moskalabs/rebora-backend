@@ -66,6 +66,7 @@ public interface AdminService {
             @Param("movieRunningTime") Integer movieRunningTime,
             @Param("moviePrice") Integer moviePrice,
             @Param("moviePopularCount") Integer moviePopularCount,
+            @Param("movieUseYn") Boolean movieUseYn,
             @Param("changeMovieImage") MultipartFile changeMovieImage,
             @Param("changeMovieBannerImage") MultipartFile changeMovieBannerImage,
             @Param("changeMovieRecruitmentImage") MultipartFile changeMovieRecruitmentImage

@@ -54,7 +54,7 @@ public class CreateMainBannerConfig {
     ) {
         log.info("********** 메인 배너 생성 배치 confirmRecruitmentJobStep **********");
         return stepBuilderFactory.get("createMainBannerJobStep")  // 2_1
-                .<BannerCompareDto, MainBanner>chunk(10)
+                .<BannerCompareDto, MainBanner>chunk(30)
                 .reader(createMainBannerReader())// 2_2
                 .processor(createMainBannerProcessor())
                 .writer(createMainBannerWriter())

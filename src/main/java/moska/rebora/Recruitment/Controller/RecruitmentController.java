@@ -93,12 +93,13 @@ public class RecruitmentController {
      * @return BasePageResponse<UserRecruitmentListDto>
      */
     @Tag(name = "모집")
-    @GetMapping("/searchList")
-    public BasePageResponse<UserRecruitmentListDto> searchList(
+    @GetMapping("/getSearchList")
+    public BasePageResponse<UserRecruitmentListDto> getSearchList(
             @RequestParam(required = false, defaultValue = "") String searchWord,
             @PageableDefault(page = 0, size = 10) Pageable pageable
 
     ) {
+
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         UserSearchCondition userSearchCondition = new UserSearchCondition();
 

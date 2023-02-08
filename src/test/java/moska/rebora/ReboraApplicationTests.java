@@ -985,4 +985,25 @@ class ReboraApplicationTests {
 
         log.info("isEmpty={}" , optionalPayment.isEmpty());
     }
+
+    @Test
+    void checkTheaterCsv(){
+
+        LocalDateTime theaterStartTime = convertDateTime("2023.02.27", "16:00");
+        LocalDateTime theaterEndTime = convertDateTime("2023.02.27", "16:50");
+
+        Long theaterCsv = theaterRepository.checkTheaterCsv("서울", "CGV", "소풍점", "1관", theaterStartTime, theaterEndTime);
+
+        log.info("count={}", theaterCsv);
+
+    }
+
+    public LocalDateTime convertDateTime(String date, String time) {
+        String[] dateList = date.split("\\.");
+        String[] timeList = time.split(":");
+        log.info(Arrays.toString(timeList));
+        log.info("time1={}", Integer.parseInt(timeList[0]));
+        log.info("time2={}", Integer.parseInt(timeList[1]));
+        return LocalDateTime.of(Integer.parseInt(dateList[0]), Integer.parseInt(dateList[1]), Integer.parseInt(dateList[2]), Integer.parseInt(timeList[0]), Integer.parseInt(timeList[1]));
+    }
 }

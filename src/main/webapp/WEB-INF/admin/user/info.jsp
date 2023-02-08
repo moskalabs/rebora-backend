@@ -243,7 +243,7 @@
                                             </div>
                                             <div class="icheck-primary d-inline">
                                                 <c:choose>
-                                                    <c:when test="${user.content.userPushNightYn == false}">
+                                                    <c:when test="${user.content.userUseYn == false}">
                                                         <input style="margin: 0" class="form-check-input" type="radio"
                                                                value="false"
                                                                name="userUseYn"

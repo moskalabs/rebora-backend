@@ -129,6 +129,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                         RecruitmentInfoDto.class,
                         movie.movieName,
                         movie.movieRecruitmentImage,
+                        movie.movieImage,
                         movie.id.as("movieId"),
                         theater.id.as("theaterId"),
                         theater.theaterStartDatetime,

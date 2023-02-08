@@ -61,13 +61,9 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .from(movie)
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .leftJoin(userMovie.user, user)
-                .leftJoin(movie.movieCategoryList, movieCategory)
-                .leftJoin(movieCategory.category, category)
-                .groupBy(movie.movieName)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .where(
-                        getCategory(searchCondition.getCategory()),
                         getSearchWord(searchCondition.getSearchWord())
                 )
                 .orderBy(
@@ -78,7 +74,6 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .select(movie.countDistinct())
                 .from(movie)
                 .where(
-                        getCategory(searchCondition.getCategory()),
                         getSearchWord(searchCondition.getSearchWord())
                 )
                 .leftJoin(movie.movieCategoryList, movieCategory)
@@ -94,9 +89,64 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         return new PageImpl<>(content, pageable, total);
     }
 
+    @Override
+    public Page<MoviePageDto> getMovieListByCategory(
+            @Param("searchCondition") UserSearchCondition searchCondition,
+            @Param("userEmail") String userEmail,
+            @Param("pageable") Pageable pageable,
+            @Param("paramCategory") Category paramCategory
+    ) {
 
-    public BooleanExpression getCategory(String selectCategory) {
-        return hasText(selectCategory) && !selectCategory.equals("all") ? category.categoryName.eq(selectCategory) : null;
+        List<OrderSpecifier> ORDERS = getListOrders(pageable);
+
+        List<MoviePageDto> content = queryFactory
+                .select(Projections.fields(
+                        MoviePageDto.class,
+                        movie.id,
+                        movie.movieName,
+                        movie.movieRating,
+                        movie.movieDirector,
+                        movie.movieImage,
+                        movie.movieBannerImage,
+                        movie.movieDetailLink,
+                        movie.movieRunningTime,
+                        movie.moviePopularCount,
+                        movie.movieStarRating,
+                        userMovie.userMovieWish,
+                        userMovie.id.as("userMovieId")
+                ))
+                .from(movieCategory)
+                .join(movieCategory.movie, movie)
+                .join(movieCategory.category, category)
+                .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
+                .leftJoin(userMovie.user, user)
+                .where(
+                        category.eq(paramCategory)
+                )
+                .orderBy(
+                        ORDERS.toArray(OrderSpecifier[]::new))
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = queryFactory
+                .select(movie.count())
+                .from(movieCategory)
+                .join(movieCategory.movie, movie)
+                .join(movieCategory.category, category)
+                .where(
+                        category.eq(paramCategory)
+                )
+                .fetchFirst();
+
+        if (!content.isEmpty()) {
+            content.forEach(m -> {
+                m.setConvertStartRation(convertStarRating(m.getMovieStarRating()));
+                m.setCategoryList(getCateGory(m.getId()));
+            });
+        }
+
+        return new PageImpl<>(content, pageable, total);
     }
 
     public BooleanExpression getSearchWord(String searchWord) {

@@ -129,4 +129,26 @@ public class TheaterAdminImpl implements TheaterAdmin {
                 .otherwise(5);
         return new OrderSpecifier<>(Order.ASC, cases);
     }
+
+    public Long checkTheaterCsv(
+            String theaterRegion,
+            String theaterCinemaBrandName,
+            String theaterCinemaName,
+            String theaterName,
+            LocalDateTime theaterStartDatetime,
+            LocalDateTime theaterEndDatetime
+    ) {
+        return queryFactory.select(theater.count())
+                .from(theater)
+                .where(
+                        theater.theaterRegion.eq(theaterRegion),
+                        theater.theaterCinemaBrandName.eq(theaterCinemaBrandName),
+                        theater.theaterCinemaName.eq(theaterCinemaName),
+                        theater.theaterName.eq(theaterName),
+                        theater.theaterStartDatetime.between(theaterStartDatetime, theaterEndDatetime)
+                                .or(theater.theaterEndDatetime.between(theaterStartDatetime, theaterEndDatetime))
+                                .or(theater.theaterStartDatetime.loe(theaterStartDatetime).and(theater.theaterEndDatetime.goe(theaterEndDatetime)))
+                )
+                .fetchOne();
+    }
 }

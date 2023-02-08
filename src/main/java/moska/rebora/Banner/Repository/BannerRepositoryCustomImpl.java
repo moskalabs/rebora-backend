@@ -104,7 +104,7 @@ public class BannerRepositoryCustomImpl implements BannerRepositoryCustom {
                 .where(banner.id.ne(1L))
                 .orderBy(theater.theaterMinPeople.subtract(recruitment.recruitmentPeople).asc())
                 .offset(0)
-                .limit(10)
+                .limit(30)
                 .fetch();
     }
 }

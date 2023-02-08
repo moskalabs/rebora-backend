@@ -36,7 +36,7 @@ public class AdminMovieDto {
     private Integer moviePopularCount;
     @Schema(description = "영화 평점 변환")
     private String convertStartRation;
-
+    private Boolean movieUseYn;
     @Schema(description = "영화 카테고리 리스트")
     private List<AdminMovieCategoryDto> categoryList;
     @Schema(description = "극장 영화 리스트")
@@ -55,6 +55,7 @@ public class AdminMovieDto {
         this.moviePopularCount = moviePageDto.getMoviePopularCount();
         this.convertStartRation = moviePageDto.getConvertStartRation();
         this.moviePrice = moviePageDto.getMoviePrice();
+        this.movieUseYn = moviePageDto.getMovieUseYn();
     }
 
     public AdminMovieDto() {

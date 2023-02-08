@@ -318,7 +318,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             bannerRepository.save(banner);
             List<MainBanner> mainBannerList = mainBannerRepository.findAll();
 
-            if (mainBannerList.size() < 10) {
+            if (mainBannerList.size() < 30) {
                 MainBanner mainBanner = MainBanner
                         .builder()
                         .banner(banner)
