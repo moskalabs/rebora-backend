@@ -47,6 +47,7 @@ public class RecruitmentInfoDto {
     private String recruiterUserImage;
     private Integer recruitmentPeople;
     private String recruitmentIntroduce;
+    private Boolean recruitmentCommentUseYn;
 
     private Page<CommentDto> pageComment;
     private List<UserImageListDto> userImageList;
@@ -60,7 +61,7 @@ public class RecruitmentInfoDto {
         this.userImageList = userImageList;
     }
 
-    public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople) {
+    public RecruitmentInfoDto(String movieName, String movieRecruitmentImage, Long movieId, Long theaterId, LocalDateTime theaterStartDatetime, LocalDateTime theaterEndDatetime, String theaterDay, Integer theaterMaxPeople, Integer theaterMinPeople, String theaterCinemaName, String theaterCinemaBrandName, String theaterRegion, Integer theaterPrice, Integer theaterTime, Long userRecruitmentId, Boolean userRecruitmentWish, Boolean userRecruitmentYn, Integer userRecruitmentPeople, Long recruitmentId, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, String recruiterNickname, String recruiterUserImage, Integer recruitmentPeople, Boolean recruitmentCommentUseYn) {
         this.movieName = movieName;
         this.movieRecruitmentImage = movieRecruitmentImage;
         this.movieId = movieId;
@@ -85,5 +86,6 @@ public class RecruitmentInfoDto {
         this.recruiterNickname = recruiterNickname;
         this.recruiterUserImage = recruiterUserImage;
         this.recruitmentPeople = recruitmentPeople;
+        this.recruitmentCommentUseYn = recruitmentCommentUseYn;
     }
 }

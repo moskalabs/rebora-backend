@@ -482,6 +482,7 @@ public class PaymentServiceImpl implements PaymentService {
      * @param userRecruitmentId 유저 모집 아이디
      */
     @Override
+    @Transactional
     public void reserveRecruitment(Long userRecruitmentId) {
 
         Optional<UserRecruitment> userRecruitmentOptional = userRecruitmentRepository.findById(userRecruitmentId);
@@ -494,9 +495,20 @@ public class PaymentServiceImpl implements PaymentService {
         UserRecruitment userRecruitment = userRecruitmentOptional.get();
 
         Recruitment recruitment = userRecruitment.getRecruitment();
-
+        Movie movie = recruitment.getMovie();
         userRecruitment.updateUserRecruitmentYn(true);
         recruitment.plusRecruitmentPeople(userRecruitment.getUserRecruitmentPeople());
+
+        User recruiter = userRepository.getUserByUserEmail(recruitment.getCreatedBy());
+
+        String subject = "모집한 게시물(" + movie.getMovieName() + ")에 모집을 신청했습니다.";
+        String content = movie.getMovieName() + "의 모집한 게시물에 " + userRecruitment.getUserRecruitmentPeople() + "명이 모집을 신청했습니다.";
+
+        if (recruiter != null) {
+            notificationService.createNotificationRecruitment(
+                    subject, content, NotificationKind.RECRUITMENT, recruitment, "", recruiter
+            );
+        }
 
         userRecruitmentRepository.save(userRecruitment);
         recruitmentRepository.save(recruitment);
@@ -609,8 +621,6 @@ public class PaymentServiceImpl implements PaymentService {
         if (status.equals("failed")) {
             throw new RuntimeException("결제가 실패했습니다. 다시 시도해주세요. 실패 이유 : " + failReason);
         }
-
-
         //결제 시기
         LocalDateTime authenticatedAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(paidAt), TimeZone.getDefault().toZoneId());
 
@@ -627,6 +637,17 @@ public class PaymentServiceImpl implements PaymentService {
                 recruitment,
                 payment
         );
+
+        User recruiter = userRepository.getUserByUserEmail(recruitment.getCreatedBy());
+
+        String subject = "모집한 게시물(" + movie.getMovieName() + ")에 모집을 신청했습니다.";
+        String contentRecruiter = movie.getMovieName() + "의 모집한 게시물에 " + userRecruitment.getUserRecruitmentPeople() + "명이 모집을 신청했습니다.";
+
+        if (recruiter != null) {
+            notificationService.createNotificationRecruitment(
+                    subject, contentRecruiter, NotificationKind.RECRUITMENT, recruitment, "", recruiter
+            );
+        }
 
         userRecruitment.cancelUserRecruitment(true);
         recruitment.plusRecruitmentPeople(userRecruitment.getUserRecruitmentPeople());

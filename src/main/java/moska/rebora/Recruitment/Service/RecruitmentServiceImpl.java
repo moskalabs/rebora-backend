@@ -161,6 +161,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             @Param("bannerYn") Boolean bannerYn,
             @Param("bannerSubText") String bannerSubText,
             @Param("bannerMainText") String bannerMainText,
+            @Param("recruitmentCommentUseYn") Boolean recruitmentCommentUseYn,
             @Param("merchantUid") String merchantUid,
             @Param("impUid") String impUid
     ) {
@@ -229,6 +230,7 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 .recruitmentExposeYn(true)
                 .recruitmentIntroduce(recruitmentIntroduce)
                 .recruitmentEndDate(recruitmentEndDate)
+                .recruitmentCommentUseYn(recruitmentCommentUseYn)
                 .theater(theater)
                 .movie(movie)
                 .build();
@@ -286,16 +288,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
                 theater.getTheaterName()
         );
 
-        String notificationSubject = "찜한 영화의 모집게시물이 등록되었습니다.";
-
-        asyncTaskService.createNotificationRecruitment(
-                notificationSubject,
-                notificationContent,
-                NotificationKind.WISH_MOVIE,
-                recruitment.getId(),
-                movie.getId()
-        );
-
         notificationService.createNotificationPayment(
                 "모집의 결제가 완료되었습니다.",
                 notificationContent,
@@ -308,7 +300,6 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         //배너 유무 있을시에만 추가
         if (bannerYn) {
-
             Banner banner = Banner.builder()
                     .bannerSubText(bannerSubText)
                     .bannerMainText(bannerMainText)
@@ -510,6 +501,16 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         recruitmentRepository.save(recruitment);
     }
 
+    /**
+     * 모집 업데이트
+     *
+     * @param recruitmentId           모집 아이디
+     * @param recruitmentIntroduce    모집 소개
+     * @param bannerYn                배너 유무
+     * @param bannerSubText           배너 서브 텍스트
+     * @param bannerMainText          배너 메인 텍스트
+     * @param recruitmentCommentUseYn 모집 댓글 사용 여부
+     */
     @Override
     @Transactional
     public void updateRecruitment(

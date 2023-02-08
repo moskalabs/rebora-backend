@@ -88,6 +88,7 @@ public class AdminRecruitmentImpl implements AdminRecruitment {
                         recruitment.recruitmentPeople,
                         recruitment.recruitmentIntroduce,
                         recruitment.recruitmentExposeYn,
+                        recruitment.recruitmentCommentUseYn,
                         ExpressionUtils.as(select(user.userNickname)
                                 .from(user)
                                 .where(user.userEmail.eq(recruitment.createdBy)), "recruiterNickname")

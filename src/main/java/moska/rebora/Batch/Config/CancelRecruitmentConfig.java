@@ -104,7 +104,6 @@ public class CancelRecruitmentConfig {
                 log.info("********** 모집 취소 배치 cancelRecruitmentProcessor **********");
 
                 List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getBatchRefundUserRecruitment(recruitment.getId());
-                List<UserRecruitment> userWishRecruitmentList = userRecruitmentRepository.getBatchUserWishRecruitment(recruitment.getId());
                 List<User> userList = new ArrayList<>();
 
                 Movie movie = recruitment.getMovie();
@@ -135,13 +134,6 @@ public class CancelRecruitmentConfig {
                 //모집 취소 알림
                 notificationService.createNotificationRecruitment(movie.getMovieName(), notificationSubject, notificationContent, NotificationKind.HISTORY, recruitment, userList);
 
-                //짬헌 모집 알림
-                for (UserRecruitment userRecruitment : userWishRecruitmentList) {
-                    User user = userRecruitment.getUser();
-                    notificationSubject = "찜한 모집이 취소되었습니다.";
-                    notificationService.createNotificationRecruitment(notificationSubject, notificationContent, NotificationKind.WISH_RECRUITMENT, recruitment, movie.getMovieName(), user);
-                    pushService.sendUserPush(user , notificationSubject, notificationContent);
-                }
                 recruitment.updateRecruitmentStatus(RecruitmentStatus.CANCEL);
 
                 return recruitment;

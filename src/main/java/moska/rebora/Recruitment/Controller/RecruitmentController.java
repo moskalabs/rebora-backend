@@ -151,19 +151,20 @@ public class RecruitmentController {
             @RequestParam("bannerYn") Boolean bannerYn,
             @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
             @RequestParam(value = "bannerMainText", required = false) String bannerMainText,
+            @RequestParam(value = "recruitmentCommentUseYn", required = false, defaultValue = "true") Boolean recruitmentCommentUseYn,
             @RequestParam String merchantUid,
             @RequestParam String impUid
     ) {
 
-        log.info("모집 생성 Request userRecruitmentPeople={} movieId={} theaterId={} recruitmentIntroduce={} bannerYn={} bannerSubText={} bannerMainText={} merchantUid={} impUid={}",
-                userRecruitmentPeople, movieId, theaterId, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, merchantUid, impUid);
+        log.info("모집 생성 Request userRecruitmentPeople={} movieId={} theaterId={} recruitmentIntroduce={} bannerYn={} bannerSubText={} bannerMainText={} merchantUid={} impUid={} recruitmentCommentUseYn={}",
+                userRecruitmentPeople, movieId, theaterId, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, merchantUid, impUid, recruitmentCommentUseYn);
 
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
 
         BaseInfoResponse<CreateRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
         CreateRecruitmentDto createRecruitmentDto = new CreateRecruitmentDto();
 
-        Recruitment recruitment = recruitmentService.createRecruitment(userRecruitmentPeople, userEmail, movieId, theaterId, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, merchantUid, impUid);
+        Recruitment recruitment = recruitmentService.createRecruitment(userRecruitmentPeople, userEmail, movieId, theaterId, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, recruitmentCommentUseYn, merchantUid, impUid);
 
         baseInfoResponse.setResult(true);
         createRecruitmentDto.setRecruitmentId(recruitment.getId());
@@ -258,6 +259,17 @@ public class RecruitmentController {
         return baseResponse;
     }
 
+    /**
+     * 모집 업데이트
+     *
+     * @param recruitmentId           모집 아이디
+     * @param recruitmentIntroduce    모집 소개
+     * @param bannerYn                배너 유무
+     * @param bannerSubText           배너 서브 텍스트
+     * @param bannerMainText          배너 메인 텍스트
+     * @param recruitmentCommentUseYn 모집 댓글 사용 여부
+     * @return BaseResponse
+     */
     @PutMapping("/updateRecruitment/{recruitmentId}")
     public BaseResponse updateRecruitment(
             @PathVariable Long recruitmentId,

@@ -38,6 +38,7 @@ public interface RecruitmentService {
             @Param("bannerYn") Boolean bannerYn,
             @Param("bannerSubText") String bannerSubText,
             @Param("bannerMainText") String bannerMainText,
+            @Param("recruitmentCommentUseYn") Boolean recruitmentCommentUseYn,
             @Param("merchantUid") String merchantUid,
             @Param("impUid") String impUid
     );

@@ -78,8 +78,8 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                                 recruitment.recruitmentPeople,
                                 ExpressionUtils.as(
                                         select(recruiterUser.userImage.as("recruiterUserImage"))
-                                        .from(recruiterUser)
-                                        .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
+                                                .from(recruiterUser)
+                                                .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),
                                 ExpressionUtils.as(select(recruiterUser.userNickname.as("recruiterNickname"))
                                         .from(recruiterUser)
                                         .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterNickname")
@@ -151,6 +151,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                         recruitment.recruitmentStatus,
                         recruitment.recruitmentPeople,
                         recruitment.recruitmentIntroduce,
+                        recruitment.recruitmentCommentUseYn,
                         ExpressionUtils.as(select(recruiterUser.userImage.as("recruiterUserImage"))
                                 .from(recruiterUser)
                                 .where(recruiterUser.userEmail.eq(recruitment.createdBy)), "recruiterUserImage"),

@@ -1,9 +1,13 @@
 package moska.rebora.Comment.Service;
 
+import lombok.AllArgsConstructor;
 import moska.rebora.Comment.Dto.CommentDto;
 import moska.rebora.Comment.Entity.Comment;
 import moska.rebora.Comment.Repository.CommentRepository;
+import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Enum.UserGrade;
+import moska.rebora.Movie.Entity.Movie;
+import moska.rebora.Notification.Service.NotificationService;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.User.Entity.User;
@@ -13,20 +17,18 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Objects;
 import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class CommentServiceImpl implements CommentService {
 
-    @Autowired
     CommentRepository commentRepository;
-
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     RecruitmentRepository recruitmentRepository;
+    NotificationService notificationService;
 
     /**
      * 코멘트 리스트 가져오기
@@ -48,17 +50,34 @@ public class CommentServiceImpl implements CommentService {
      * @param userEmail      유저 이메일
      */
     @Override
+    @Transactional
     public void createComment(Long recruitmentId, String commentContent, String userEmail) {
 
         User user = userRepository.getUserByUserEmail(userEmail);
-        Recruitment recruitment = recruitmentRepository.getRecruitmentById(recruitmentId);
+        Optional<Recruitment> optionalRecruitment = recruitmentRepository.findById(recruitmentId);
+
 
         if (user == null) {
             throw new NullPointerException("존재하지 않는 유저입니다 \n다시 시도해주세요");
         }
 
-        if (recruitment == null) {
+        if (optionalRecruitment.isEmpty()) {
             throw new NullPointerException("존재하지 않는 모집입니다 \n다시 시도해주세요");
+        }
+
+        Recruitment recruitment = optionalRecruitment.get();
+
+        Movie movie = recruitment.getMovie();
+
+        User recruiter = userRepository.getUserByUserEmail(recruitment.getCreatedBy());
+
+        String subject = "모집한 게시물(" + movie.getMovieName() + ")에 댓글이 달렸습니다.";
+        String content = movie.getMovieName() + "의 모집한 게시물에 댓글이 달렸습니다.";
+
+        if (recruiter != null) {
+            notificationService.createNotificationRecruitment(
+                    subject, content, NotificationKind.RECRUITMENT, recruitment, "", recruiter
+            );
         }
 
         Comment comment = Comment.builder()
