@@ -14,6 +14,7 @@ import moska.rebora.Common.Service.AsyncTaskService;
 import moska.rebora.Enum.NotificationKind;
 import moska.rebora.Enum.PaymentStatus;
 import moska.rebora.Enum.RecruitmentStatus;
+import moska.rebora.Enum.UserGrade;
 import moska.rebora.Movie.Entity.Movie;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Notification.Service.NotificationService;
@@ -507,5 +508,100 @@ public class RecruitmentServiceImpl implements RecruitmentService {
 
         recruitment.minusRecruitmentPeople((recruitment.getRecruitmentPeople() - userRecruitmentPeople));
         recruitmentRepository.save(recruitment);
+    }
+
+    @Override
+    @Transactional
+    public void updateRecruitment(
+            Long recruitmentId,
+            String userEmail,
+            String recruitmentIntroduce,
+            Boolean bannerYn,
+            String bannerSubText,
+            String bannerMainText,
+            Boolean recruitmentCommentUseYn
+    ) {
+        User user = userRepository.getUserByUserEmail(userEmail);
+
+        Optional<Recruitment> optionalRecruitment = recruitmentRepository.findById(recruitmentId);
+
+        //모집이 없을 경우
+        if (optionalRecruitment.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 모집 정보입니다.");
+        }
+
+        Recruitment recruitment = optionalRecruitment.get();
+
+        //유저가 권한이 있는지
+        if (!user.getUserGrade().equals(UserGrade.ADMIN) && !recruitment.getCreatedBy().equals(userEmail)) {
+            throw new RuntimeException("모집 수정 권한이 없는 유저입니다.");
+        }
+
+        //모집 변경
+        recruitment.changeRecruitment(recruitmentIntroduce, recruitmentCommentUseYn);
+        Movie movie = recruitment.getMovie();
+        Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+
+        //배너가 있는 모집일 경우
+        if (banner != null) {
+            banner.changeBanner(bannerYn, bannerMainText, bannerSubText);
+
+            MainBanner mainBanner = mainBannerRepository.getMainBannerByBanner(banner);
+
+            //배너가 노출일 경우
+            if (Boolean.FALSE.equals(bannerYn)) {
+
+                //배너 안보이게 할 경우 메인 배너에서 삭제
+                if (mainBanner != null) {
+                    mainBannerRepository.delete(mainBanner);
+                }
+
+            } else {
+
+                //메인 배너가 없을 경우 생성
+                if (mainBanner == null) {
+
+                    List<MainBanner> mainBannerList = mainBannerRepository.findAll();
+
+                    if (mainBannerList.size() < 30) {
+                        MainBanner createMainBanner = MainBanner
+                                .builder()
+                                .banner(banner)
+                                .build();
+
+                        mainBannerRepository.save(createMainBanner);
+                    }
+                }
+            }
+
+            bannerRepository.save(banner);
+        } else {
+
+            //배너 노출할 경우
+            if (Boolean.TRUE.equals(bannerYn)) {
+                Banner createBanner = Banner
+                        .builder()
+                        .bannerExposeYn(true)
+                        .bannerImage(movie.getMovieBannerImage())
+                        .bannerMainText(bannerMainText)
+                        .bannerSubText(bannerSubText)
+                        .recruitment(recruitment)
+                        .build();
+
+                bannerRepository.save(createBanner);
+
+                List<MainBanner> mainBannerList = mainBannerRepository.findAll();
+
+                if (mainBannerList.size() < 30) {
+                    MainBanner createMainBanner = MainBanner
+                            .builder()
+                            .banner(createBanner)
+                            .build();
+
+                    mainBannerRepository.save(createMainBanner);
+                }
+            }
+        }
+
     }
 }

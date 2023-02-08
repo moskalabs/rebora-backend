@@ -42,8 +42,18 @@ public class Banner extends BaseEntity {
         this.bannerExposeYn = bannerExposeYn;
     }
 
-    public void deleteBanner(){
+    public void deleteBanner() {
         this.recruitment = null;
+    }
+
+    public void changeBanner(
+            Boolean bannerExposeYn,
+            String bannerMainText,
+            String bannerSubText
+    ) {
+        this.bannerExposeYn = bannerExposeYn;
+        this.bannerMainText = bannerMainText;
+        this.bannerSubText = bannerSubText;
     }
 
     @Builder

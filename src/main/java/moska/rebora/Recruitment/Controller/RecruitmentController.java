@@ -257,4 +257,22 @@ public class RecruitmentController {
         recruitmentService.cancelRecruitment(recruitmentId, userEmail);
         return baseResponse;
     }
+
+    @PutMapping("/updateRecruitment/{recruitmentId}")
+    public BaseResponse updateRecruitment(
+            @PathVariable Long recruitmentId,
+            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
+            @RequestParam("bannerYn") Boolean bannerYn,
+            @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
+            @RequestParam(value = "bannerMainText", required = false) String bannerMainText,
+            @RequestParam(value = "recruitmentCommentUseYn") Boolean recruitmentCommentUseYn
+    ) {
+
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        recruitmentService.updateRecruitment(recruitmentId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, recruitmentCommentUseYn);
+
+        return baseResponse;
+    }
 }

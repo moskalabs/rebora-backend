@@ -57,4 +57,13 @@ public interface RecruitmentService {
                           @Param("userRecruitmentPeople") Integer userRecruitmentPeople);
 
     void cancelRecruitment(@Param("recruitmentId") Long recruitmentId, @Param("userEmail") String userEmail);
+
+    void updateRecruitment(
+            @Param("recruitmentId") Long recruitmentId,
+            @Param("userEmail") String userEmail,
+            @Param("recruitmentIntroduce") String recruitmentIntroduce,
+            @Param("bannerYn") Boolean bannerYn,
+            @Param("bannerSubText") String bannerSubText,
+            @Param("bannerMainText") String bannerMainText,
+            @Param("recruitmentCommentUseYn") Boolean recruitmentCommentUseYn);
 }

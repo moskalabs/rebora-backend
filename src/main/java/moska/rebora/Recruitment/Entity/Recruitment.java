@@ -46,6 +46,9 @@ public class Recruitment extends BaseEntity {
     @Column(nullable = false)
     private Boolean recruitmentExposeYn;
 
+    @Column(columnDefinition = "boolean default false")
+    private Boolean recruitmentCommentUseYn;
+
     @OneToMany(mappedBy = "recruitment")
     List<UserRecruitment> userRecruitmentList = new ArrayList<UserRecruitment>();
 
@@ -80,8 +83,16 @@ public class Recruitment extends BaseEntity {
         this.recruitmentExposeYn = recruitmentExposeYn;
     }
 
+    public void changeRecruitment(
+            String recruitmentIntroduce,
+            Boolean recruitmentCommentUseYn
+    ) {
+        this.recruitmentIntroduce = recruitmentIntroduce;
+        this.recruitmentCommentUseYn = recruitmentCommentUseYn;
+    }
+
     @Builder
-    public Recruitment(String recruitmentIntroduce, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentExposeYn, Theater theater, Movie movie, Integer recruitmentPeople) {
+    public Recruitment(String recruitmentIntroduce, LocalDateTime recruitmentEndDate, RecruitmentStatus recruitmentStatus, Boolean recruitmentExposeYn, Theater theater, Movie movie, Integer recruitmentPeople, Boolean recruitmentCommentUseYn) {
 
         this.recruitmentIntroduce = recruitmentIntroduce;
         this.recruitmentEndDate = recruitmentEndDate;
@@ -90,5 +101,6 @@ public class Recruitment extends BaseEntity {
         this.recruitmentPeople = recruitmentPeople;
         this.theater = theater;
         this.movie = movie;
+        this.recruitmentCommentUseYn = recruitmentCommentUseYn;
     }
 }
