@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface MovieRepositoryMain {
 
-    List<MoviePageDto> getMovieMainList(@Param("userEmail")String userEmail);
+    List<MoviePageDto> getMovieMainList(String userEmail, String userBirth);
 }

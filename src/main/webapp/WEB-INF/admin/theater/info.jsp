@@ -331,6 +331,10 @@
         })
     })
 
+    function goToList() {
+        window.history.back();
+    }
+
     function cancelSave() {
         Swal.fire({
             title            : "취소",

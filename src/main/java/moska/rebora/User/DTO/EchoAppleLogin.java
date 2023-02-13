@@ -7,4 +7,6 @@ public class EchoAppleLogin {
 
     private String code;
     private String id_token;
+
+
 }

@@ -1,12 +1,15 @@
 package moska.rebora.Admin.Dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import moska.rebora.Common.BaseEntity;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.Enum.UserSnsKind;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class AdminUserDto {
@@ -42,4 +45,9 @@ public class AdminUserDto {
     private Long recruiterCount;
     private LocalDateTime regDate;
     private LocalDateTime modDate;
+    private List<AdminWishMovieDto> wishMovieList;
+    private List<AdminWishRecruitmentDto> wishRecruitmentList;
+
+    public AdminUserDto() {
+    }
 }

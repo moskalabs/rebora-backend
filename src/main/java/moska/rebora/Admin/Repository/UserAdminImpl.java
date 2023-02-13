@@ -5,6 +5,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import moska.rebora.Admin.Dto.AdminUserDto;
+import moska.rebora.Admin.Dto.AdminWishMovieDto;
+import moska.rebora.Admin.Dto.AdminWishRecruitmentDto;
+import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.User.DTO.UserSearchCondition;
@@ -25,6 +28,7 @@ import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
 import static moska.rebora.User.Entity.QUser.user;
+import static moska.rebora.User.Entity.QUserMovie.userMovie;
 import static moska.rebora.User.Entity.QUserRecruitment.userRecruitment;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -83,20 +87,20 @@ public class UserAdminImpl implements UserAdmin {
     @Override
     public AdminUserDto getAdminUserInfo(Long userId) {
         AdminUserDto adminUserDto = queryFactory.select(
-                Projections.fields(
-                        AdminUserDto.class,
-                        user.id.as("userId"),
-                        user.userEmail,
-                        user.userName,
-                        user.userNickname,
-                        user.userImage,
-                        user.userUseYn,
-                        user.userPushYn,
-                        user.userPushNightYn,
-                        user.userGrade,
-                        user.userSnsKind,
-                        user.regDate
-                ))
+                        Projections.fields(
+                                AdminUserDto.class,
+                                user.id.as("userId"),
+                                user.userEmail,
+                                user.userName,
+                                user.userNickname,
+                                user.userImage,
+                                user.userUseYn,
+                                user.userPushYn,
+                                user.userPushNightYn,
+                                user.userGrade,
+                                user.userSnsKind,
+                                user.regDate
+                        ))
                 .from(user)
                 .where(user.id.eq(userId))
                 .fetchFirst();
@@ -105,6 +109,56 @@ public class UserAdminImpl implements UserAdmin {
         adminUserDto.setRecruiterCount(countMyRecruiter(adminUserDto.getUserEmail()));
 
         return adminUserDto;
+    }
+
+    @Override
+    public List<AdminWishMovieDto> getWishMovieList(Long userId) {
+        return queryFactory.select(
+                        Projections.fields(
+                                AdminWishMovieDto.class,
+                                movie.id.as("movieId"),
+                                movie.movieName
+                        )
+                )
+                .from(userMovie)
+                .join(userMovie.user, user).on(user.id.eq(userId))
+                .join(userMovie.movie, movie)
+                .where(
+                        userMovie.userMovieWish.eq(true),
+                        movie.movieUseYn.eq(true)
+                )
+                .fetch();
+    }
+
+    @Override
+    public List<AdminWishRecruitmentDto> getWishRecruitmentList(Long userId) {
+        return queryFactory.select(
+                        Projections.fields(
+                                AdminWishRecruitmentDto.class,
+                                movie.id.as("movieId"),
+                                movie.movieName,
+                                theater.id.as("theaterId"),
+                                theater.theaterRegion,
+                                theater.theaterCinemaName,
+                                theater.theaterCinemaBrandName,
+                                theater.theaterName,
+                                theater.theaterDay,
+                                theater.theaterStartDatetime,
+                                theater.theaterEndDatetime
+                        )
+                )
+                .from(userRecruitment)
+                .join(userRecruitment.user, user).on(user.id.eq(userId))
+                .join(userRecruitment.recruitment, recruitment)
+                .join(recruitment.theater, theater)
+                .join(recruitment.movie, movie)
+                .where(
+                        userRecruitment.userRecruitmentWish.eq(true),
+                        recruitment.recruitmentStatus.notIn(RecruitmentStatus.CANCEL, RecruitmentStatus.COMPLETED),
+                        recruitment.recruitmentExposeYn.eq(true),
+                        movie.movieUseYn.eq(true)
+                )
+                .fetch();
     }
 
     public Long countParticipationHistory(@Param("userId") @Valid Long userId) {

@@ -10,4 +10,6 @@ import java.util.List;
 
 public interface BannerRepository extends JpaRepository<Banner, Long>, BannerRepositoryCustom{
     Banner getBannerByRecruitment(Recruitment recruitment);
+
+    Banner getBannerById(Long bannerId);
 }

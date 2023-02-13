@@ -2,12 +2,16 @@ package moska.rebora.Main.Repository;
 
 import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import moska.rebora.Enum.MovieRating;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Recruitment.Entity.QRecruitment;
 import moska.rebora.User.DTO.UserImageListDto;
 import moska.rebora.User.DTO.UserRecruitmentListDto;
 
+import static io.jsonwebtoken.lang.Strings.hasText;
+import static moska.rebora.Common.CommonConst.ADULT_BIRTH;
 import static moska.rebora.User.Entity.QUserRecruitment.userRecruitment;
 
 import moska.rebora.User.Entity.QUser;
@@ -15,6 +19,7 @@ import moska.rebora.User.Entity.QUserRecruitment;
 import org.springframework.data.repository.query.Param;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +38,10 @@ public class RecruitmentRepositoryMainImpl implements RecruitmentRepositoryMain 
     }
 
     @Override
-    public List<UserRecruitmentListDto> getRecruitmentMainList(@Param("userEmail") String userEmail) {
+    public List<UserRecruitmentListDto> getRecruitmentMainList(
+            @Param("userEmail") String userEmail,
+            @Param("userBirth") String userBirth
+    ) {
 
         QUser recruiterUser = new QUser("recruiterUser");
 
@@ -72,7 +80,10 @@ public class RecruitmentRepositoryMainImpl implements RecruitmentRepositoryMain 
                 .leftJoin(recruitment.movie, movie)
                 .leftJoin(recruitment.theater, theater)
                 .leftJoin(recruitment.userRecruitmentList, userRecruitment).on(userRecruitment.user.userEmail.eq(userEmail))
-                .where(recruitment.recruitmentStatus.eq(RecruitmentStatus.CONFIRMATION))
+                .where(
+                        recruitment.recruitmentStatus.eq(RecruitmentStatus.CONFIRMATION),
+                        notAdult(userEmail, userBirth)
+                )
                 .orderBy(theater.theaterStartDatetime.asc())
                 .offset(0)
                 .limit(10)
@@ -99,5 +110,10 @@ public class RecruitmentRepositoryMainImpl implements RecruitmentRepositoryMain 
                 .offset(0)
                 .limit(5)
                 .fetch();
+    }
+
+    public BooleanExpression notAdult(String userEmail, String userBirth) {
+        LocalDate userBirthDate = LocalDate.parse(userBirth);
+        return hasText(userEmail) && !userEmail.equals("anonymousUser") && userBirthDate.isBefore(ADULT_BIRTH) ? null : movie.movieRating.ne(MovieRating.ADULT);
     }
 }

@@ -369,6 +369,82 @@
                                 </c:if>
                                 <c:if test="${param.userId != null}">
                                     <tr>
+                                        <th class="border-end" scope="row" style="width: 25%;">영화 찜 목록</th>
+                                        <td>
+                                            <div style="display: flex; flex-direction: column;">
+                                                <p>
+                                                    <c:forEach var="wishMovie" items="${user.content.wishMovieList}"
+                                                               varStatus="status">
+                                                        <c:choose>
+                                                            <c:when test="${status.index == 0}">
+                                                                <span><b>${wishMovie.movieName}</b></span>&nbsp;&nbsp;
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                |&nbsp;&nbsp;<span><b>${wishMovie.movieName}</b></span>&nbsp;&nbsp;
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:forEach>
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:if>
+                                <c:if test="${param.userId != null}">
+                                    <tr>
+                                        <th class="border-end" scope="row" style="width: 25%;">모집 찜 목록</th>
+                                        <td>
+                                            <div style="display: flex; flex-direction: column;">
+                                                <p>
+                                                    <c:forEach var="wishRecruitment"
+                                                               items="${user.content.wishRecruitmentList}"
+                                                               varStatus="status">
+                                                        <fmt:parseDate value="${ wishRecruitment.theaterStartDatetime }"
+                                                                       pattern="yyyy-MM-dd'T'HH:mm"
+                                                                       var="parseTheaterStartTime" type="both"/>
+                                                        <fmt:parseDate value="${ wishRecruitment.theaterEndDatetime }"
+                                                                       pattern="yyyy-MM-dd"
+                                                                       var="parseTheaterEndTime" type="both"/>
+                                                        <c:choose>
+                                                            <c:when test="${status.index == 0}">
+                                                                <span><b>${wishRecruitment.theaterRegion}
+                                                                        ${wishRecruitment.theaterCinemaBrandName}
+                                                                        ${wishRecruitment.theaterCinemaName}
+                                                                    ${wishRecruitment.theaterName}
+                                                                    (${wishRecruitment.theaterDay})
+
+                                                                    <fmt:formatDate pattern="HH:mm"
+                                                                                    value="${ parseTheaterStartTime }"/> ~
+                                                                    <fmt:formatDate
+                                                                            pattern="HH:mm"
+                                                                            value="${ parseTheaterEndTime }"/>
+                                                                    ${wishRecruitment.movieName}
+                                                                </b></span>
+                                                                &nbsp;&nbsp;
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                |&nbsp;&nbsp;<span><b>${wishRecruitment.theaterRegion}
+                                                                ${wishRecruitment.theaterCinemaBrandName}
+                                                                ${wishRecruitment.theaterCinemaName}
+                                                                ${wishRecruitment.theaterName}
+                                                                (${wishRecruitment.theaterDay})
+
+                                                                <fmt:formatDate pattern="HH:mm"
+                                                                                value="${ parseTheaterStartTime }"/> ~
+                                                                <fmt:formatDate
+                                                                        pattern="HH:mm"
+                                                                        value="${ parseTheaterEndTime }"/>
+                                                                ${wishRecruitment.movieName}
+                                                                </b></span>&nbsp;&nbsp;
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:forEach>
+                                                </p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:if>
+                                <c:if test="${param.userId != null}">
+                                    <tr>
                                         <th class="border-end" scope="row" style="width: 25%;">등록일</th>
                                         <td style="width: 80%; height: 60px; display: flex; flex-direction: row; align-items: center">
                                             <p><fmt:formatDate pattern="yyyy년MM월dd일 HH:mm"
@@ -391,7 +467,8 @@
                         <div style="display:flex; width: 100%; height:40px; justify-content:flex-end">
                             <button type="button" class="btn btn-success mr-3" onclick="saveUser()">&nbsp;저장&nbsp;
                             </button>
-                            <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;</button>
+                            <button type="button" class="btn btn-danger mr-3" onclick="cancelSave()">&nbsp;취소&nbsp;
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -7,5 +7,8 @@ import java.util.List;
 
 public interface RecruitmentRepositoryMain {
 
-    List<UserRecruitmentListDto> getRecruitmentMainList(@Param("userEmail")String userEmail);
+    List<UserRecruitmentListDto> getRecruitmentMainList(
+            @Param("userEmail")String userEmail,
+            @Param("userBirth")String userBirth
+    );
 }

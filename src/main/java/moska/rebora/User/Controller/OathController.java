@@ -9,6 +9,7 @@ import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.User.DTO.EchoAppleLogin;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Service.OathService;
+import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -82,17 +83,19 @@ public class OathController {
     /**
      * 애플 안드로이드 콜백
      *
-     * @param body 파라미터 받기
+     * @param jsonObject 파라미터 받기
      * @return ResponseEntity<Object>
      * @throws URISyntaxException URL 통신 오류
      */
     @CrossOrigin(origins = "https://appleid.apple.com")
     @PostMapping(value = "/appleCallback", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<Object> appleCallback(EchoAppleLogin body) throws URISyntaxException {
+    public ResponseEntity<Object> appleCallback(JSONObject jsonObject) throws URISyntaxException {
 
         String androidPackage = "com.moca.robora";
         String androidScheme = "signinwithapple";
-        String callback = String.format("intent://callback?code=%s&id_token=%s#Intent;package=%s;scheme=%s;end", body.getCode(), body.getId_token(), androidPackage, androidScheme);
+        JSONObject user = (JSONObject) jsonObject.get("user");
+        JSONObject name = (JSONObject) user.get("name");
+        String callback = String.format("intent://callback?code=%s&id_token=%s&firstName=%s&lastName=%s#Intent;package=%s;scheme=%s;end", jsonObject.get("code"), jsonObject.get("id_token"), name.get("firstName"), name.get("lastName"), androidPackage, androidScheme);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(new URI(callback));
         return new ResponseEntity<>(httpHeaders, HttpStatus.TEMPORARY_REDIRECT);
@@ -137,7 +140,7 @@ public class OathController {
             String userSnsKind,
             String authToken
     ) {
-        
+
         BaseInfoResponse<SnsInfo> baseInfoResponse = new BaseInfoResponse<>();
         SnsInfo snsInfo = new SnsInfo();
 

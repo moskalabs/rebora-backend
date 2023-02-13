@@ -12,4 +12,6 @@ public interface CinemaRepository extends JpaRepository<Cinema, Long>, AdminCine
     Optional<Cinema> getCinemaByCinemaName(String cinemaName);
 
     Optional<Cinema> getCinemaByCinemaNameAndRegionName(String cinemaName, String regionName);
+
+    List<Cinema> getCinemasByRegionNameAndBrandName(String regionName, String brandName);
 }

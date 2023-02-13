@@ -1,5 +1,6 @@
 package moska.rebora.Admin.Controller;
 
+import com.google.gson.JsonObject;
 import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import lombok.AllArgsConstructor;
@@ -9,10 +10,15 @@ import moska.rebora.Admin.Dto.AdminUserDto;
 import moska.rebora.Admin.Dto.FileReadCsvDto;
 import moska.rebora.Admin.Service.AdminCinemaService;
 import moska.rebora.Admin.Service.AdminService;
+import moska.rebora.Admin.Service.AdminTheaterService;
+import moska.rebora.Admin.Service.AdminUserService;
+import moska.rebora.Cinema.Dto.CinemaDto;
 import moska.rebora.Cinema.Dto.CinemaPageDto;
 import moska.rebora.Cinema.Dto.MovieCinemaDto;
 import moska.rebora.Cinema.Entity.Brand;
+import moska.rebora.Cinema.Entity.Cinema;
 import moska.rebora.Cinema.Repository.BrandRepository;
+import moska.rebora.Cinema.Repository.CinemaRepository;
 import moska.rebora.Cinema.Repository.MovieCinemaRepository;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
@@ -27,6 +33,7 @@ import moska.rebora.User.DTO.UserSearchCondition;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserRecruitment;
 import moska.rebora.User.Repository.UserRepository;
+import org.json.simple.JSONObject;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -47,6 +54,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
@@ -64,6 +72,12 @@ public class AdminController {
     BrandRepository brandRepository;
 
     AdminCinemaService adminCinemaService;
+
+    AdminUserService adminUserService;
+
+    CinemaRepository cinemaRepository;
+
+    AdminTheaterService adminTheaterService;
 
     @GetMapping("/login")
     public ModelAndView login(
@@ -160,12 +174,77 @@ public class AdminController {
         LocalDate date = LocalDate.now();
 
         if (!selectDate.equals("")) {
-            date = LocalDate.parse(selectDate+"-01");
+            date = LocalDate.parse(selectDate + "-01");
         }
 
         mav.addObject("theaterList", adminService.getAdminTheaterPage(theaterRegion, theaterCinemaBrandName, date, pageable));
         mav.setViewName("/admin/theater/list");
         return mav;
+    }
+
+    @GetMapping("/theater/write")
+    public ModelAndView theaterWrite(
+            ModelAndView mav
+    ) {
+
+        List<String> regionList = new ArrayList<>(Arrays.asList("서울", "경기", "인천", "강원", "대전/충청", "대구", "부산/울산", "경상", "광주/전라/제주"));
+
+        mav.addObject("regionList", regionList);
+        mav.addObject("brandList", brandRepository.findAll());
+        mav.setViewName("/admin/theater/write");
+        return mav;
+    }
+
+    @GetMapping("/theater/getCinema")
+    public JSONObject getCinema(
+            @RequestParam String region,
+            @RequestParam String brand
+    ) {
+
+        JSONObject jsonObject = new JSONObject();
+        List<Cinema> cinemaList = cinemaRepository.getCinemasByRegionNameAndBrandName(region, brand);
+        List<CinemaDto> cinemaDtoList = cinemaList.stream().map(CinemaDto::new).collect(Collectors.toList());
+        jsonObject.put("cinemaList", cinemaDtoList);
+        return jsonObject;
+    }
+
+    @PostMapping("/theater/createTheater")
+    public BaseResponse createTheater(
+            @RequestParam String regionName,
+            @RequestParam String brandName,
+            @RequestParam Long cinemaId,
+            @RequestParam String theaterName,
+            @RequestParam String theaterDate,
+            @RequestParam String theaterStartHour,
+            @RequestParam String theaterStartMinute,
+            @RequestParam String theaterEndHour,
+            @RequestParam String theaterEndMinute,
+            @RequestParam Integer theaterMinPeople,
+            @RequestParam Integer theaterMaxPeople,
+            @RequestParam Integer theaterTime,
+            @RequestParam Integer theaterPrice
+    ) {
+
+        adminTheaterService.createTheater(
+                regionName,
+                brandName,
+                cinemaId,
+                theaterName,
+                theaterDate,
+                theaterStartHour,
+                theaterStartMinute,
+                theaterEndHour,
+                theaterEndMinute,
+                theaterMinPeople,
+                theaterMaxPeople,
+                theaterTime,
+                theaterPrice
+        );
+
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+
+        return baseResponse;
     }
 
     @GetMapping("/payment/list")
@@ -363,7 +442,7 @@ public class AdminController {
         baseInfoResponse.setResult(true);
 
         if (userId != null) {
-            baseInfoResponse.setContent(userRepository.getAdminUserInfo(userId));
+            baseInfoResponse.setContent(adminUserService.getUserInfo(userId));
         }
 
         mav.addObject("user", baseInfoResponse);
@@ -527,12 +606,16 @@ public class AdminController {
             ModelAndView mav,
             @RequestParam(required = false) Long cinemaId
     ) {
+        List<String> regionList = new ArrayList<>(Arrays.asList("서울", "경기", "인천", "강원", "대전/충청", "대구", "부산/울산", "경상", "광주/전라/제주"));
+
         BaseInfoResponse<CinemaPageDto> baseInfoResponse = new BaseInfoResponse<>();
         baseInfoResponse.setResult(true);
         baseInfoResponse.setContent(adminCinemaService.getCinemaInfo(cinemaId));
 
+        mav.addObject("regionList", regionList);
         mav.setViewName("/admin/cinema/info");
         mav.addObject("cinema", baseInfoResponse);
+
         return mav;
     }
 
@@ -552,6 +635,12 @@ public class AdminController {
         log.info("cinemaName={}", cinemaName);
 
         String finalString = "";
+
+        List<String> regionList = new ArrayList<>(Arrays.asList("서울", "경기", "인천", "강원", "대전/충청", "대구", "부산/울산", "경상", "광주/전라/제주"));
+        if(!regionList.contains(regionName)){
+            throw new NullPointerException("존재하지 않는 지역명입니다.");
+        }
+
         List<Long> movieIdList = new ArrayList<>();
         log.info("movieList Length={}", movieList.length);
         for (String s : movieList) {

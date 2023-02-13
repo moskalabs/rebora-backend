@@ -7,7 +7,9 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import io.jsonwebtoken.lang.Strings;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Enum.MovieRating;
 import moska.rebora.Enum.RecruitmentStatus;
 import moska.rebora.Recruitment.Dto.RecruitmentInfoDto;
 import moska.rebora.Recruitment.Entity.Recruitment;
@@ -21,12 +23,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.querydsl.jpa.JPAExpressions.select;
+import static moska.rebora.Common.CommonConst.ADULT_BIRTH;
 import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Recruitment.Entity.QRecruitment.recruitment;
 import static moska.rebora.Theater.Entity.QTheater.theater;
@@ -46,6 +50,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
     @Override
     public Page<UserRecruitmentListDto> getList(Pageable pageable,
                                                 String userEmail,
+                                                String userBirth,
                                                 UserSearchCondition searchCondition) {
 
         List<OrderSpecifier> ORDERS = getListOrders(searchCondition.getRecruitmentStatus());
@@ -93,7 +98,8 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                         getTheaterRegion(searchCondition.getTheaterRegion()),
                         recruitmentStatus(searchCondition.getRecruitmentStatus()),
                         createSearchWord(searchCondition.getSearchWord()),
-                        createMovieId(searchCondition.getMovieId())
+                        createMovieId(searchCondition.getMovieId()),
+                        notAdult(userEmail, userBirth)
                 )
                 .orderBy(
                         ORDERS.toArray(OrderSpecifier[]::new)
@@ -130,6 +136,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                         movie.movieName,
                         movie.movieRecruitmentImage,
                         movie.movieImage,
+                        movie.movieRunningTime,
                         movie.id.as("movieId"),
                         theater.id.as("theaterId"),
                         theater.theaterStartDatetime,
@@ -137,6 +144,7 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                         theater.theaterDay,
                         theater.theaterMaxPeople,
                         theater.theaterMinPeople,
+                        theater.theaterName,
                         theater.theaterCinemaName,
                         theater.theaterCinemaBrandName,
                         theater.theaterRegion,
@@ -227,5 +235,10 @@ public class RecruitmentCustomImpl implements RecruitmentCustom {
                 .offset(0)
                 .limit(5)
                 .fetch();
+    }
+
+    public BooleanExpression notAdult(String userEmail, String userBirth) {
+        LocalDate userBirthDate = LocalDate.parse(userBirth);
+        return Strings.hasText(userEmail) && !userEmail.equals("anonymousUser") && userBirthDate.isBefore(ADULT_BIRTH) ? null : movie.movieRating.ne(MovieRating.ADULT);
     }
 }

@@ -1,6 +1,7 @@
 package moska.rebora.Recruitment.Controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BasePageResponse;
@@ -24,12 +25,12 @@ import org.springframework.web.bind.annotation.*;
 import static org.springframework.util.StringUtils.hasText;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/api/recruitment")
 @Slf4j
 @Tag(name = "모집")
 public class RecruitmentController {
-
-    @Autowired
+    
     RecruitmentService recruitmentService;
 
     /**
@@ -172,35 +173,6 @@ public class RecruitmentController {
 
         return baseInfoResponse;
     }
-
-    /*
-     * 모집 예약
-     *
-     * @param movieId              영화 아이디
-     * @param theaterId            상영관 아이디
-     * @param recruitmentIntroduce 모집 소개
-     * @param bannerYn             배너 유무
-     * @param bannerSubText        배너 서브 텍스트
-     * @param bannerMainText       배너 메인 텍스트
-     * @return JSONObject
-     */
-//    @PostMapping("/reserveRecruitment")
-//    public BaseInfoResponse<ReserveRecruitmentDto> reserveRecruitment(
-//            @RequestParam Long movieId,
-//            @RequestParam Long theaterId,
-//            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
-//            @RequestParam("bannerYn") Boolean bannerYn,
-//            @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
-//            @RequestParam(value = "bannerMainText", required = false) String bannerMainText
-//    ) {
-//        BaseInfoResponse<ReserveRecruitmentDto> baseInfoResponse = new BaseInfoResponse<>();
-//
-//        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-//        baseInfoResponse.setResult(true);
-//        baseInfoResponse.setContent(recruitmentService.reserveRecruitment(movieId, theaterId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText));
-//
-//        return baseInfoResponse;
-//    }
 
     /**
      * 모집 취소

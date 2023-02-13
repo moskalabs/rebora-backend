@@ -106,8 +106,21 @@
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 20%;">지역명</th>
                                     <td style="width: 80%;">
-                                        <input type="text" value="${cinema.content.regionName}" style="width:500px"
-                                               class="form-control" id="regionName">
+                                        <div class="form-group" style="display:flex; width:180px;">
+                                            <select class="form-control select2bs4" aria-label="Default select example"
+                                                    id="regionName">
+                                                <c:forEach var="region" items="${regionList}" varStatus="status">
+                                                    <c:choose>
+                                                        <c:when test="${cinema.content.regionName.equals(region)}">
+                                                            <option value="${region}" selected>${region}</option>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <option value="${region}">${region}</option>
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                </c:forEach>
+                                            </select>
+                                        </div>
                                     </td>
                                 </tr>
                                 <tr>

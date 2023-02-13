@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface RecruitmentCustom {
 
-    Page<UserRecruitmentListDto> getList(Pageable pageable, String userEmail, UserSearchCondition searchCondition);
+    Page<UserRecruitmentListDto> getList(Pageable pageable, String userEmail, String userBirth, UserSearchCondition searchCondition);
 
     RecruitmentInfoDto getRecruitmentInfo(Long recruitmentId, String userEmail);
 

@@ -1,5 +1,6 @@
 package moska.rebora.Main.Service;
 
+import lombok.AllArgsConstructor;
 import moska.rebora.Banner.Dto.BannerDto;
 import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Repository.BannerRepository;
@@ -9,6 +10,8 @@ import moska.rebora.Main.Dto.MainDto;
 import moska.rebora.Movie.Repository.MovieRepository;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
 import moska.rebora.User.DTO.UserSearchCondition;
+import moska.rebora.User.Entity.User;
+import moska.rebora.User.Repository.UserRepository;
 import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,25 +20,24 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class MainServiceImpl implements MainService {
 
-    @Autowired
     RecruitmentRepository recruitmentRepository;
 
-    @Autowired
     MovieRepository movieRepository;
 
-    @Autowired
     BannerRepository bannerRepository;
 
-    @Autowired
     MainBannerRepository mainBannerRepository;
+    private final UserRepository userRepository;
 
     @Override
     public MainDto getMain() {
@@ -43,21 +45,25 @@ public class MainServiceImpl implements MainService {
         MainDto mainDto = new MainDto();
 
         UserSearchCondition userSearchCondition = new UserSearchCondition(); //검색 조건
-        Pageable pageable = PageRequest.of(0, 10);
         userSearchCondition.setRecruitmentStatus(RecruitmentStatus.CONFIRMATION); //확정 된 경우에만
         userSearchCondition.setOrderByMovie("popular"); //인기순으로 정리
 
-        JSONObject jsonObject = new JSONObject();
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+        String userBirth = LocalDate.now().minusDays(20L).toString();
+
+        if (!userEmail.equals("anonymousUser")) {
+            User user = userRepository.getUserByUserEmail(userEmail);
+            userBirth = user.getUserBirth();
+        }
 
         mainDto.setResult(true);
-        mainDto.setRecruitmentList(recruitmentRepository.getRecruitmentMainList(userEmail));
-        mainDto.setMovieList(movieRepository.getMovieMainList(userEmail));
+        mainDto.setRecruitmentList(recruitmentRepository.getRecruitmentMainList(userEmail, userBirth));
+        mainDto.setMovieList(movieRepository.getMovieMainList(userEmail, userBirth));
 
         List<BannerDto> bannerRecentlyDtoList = mainBannerRepository.getMainBanner();
         List<BannerDto> bannerDtoList = new ArrayList<>();
         if (bannerRecentlyDtoList.isEmpty()) {
-            Banner banner = bannerRepository.findById(1L).get();
+            Banner banner = bannerRepository.getBannerById(1L);
             BannerDto bannerDto = new BannerDto();
             bannerDto.setBannerExposeYn(banner.getBannerExposeYn());
             bannerDto.setBannerImage(banner.getBannerImage());

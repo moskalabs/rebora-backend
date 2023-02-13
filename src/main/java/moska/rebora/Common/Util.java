@@ -10,6 +10,8 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 @Slf4j
@@ -59,7 +61,6 @@ public class Util {
     }
 
 
-
     public String createRandomString(int size) {
 
         String result = "";
@@ -77,5 +78,15 @@ public class Util {
         }
 
         return result;
+    }
+
+    public LocalDateTime convertDateTime(
+            Integer year,
+            Integer month,
+            Integer date,
+            Integer hour,
+            Integer minute
+    ) {
+        return LocalDateTime.of(year, month, date, hour, minute);
     }
 }

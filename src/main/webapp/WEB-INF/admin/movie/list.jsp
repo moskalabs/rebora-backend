@@ -27,8 +27,14 @@
             display: none;
         }
 
+        .btn-secondary {
+            font-size: 16px;
+            padding : 0;
+        }
+
         .label-file {
-            display: inline-block;
+            display: flex;
+            justify-content: center;
             font-weight: 400;
             text-align: center;
             vertical-align: middle;
@@ -36,7 +42,6 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            padding: 0.375rem 0.75rem;
             font-size: 1rem;
             line-height: 1.5;
             border-radius: 0.25rem;
@@ -52,7 +57,7 @@
     </style>
 </head>
 
-<body class="hold-transition sidebar-mini" style="min-width: 1140px;">
+<body class="hold-transition sidebar-mini" style="min-width: 1600px">
 <div class="wrapper">
     <%@include file="../include/sidebar.jsp" %>
     <div class="content-wrapper" style="overflow-y: auto">
@@ -94,8 +99,8 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-body" style="display: flex; flex-direction: row;">
-                                <button type="button" onclick="movieCountResultAll()" class="btn btn-secondary">전체 누적
-                                    카운팅 리셋
+                                <button type="button" style="width: 180px;" onclick="movieCountResultAll()" class="btn btn-secondary">
+                                    전체 누적 카운팅 리셋
                                 </button>
                                 <div class="ml-4" style="display:flex; width:130px;">
                                     <select class="custom-select" aria-label="Default select example"
@@ -119,10 +124,10 @@
                                     </select>
                                 </div>
                                 <input type="text" value="${param.searchWord}" class="form-control ml-2"
-                                       style="width:300px" id="searchWord"
+                                       style="width:30%" id="searchWord"
                                        placeholder="검색어를 입력해 주세요">
-                                <button type="button" class="btn btn-secondary ml-3" onclick="searchMovie()">&nbsp;검색&nbsp;</button>
-                                <div class="ml-4" style="display:flex; width:130px;">
+                                <button type="button" class="btn btn-secondary ml-3" style="width: 50px;" onclick="searchMovie()">&nbsp;검색&nbsp;</button>
+                                <div class="ml-4" style="display:flex; width:140px;">
                                     <select class="custom-select" aria-label="Default select example" id="movieSize"
                                             onchange="changePageSize()">
                                         <c:choose>
@@ -151,20 +156,20 @@
                                         </c:choose>
                                     </select>
                                 </div>
-                                <button type="button" class="btn btn-secondary ml-3" onclick="goToCreateMovie()">
+                                <button type="button" style="width: 80px;" class="btn btn-secondary ml-3" onclick="goToCreateMovie()">
                                     영화 등록
                                 </button>
-                                <button type="button" class="btn btn-secondary ml-3" onclick="downloadCsvFile()">
+                                <button type="button" style="width: 160px;" class="btn btn-secondary ml-3" onclick="downloadCsvFile()">
                                     엑셀파일 다운로드
                                 </button>
                                 <label style="margin: 0;" class="ml-3" for="movieCsvFile">
-                                    <div class="label-file" style="height: 40px; display: flex; align-items: center">
+                                    <div class="label-file" style="height: 40px; width: 120px; display: flex; align-items: center">
                                         엑셀파일 업로드
                                     </div>
                                 </label>
                                 <input type="file" name="movieImageFile" id="movieCsvFile" accept="text/csv">
                                 <label style="margin: 0;" class="ml-3" for="movieImageFile">
-                                    <div class="label-file" style="height: 40px; display: flex; align-items: center">
+                                    <div class="label-file" style="height: 40px; width: 120px; display: flex; align-items: center">
                                         영화 이미지 등록
                                     </div>
                                 </label>
@@ -205,11 +210,13 @@
                                             <td>${movie.moviePopularCount} </td>
                                             <td>
                                                 <button type="button" onclick="movieCountResult(${movie.id})"
+                                                        style="height: 40px; width: 120px"
                                                         class="btn btn-secondary ms-3 btn-secondary">&nbsp;카운팅 리셋&nbsp;
                                                 </button>
                                             </td>
                                             <td>
                                                 <button type="button" onclick="goToDetailInfo(${movie.id})"
+                                                        style="height: 40px; width: 80px"
                                                         class="btn btn-secondary ms-3 btn-secondary">&nbsp;수정&nbsp;
                                                 </button>
                                             </td>

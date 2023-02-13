@@ -5,8 +5,10 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import io.jsonwebtoken.lang.Strings;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.Entity.Category;
+import moska.rebora.Enum.MovieRating;
 import moska.rebora.Movie.Dto.MoviePageDto;
 import moska.rebora.User.DTO.UserSearchCondition;
 import org.springframework.data.domain.Page;
@@ -16,9 +18,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static moska.rebora.Common.CommonConst.ADULT_BIRTH;
 import static moska.rebora.Common.Entity.QCategory.category;
 import static moska.rebora.Movie.Entity.QMovie.movie;
 import static moska.rebora.Movie.Entity.QMovieCategory.movieCategory;
@@ -38,9 +42,11 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
     @Override
     public Page<MoviePageDto> getMovieList(@Param("searchCondition") UserSearchCondition searchCondition,
                                            @Param("userEmail") String userEmail,
+                                           @Param("userBirth") String userBirth,
                                            @Param("pageable") Pageable pageable
     ) {
         List<OrderSpecifier> ORDERS = getListOrders(pageable);
+        log.info("hasTest={} userEmail={} userBirth={}", Strings.hasText(userEmail), userEmail, userBirth);
 
         List<MoviePageDto> content = queryFactory
                 .select(Projections.fields(
@@ -64,7 +70,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .where(
-                        getSearchWord(searchCondition.getSearchWord())
+                        getSearchWord(searchCondition.getSearchWord()),
+                        notAdult(userEmail,userBirth)
                 )
                 .orderBy(
                         ORDERS.toArray(OrderSpecifier[]::new))
@@ -74,7 +81,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .select(movie.countDistinct())
                 .from(movie)
                 .where(
-                        getSearchWord(searchCondition.getSearchWord())
+                        getSearchWord(searchCondition.getSearchWord()),
+                        notAdult(userEmail,userBirth)
                 )
                 .leftJoin(movie.movieCategoryList, movieCategory)
                 .leftJoin(movieCategory.category, category)
@@ -93,11 +101,13 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
     public Page<MoviePageDto> getMovieListByCategory(
             @Param("searchCondition") UserSearchCondition searchCondition,
             @Param("userEmail") String userEmail,
+            @Param("userBirth") String userBirth,
             @Param("pageable") Pageable pageable,
             @Param("paramCategory") Category paramCategory
     ) {
 
         List<OrderSpecifier> ORDERS = getListOrders(pageable);
+        log.info("hasTest={} userEmail={} userBirth={}", Strings.hasText(userEmail), userEmail, userBirth);
 
         List<MoviePageDto> content = queryFactory
                 .select(Projections.fields(
@@ -121,7 +131,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .leftJoin(userMovie.user, user)
                 .where(
-                        category.eq(paramCategory)
+                        category.eq(paramCategory),
+                        notAdult(userEmail,userBirth)
                 )
                 .orderBy(
                         ORDERS.toArray(OrderSpecifier[]::new))
@@ -135,7 +146,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .join(movieCategory.movie, movie)
                 .join(movieCategory.category, category)
                 .where(
-                        category.eq(paramCategory)
+                        category.eq(paramCategory),
+                        notAdult(userEmail,userBirth)
                 )
                 .fetchFirst();
 
@@ -194,5 +206,10 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .join(movieCategory.movie, movie)
                 .where(movie.id.eq(movieId))
                 .fetch();
+    }
+
+    public BooleanExpression notAdult(String userEmail, String userBirth) {
+        LocalDate userBirthDate = LocalDate.parse(userBirth);
+        return Strings.hasText(userEmail) && !userEmail.equals("anonymousUser") && userBirthDate.isBefore(ADULT_BIRTH) ? null : movie.movieRating.ne(MovieRating.ADULT);
     }
 }

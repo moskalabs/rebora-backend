@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.EmailAuthKind;
@@ -33,16 +34,10 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RequestMapping("/api/user")
 @Slf4j
 @Tag(name = "유저", description = "유저 정보")
+@AllArgsConstructor
 public class UserController {
-
-
-    @Autowired
     UserService userService;
-
-    @Autowired
     UserEmailAuthService userEmailAuthService;
-
-    @Autowired
     UserRepository userRepository;
 
     /**

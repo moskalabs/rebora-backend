@@ -153,7 +153,9 @@ public class OathServiceImpl implements OathService {
         String header = new String(Base64.getDecoder().decode(decodeArray[0]));
         JSONParser jsonParser = new JSONParser();
         try {
+
             JSONObject appleJson = (JSONObject) jsonParser.parse(header);
+            log.info("appleJson={}", appleJson);
             List<ApplePublicKeyDto> applePublicKeyDtoList = getPublicAppleKeys();
             for (ApplePublicKeyDto publicKeyDto : applePublicKeyDtoList) {
                 String appleKid = appleJson.get("kid").toString();
@@ -164,6 +166,7 @@ public class OathServiceImpl implements OathService {
             }
 
             Claims userInfo = Jwts.parser().setSigningKey(getPublicKey(applePublicKeyDto)).parseClaimsJws(idToken).getBody();
+            log.info("jwts gogo={}", userInfo);
             String id = userInfo.get("sub").toString();
             String email = userInfo.get("email").toString();
             prmMap.put("userEmail", email);

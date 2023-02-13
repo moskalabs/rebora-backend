@@ -1,6 +1,7 @@
 package moska.rebora.Recruitment.Service;
 
 import com.mchange.util.DuplicateElementException;
+import lombok.AllArgsConstructor;
 import moska.rebora.Banner.Entity.Banner;
 import moska.rebora.Banner.Entity.MainBanner;
 import moska.rebora.Banner.Repository.BannerRepository;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -52,45 +54,21 @@ import java.util.Optional;
 import java.util.TimeZone;
 
 @Service
+@AllArgsConstructor
 public class RecruitmentServiceImpl implements RecruitmentService {
 
-    @Autowired
     RecruitmentRepository recruitmentRepository;
-
-    @Autowired
     CommentRepository commentRepository;
-
-    @Autowired
     UserRecruitmentRepository userRecruitmentRepository;
-
-    @Autowired
     TheaterRepository theaterRepository;
-
-    @Autowired
     UserRepository userRepository;
-
-    @Autowired
     BannerRepository bannerRepository;
-
-    @Autowired
     MovieRepository movieRepository;
-
-    @Autowired
     MainBannerRepository mainBannerRepository;
-
-    @Autowired
     NotificationService notificationService;
-
-    @Autowired
     UserMovieRepository userMovieRepository;
-
-    @Autowired
     AsyncTaskService asyncTaskService;
-
-    @Autowired
     BannerService bannerService;
-
-    @Autowired
     PaymentService paymentService;
 
     /**
@@ -105,7 +83,14 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     public BasePageResponse<UserRecruitmentListDto> getList(Pageable pageable, String userEmail, UserSearchCondition userSearchCondition) {
 
         BasePageResponse<UserRecruitmentListDto> basePageResponse = new BasePageResponse<>();
-        basePageResponse.setPage(recruitmentRepository.getList(pageable, userEmail, userSearchCondition));
+
+        String userBirth = LocalDate.now().minusDays(20L).toString();
+        if (!userEmail.equals("anonymousUser")) {
+            User user = userRepository.getUserByUserEmail(userEmail);
+            userBirth = user.getUserBirth();
+        }
+
+        basePageResponse.setPage(recruitmentRepository.getList(pageable, userEmail, userBirth, userSearchCondition));
         basePageResponse.setResult(true);
 
         return basePageResponse;
@@ -492,13 +477,26 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         }
 
         UserRecruitment userRecruitment = userRecruitmentOptional.get();
-        Integer userRecruitmentPeople = userRecruitment.getUserRecruitmentPeople();
 
-        userRecruitment.updateUserRecruitment(false, 0);
-        userRecruitmentRepository.save(userRecruitment);
+        Optional<Payment> optionalPayment = Optional.ofNullable(userRecruitment.getPayment());
 
-        recruitment.minusRecruitmentPeople((recruitment.getRecruitmentPeople() - userRecruitmentPeople));
-        recruitmentRepository.save(recruitment);
+        if (optionalPayment.isEmpty()) {
+
+            if (Boolean.TRUE.equals(userRecruitment.getUserRecruitmentYn())) {
+                Integer userRecruitmentPeople = userRecruitment.getUserRecruitmentPeople();
+
+                userRecruitment.updateUserRecruitment(false, 0);
+                userRecruitmentRepository.save(userRecruitment);
+
+                recruitment.minusRecruitmentPeople((recruitment.getRecruitmentPeople() - userRecruitmentPeople));
+                recruitmentRepository.save(recruitment);
+            }
+        } else {
+            Payment payment = optionalPayment.get();
+            if (payment.getPaymentStatus().equals(PaymentStatus.COMPLETE) && Boolean.TRUE.equals(userRecruitment.getUserRecruitmentYn())) {
+                paymentService.paymentCancel(userRecruitment);
+            }
+        }
     }
 
     /**

@@ -49,6 +49,9 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <h4>상영 관리(총 <span style="color:#74b9ff">${theaterList.page.totalElements}</span>개)</h4>
+                        <button class="btn btn-success" onclick="location.href='<%=CURRENT_SERVER%>/admin/theater/write'">
+                            상영관 생성
+                        </button>
                     </div>
                 </div>
             </div>
@@ -408,7 +411,7 @@
                 "token": token
             },
             enctype    : 'multipart/form-data',
-            data       : formData,ㄴ
+            data       : formData,
             processData: false,
             contentType: false,
             method     : "POST",

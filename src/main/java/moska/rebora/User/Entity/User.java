@@ -4,6 +4,7 @@ import lombok.*;
 import moska.rebora.Common.BaseTimeEntity;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.Enum.UserSnsKind;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.Comment;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -12,7 +13,6 @@ import javax.validation.constraints.NotNull;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @Table(indexes = {
         @Index(name = "i_user_email_use", columnList = "userEmail,userUseYn"),
         @Index(name = "search_recruitment", columnList = "user_id,userEmail")
@@ -83,6 +83,24 @@ public class User extends BaseTimeEntity {
     @Column
     @Comment("유저 SNS ID")
     private String userSnsId;
+
+    @ColumnDefault("0")
+    @Column
+    @Comment("유저 본인 인증 여부")
+    private Boolean isAuthenticated;
+
+    @ColumnDefault("0")
+    @Column
+    @Comment("유저 나이")
+    private Integer userAge;
+    @ColumnDefault("'1990-01-01'")
+    @Column
+    @Comment("유저 생년월일")
+    private String userBirth;
+
+    @Column(length = 50)
+    @Comment("유저 핸드폰 번호")
+    private String userPhone;
 
     public User() {
     }
@@ -174,7 +192,8 @@ public class User extends BaseTimeEntity {
     }
 
     @Builder
-    public User(String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, UserSnsKind userSnsKind, String userSnsId) {
+    public User(Long id, String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userCustomerId, UserSnsKind userSnsKind, String userSnsId, Boolean isAuthenticated, Integer userAge, String userBirth, String userPhone) {
+        this.id = id;
         this.userEmail = userEmail;
         this.password = password;
         this.userName = userName;
@@ -186,7 +205,12 @@ public class User extends BaseTimeEntity {
         this.userGrade = userGrade;
         this.userImage = userImage;
         this.userBillingKey = userBillingKey;
+        this.userCustomerId = userCustomerId;
         this.userSnsKind = userSnsKind;
         this.userSnsId = userSnsId;
+        this.isAuthenticated = isAuthenticated;
+        this.userAge = userAge;
+        this.userBirth = userBirth;
+        this.userPhone = userPhone;
     }
 }
