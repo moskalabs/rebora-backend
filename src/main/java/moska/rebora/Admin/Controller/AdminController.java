@@ -5,13 +5,11 @@ import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Admin.Dto.AdminBrandDto;
 import moska.rebora.Admin.Dto.AdminPaymentDto;
 import moska.rebora.Admin.Dto.AdminUserDto;
 import moska.rebora.Admin.Dto.FileReadCsvDto;
-import moska.rebora.Admin.Service.AdminCinemaService;
-import moska.rebora.Admin.Service.AdminService;
-import moska.rebora.Admin.Service.AdminTheaterService;
-import moska.rebora.Admin.Service.AdminUserService;
+import moska.rebora.Admin.Service.*;
 import moska.rebora.Cinema.Dto.CinemaDto;
 import moska.rebora.Cinema.Dto.CinemaPageDto;
 import moska.rebora.Cinema.Dto.MovieCinemaDto;
@@ -38,6 +36,7 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +53,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -79,6 +79,14 @@ public class AdminController {
 
     AdminTheaterService adminTheaterService;
 
+    AdminBrandService adminBrandService;
+
+    /**
+     * 관리자 로그인 페이지
+     *
+     * @param mav 모델 앤 뷰
+     * @return ModelAndView
+     */
     @GetMapping("/login")
     public ModelAndView login(
             ModelAndView mav
@@ -89,6 +97,13 @@ public class AdminController {
         return mav;
     }
 
+    /**
+     * 관리자 로그인
+     *
+     * @param userEmail 유저 이메일
+     * @param password  비밀번호
+     * @return UserLoginDto
+     */
     @PostMapping("/adminLogin")
     public UserLoginDto adminLogin(
             @RequestParam String userEmail,
@@ -97,6 +112,15 @@ public class AdminController {
         return adminService.adminLogin(userEmail, password);
     }
 
+    /**
+     * 영화 리스트 가져오기
+     *
+     * @param mav             모델 앤 뷰
+     * @param pageable        페이징
+     * @param searchCondition 검색 조건
+     * @param searchWord      검색어
+     * @return ModelAndView
+     */
     @GetMapping("/movie/list")
     public ModelAndView movieList(
             ModelAndView mav,
@@ -114,6 +138,13 @@ public class AdminController {
         return mav;
     }
 
+    /**
+     * 영화 정보
+     *
+     * @param mav     모델 앤 뷰
+     * @param movieId 영화 아이디
+     * @return ModelAndView
+     */
     @GetMapping("/movie/info")
     public ModelAndView movieInfo(
             ModelAndView mav,
@@ -178,6 +209,7 @@ public class AdminController {
         }
 
         mav.addObject("theaterList", adminService.getAdminTheaterPage(theaterRegion, theaterCinemaBrandName, date, pageable));
+        mav.addObject("brandList", brandRepository.findAll());
         mav.setViewName("/admin/theater/list");
         return mav;
     }
@@ -378,8 +410,8 @@ public class AdminController {
                 cinema,
                 movieDetailLink,
                 movieRunningTime,
-                moviePopularCount,
                 moviePrice,
+                moviePopularCount,
                 movieUseYn,
                 changeMovieImage,
                 changeMovieBannerImage,
@@ -585,7 +617,7 @@ public class AdminController {
         log.info("cinemaBrand={}", cinemaBrand);
         log.info("searchWord={}", searchWord);
         log.info("searchCondition={}", searchCondition);
-
+        List<Brand> brandList = brandRepository.findAll();
         BasePageResponse<CinemaPageDto> basePageResponse = new BasePageResponse<>();
         UserSearchCondition userSearchCondition = new UserSearchCondition();
         userSearchCondition.setSearchWord(searchWord);
@@ -594,7 +626,7 @@ public class AdminController {
 
         basePageResponse.setPage(adminCinemaService.getCinemaPage(pageable, userSearchCondition));
         basePageResponse.setResult(true);
-
+        mav.addObject("brandList", brandList);
         mav.addObject("cinemaList", basePageResponse);
         mav.setViewName("/admin/cinema/list");
 
@@ -607,12 +639,13 @@ public class AdminController {
             @RequestParam(required = false) Long cinemaId
     ) {
         List<String> regionList = new ArrayList<>(Arrays.asList("서울", "경기", "인천", "강원", "대전/충청", "대구", "부산/울산", "경상", "광주/전라/제주"));
-
+        List<Brand> brandList = brandRepository.findAll();
         BaseInfoResponse<CinemaPageDto> baseInfoResponse = new BaseInfoResponse<>();
         baseInfoResponse.setResult(true);
         baseInfoResponse.setContent(adminCinemaService.getCinemaInfo(cinemaId));
 
         mav.addObject("regionList", regionList);
+        mav.addObject("brandList", brandList);
         mav.setViewName("/admin/cinema/info");
         mav.addObject("cinema", baseInfoResponse);
 
@@ -637,7 +670,7 @@ public class AdminController {
         String finalString = "";
 
         List<String> regionList = new ArrayList<>(Arrays.asList("서울", "경기", "인천", "강원", "대전/충청", "대구", "부산/울산", "경상", "광주/전라/제주"));
-        if(!regionList.contains(regionName)){
+        if (!regionList.contains(regionName)) {
             throw new NullPointerException("존재하지 않는 지역명입니다.");
         }
 
@@ -657,6 +690,68 @@ public class AdminController {
 
         adminCinemaService.saveInfo(cinemaId, brandName, regionName, cinemaName, movieIdList);
 
+        baseResponse.setResult(true);
+
+        return baseResponse;
+    }
+
+    @GetMapping("/brand/list")
+    public ModelAndView brandList(
+            ModelAndView mav,
+            @PageableDefault(size = 10, page = 0) Pageable pageable
+    ) {
+        BasePageResponse<AdminBrandDto> basePageResponse = new BasePageResponse<>();
+        basePageResponse.setPage(adminBrandService.getBrandList(pageable));
+        basePageResponse.setResult(true);
+
+        mav.addObject("brandList", basePageResponse);
+        mav.setViewName("/admin/brand/list");
+
+        return mav;
+    }
+
+    @GetMapping("/brand/info")
+    public ModelAndView brandInfo(
+            ModelAndView mav,
+            @RequestParam(required = false) Long brandId
+    ) {
+        BaseInfoResponse<Brand> baseInfoResponse = new BaseInfoResponse<>();
+        if (brandId != null) {
+            Optional<Brand> brandOptional = brandRepository.findById(brandId);
+            if (brandOptional.isEmpty()) {
+                throw new NullPointerException("존재하지 않는 브랜드입니다.");
+            }
+
+            baseInfoResponse.setContent(brandOptional.get());
+        }
+
+        baseInfoResponse.setResult(true);
+
+        mav.addObject("brand", baseInfoResponse);
+        mav.setViewName("/admin/brand/info");
+
+        return mav;
+    }
+
+    @DeleteMapping("/brand/deleteBrand/{brandId}")
+    public BaseResponse deleteBrand(@PathVariable Long brandId){
+
+        BaseResponse baseResponse = new BaseResponse();
+        adminBrandService.deleteBrand(brandId);
+        baseResponse.setResult(true);
+
+        return baseResponse;
+    }
+
+    @PostMapping("/brand/saveBrand")
+    public BaseResponse saveBrand(
+            @RequestParam(required = false) Long brandId,
+            @RequestParam String brandName
+    ) {
+
+        adminBrandService.saveBrand(brandId, brandName);
+
+        BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
 
         return baseResponse;

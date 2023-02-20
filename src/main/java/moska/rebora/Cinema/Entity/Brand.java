@@ -27,6 +27,10 @@ public class Brand extends BaseEntity {
     @OneToMany(mappedBy = "brand")
     List<Theater> theaterList = new ArrayList<>();
 
+    public void changeBrandName(String brandName){
+        this.brandName = brandName;
+    }
+
     @Builder
     public Brand(String brandName) {
         this.brandName = brandName;

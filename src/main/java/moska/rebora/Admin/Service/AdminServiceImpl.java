@@ -344,7 +344,21 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Transactional
-    void updateMovie(Long movieId, String movieName, String movieRating, String movieDirector, String movieStarRating, String category, String cinema, String movieDetailLink, Integer movieRunningTime, Integer moviePrice, Integer moviePopularCount, Boolean movieUseYn, MultipartFile changeMovieImage, MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
+    void updateMovie(
+            Long movieId,
+            String movieName,
+            String movieRating,
+            String movieDirector,
+            String movieStarRating,
+            String category,
+            String cinema,
+            String movieDetailLink,
+            Integer movieRunningTime,
+            Integer moviePrice,
+            Integer moviePopularCount,
+            Boolean movieUseYn,
+            MultipartFile changeMovieImage,
+            MultipartFile changeMovieBannerImage, MultipartFile changeMovieRecruitmentImage) {
         Movie movie = movieRepository.getMovieById(movieId);
         int convertMovieStarRating = 0;
         String[] startRatingList = movieStarRating.split("\\.");
@@ -458,6 +472,7 @@ public class AdminServiceImpl implements AdminService {
     public List<Theater> readTheaterFile(CSVReader csvReader) {
 
         List<Theater> theaterList = new ArrayList<>();
+
         try {
             String[] line;
             while ((line = csvReader.readNext()) != null) {
@@ -477,7 +492,7 @@ public class AdminServiceImpl implements AdminService {
 
                 Long theaterCount = theaterRepository.checkTheaterCsv(line[0], line[3], line[1], line[2], theaterStartTime, theaterEndTime);
 
-                if(theaterCount != 0L){
+                if (theaterCount != 0L) {
                     throw new DuplicateElementException("이미 겹치거나 중복된 시간입니다.");
                 }
 
@@ -501,6 +516,7 @@ public class AdminServiceImpl implements AdminService {
             }
 
             theaterRepository.saveAll(theaterList);
+
         } catch (DateTimeParseException | NumberFormatException e) {
             log.error(e.getMessage());
             throw new RuntimeException("옳바르지 않은 날짜입니다. 다시 시도해 주세요");

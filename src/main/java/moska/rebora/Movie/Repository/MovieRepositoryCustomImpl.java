@@ -70,6 +70,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .where(
+                        movie.movieUseYn.eq(true),
                         getSearchWord(searchCondition.getSearchWord()),
                         notAdult(userEmail,userBirth)
                 )
@@ -81,6 +82,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .select(movie.countDistinct())
                 .from(movie)
                 .where(
+                        movie.movieUseYn.eq(true),
                         getSearchWord(searchCondition.getSearchWord()),
                         notAdult(userEmail,userBirth)
                 )
@@ -131,6 +133,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .leftJoin(userMovie.user, user)
                 .where(
+                        movie.movieUseYn.eq(true),
                         category.eq(paramCategory),
                         notAdult(userEmail,userBirth)
                 )
@@ -146,6 +149,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                 .join(movieCategory.movie, movie)
                 .join(movieCategory.category, category)
                 .where(
+                        movie.movieUseYn.eq(true),
                         category.eq(paramCategory),
                         notAdult(userEmail,userBirth)
                 )

@@ -33,7 +33,10 @@ public class TheaterController {
 
     @Tag(name = "상영관")
     @GetMapping("/getAvailableDate")
-    public BaseListResponse<String> getAvailableDate(@RequestParam String theaterRegion, @RequestParam String selectMonth, @RequestParam Long movieId) {
+    public BaseListResponse<String> getAvailableDate(
+            @RequestParam String theaterRegion,
+            @RequestParam String selectMonth,
+            @RequestParam Long movieId) {
         BaseListResponse<String> baseListResponse = new BaseListResponse<>();
         baseListResponse.setResult(true);
         baseListResponse.setList(theaterService.getAvailableDate(theaterRegion, selectMonth, movieId));
@@ -43,7 +46,11 @@ public class TheaterController {
 
     @Tag(name = "상영관")
     @GetMapping("/getPageTheater")
-    public BasePageResponse<TheaterPageDto> getPageTheater(@RequestParam String theaterRegion, @RequestParam String selectDate, @RequestParam Long movieId, @PageableDefault(page = 0, size = 10) Pageable pageable) {
+    public BasePageResponse<TheaterPageDto> getPageTheater(
+            @RequestParam String theaterRegion,
+            @RequestParam String selectDate,
+            @RequestParam Long movieId,
+            @PageableDefault(page = 0, size = 10) Pageable pageable) {
 
         BasePageResponse<TheaterPageDto> basePageResponse = new BasePageResponse<>();
         basePageResponse.setResult(true);

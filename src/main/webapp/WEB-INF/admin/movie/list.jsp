@@ -113,14 +113,6 @@
                                                 <option value="movieName">영화 이름</option>
                                             </c:otherwise>
                                         </c:choose>
-                                        <c:choose>
-                                            <c:when test="${param.searchCondition == '' || param.searchCondition == 'brand'}">
-                                                <option value="brand" selected>상영 브랜드</option>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <option value="brand">상영 브랜드</option>
-                                            </c:otherwise>
-                                        </c:choose>
                                     </select>
                                 </div>
                                 <input type="text" value="${param.searchWord}" class="form-control ml-2"

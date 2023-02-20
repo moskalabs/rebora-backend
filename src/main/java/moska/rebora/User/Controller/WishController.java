@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import moska.rebora.Common.BasePageResponse;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Movie.Dto.MoviePageDto;
@@ -18,9 +19,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/wish")
 @Tag(name = "찜하기", description = "모집 및 영화 찜하기")
+@AllArgsConstructor
 public class WishController {
 
-    @Autowired
     WishService wishService;
 
     /**

@@ -1,5 +1,11 @@
 package moska.rebora.User.Controller;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.nimbusds.jose.shaded.json.parser.JSONParser;
+import com.nimbusds.jose.shaded.json.parser.ParseException;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +22,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletInputStream;
+import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 
 @RestController
@@ -80,22 +94,35 @@ public class OathController {
         return oathService.login(idToken, UserSnsKind.APPLE, userPushKey);
     }
 
-    /**
-     * 애플 안드로이드 콜백
-     *
-     * @param jsonObject 파라미터 받기
-     * @return ResponseEntity<Object>
-     * @throws URISyntaxException URL 통신 오류
-     */
-    @CrossOrigin(origins = "https://appleid.apple.com")
-    @PostMapping(value = "/appleCallback", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public ResponseEntity<Object> appleCallback(JSONObject jsonObject) throws URISyntaxException {
 
-        String androidPackage = "com.moca.robora";
+    @CrossOrigin(origins = "https://appleid.apple.com")
+    @PostMapping(value = "/appleCallback")
+    public ResponseEntity<Object> appleCallback(String code, String id_token, String user) throws ParseException, URISyntaxException {
+
+        String firstName = "";
+        String lastName = "";
+
+        log.info("code={}", code);
+        log.info("id_token={}", id_token);
+        log.info("user={}", user);
+
+        if (user != null) {
+            JsonParser parser = new JsonParser();
+            JsonElement element = parser.parse(user);
+            JsonObject name = element.getAsJsonObject().get("name").getAsJsonObject();
+            String email = element.getAsJsonObject().get("email").toString();
+            firstName = name.get("firstName").toString().replace("\"", "");
+            lastName = name.get("lastName").toString().replace("\"", "");
+
+            log.info("email={}", email);
+            log.info("firstName={}", firstName);
+            log.info("lastName={}", lastName);
+        }
+
+        String androidPackage = "com.moca.rebora";
         String androidScheme = "signinwithapple";
-        JSONObject user = (JSONObject) jsonObject.get("user");
-        JSONObject name = (JSONObject) user.get("name");
-        String callback = String.format("intent://callback?code=%s&id_token=%s&firstName=%s&lastName=%s#Intent;package=%s;scheme=%s;end", jsonObject.get("code"), jsonObject.get("id_token"), name.get("firstName"), name.get("lastName"), androidPackage, androidScheme);
+
+        String callback = String.format("intent://callback?code=%s&id_token=%s&firstName=%s&lastName=%s#Intent;package=%s;scheme=%s;end", code, id_token, firstName, lastName, androidPackage, androidScheme);
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setLocation(new URI(callback));
         return new ResponseEntity<>(httpHeaders, HttpStatus.TEMPORARY_REDIRECT);
@@ -159,4 +186,13 @@ public class OathController {
 class SnsInfo {
     private UserSnsKind userSnsKind;
     private String userSnsId;
+}
+
+@Data
+class AppleCallbackDto {
+    private String email;
+    private HashMap<String, Object> fullName;
+    private String identityToken;
+    private String code;
+
 }

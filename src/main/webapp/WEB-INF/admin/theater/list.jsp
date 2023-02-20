@@ -110,67 +110,35 @@
                 <div class="row">
                     <div style="display:flex; width: 100%">
                         <div style="display:flex; width:33%;">
-                            <div class="btn-group btn-group-toggle">
-                                <c:choose>
-                                    <c:when test="${param.theaterCinemaBrandName == 'CGV' || param.theaterCinemaBrandName == '' || param.theaterCinemaBrandName == null}">
-                                        <label class="btn bg-purple focus active">
-                                            <input type="radio" class="btn-check" name="theaterCinemaBrandName"
-                                                   value="CGV"
-                                                   id="CGV"
-                                                   autocomplete="off" checked>
-                                            CGV
-                                        </label>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <label class="btn bg-purple">
-                                            <input type="radio" class="btn-check" name="theaterCinemaBrandName"
-                                                   value="CGV"
-                                                   id="CGV"
-                                                   onclick="onClickBrand(this.value)"
-                                                   autocomplete="off">
-                                            CGV
-                                        </label>
-                                    </c:otherwise>
-                                </c:choose>
-                                <c:choose>
-                                    <c:when test="${param.theaterCinemaBrandName == '롯데시네마'}">
-                                        <label class="btn bg-purple focus active">
-                                            <input type="radio" class="btn-check" name="theaterCinemaBrandName"
-                                                   value="롯데시네마"
-                                                   id="롯데시네마"
-                                                   autocomplete="off" checked>
-                                            롯데시네마
-                                        </label>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <label class="btn bg-purple">
-                                            <input type="radio" class="btn-check" onclick="onClickBrand(this.value)"
-                                                   name="theaterCinemaBrandName" value="롯데시네마" id="롯데시네마"
-                                                   autocomplete="off">
-                                            롯데시네마
-                                        </label>
-                                    </c:otherwise>
-                                </c:choose>
-                                <c:choose>
-                                    <c:when test="${param.theaterCinemaBrandName == '메가박스'}">
-                                        <label class="btn bg-purple focus active">
-                                            <input type="radio" class="btn-check" name="theaterCinemaBrandName"
-                                                   value="메가박스"
-                                                   id="메가박스"
-                                                   autocomplete="off" checked>
-                                            메가박스
-                                        </label>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <label class="btn bg-purple">
-                                            <input type="radio" class="btn-check" onclick="onClickBrand(this.value)"
-                                                   name="theaterCinemaBrandName" value="메가박스" id="메가박스"
-                                                   autocomplete="off">
-                                            메가박스
-                                        </label>
-                                    </c:otherwise>
-                                </c:choose>
-                            </div>
+                            <select class="form-control select2bs4 ml-2" aria-label="Default select example"
+                                    id="cinemaBrand" onchange="onChangeBrand()" style="width: 200px;">
+                                <c:forEach var="brand" items="${brandList}" varStatus="status">
+                                    <c:choose>
+                                        <c:when test="${brand.brandName == 'CGV'}">
+                                            <c:choose>
+                                                <c:when test="${param.theaterCinemaBrandName == '' || param.theaterCinemaBrandName == brand.brandName}">
+                                                    <option value="${brand.brandName}"
+                                                            selected>${brand.brandName}</option>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <option value="${brand.brandName}">${brand.brandName}</option>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <c:choose>
+                                                <c:when test="${param.theaterCinemaBrandName == brand.brandName}">
+                                                    <option value="${brand.brandName}"
+                                                            selected>${brand.brandName}</option>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <option value="${brand.brandName}">${brand.brandName}</option>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                            </select>
                         </div>
                         <div style="display:flex; width:33%; justify-content:center;">
                             <input type="month" id="start" name="trip-start" onchange="onclickSelectDate(this.value)"
@@ -365,14 +333,14 @@
         location.href = "<%=CURRENT_SERVER%>/admin/theater/list?page=0&size=10&theaterCinemaBrandName=" + cinemaBrandName + "&theaterRegion=" + theaterRegion + "&selectDate=" + selectDate;
     }
 
-    function onClickBrand(selectBrand) {
-
+    function onChangeBrand(){
+        let cinemaBrand = $("#cinemaBrand").val();
         let theaterRegion = '${param.theaterRegion}';
         if (theaterRegion === '') {
             theaterRegion = "서울";
         }
         let selectDate = '${param.selectDate}';
-        location.href = "<%=CURRENT_SERVER%>/admin/theater/list?page=0&size=10&theaterCinemaBrandName=" + selectBrand + "&theaterRegion=" + theaterRegion + "&selectDate=" + selectDate;
+        location.href = "<%=CURRENT_SERVER%>/admin/theater/list?page=0&size=10&theaterCinemaBrandName=" + cinemaBrand + "&theaterRegion=" + theaterRegion + "&selectDate=" + selectDate;
     }
 
     function onclickUpload() {

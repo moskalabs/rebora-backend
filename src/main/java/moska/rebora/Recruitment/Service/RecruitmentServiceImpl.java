@@ -494,7 +494,16 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         } else {
             Payment payment = optionalPayment.get();
             if (payment.getPaymentStatus().equals(PaymentStatus.COMPLETE) && Boolean.TRUE.equals(userRecruitment.getUserRecruitmentYn())) {
+
                 paymentService.paymentCancel(userRecruitment);
+
+                Integer userRecruitmentPeople = userRecruitment.getUserRecruitmentPeople();
+
+                userRecruitment.updateUserRecruitment(false, 0);
+                userRecruitmentRepository.save(userRecruitment);
+
+                recruitment.minusRecruitmentPeople((recruitment.getRecruitmentPeople() - userRecruitmentPeople));
+                recruitmentRepository.save(recruitment);
             }
         }
     }
@@ -502,23 +511,15 @@ public class RecruitmentServiceImpl implements RecruitmentService {
     /**
      * 모집 업데이트
      *
-     * @param recruitmentId           모집 아이디
-     * @param recruitmentIntroduce    모집 소개
-     * @param bannerYn                배너 유무
-     * @param bannerSubText           배너 서브 텍스트
-     * @param bannerMainText          배너 메인 텍스트
-     * @param recruitmentCommentUseYn 모집 댓글 사용 여부
+     * @param recruitmentId        모집 아이디
+     * @param recruitmentIntroduce 모집 소개
      */
     @Override
     @Transactional
     public void updateRecruitment(
             Long recruitmentId,
             String userEmail,
-            String recruitmentIntroduce,
-            Boolean bannerYn,
-            String bannerSubText,
-            String bannerMainText,
-            Boolean recruitmentCommentUseYn
+            String recruitmentIntroduce
     ) {
         User user = userRepository.getUserByUserEmail(userEmail);
 
@@ -537,70 +538,96 @@ public class RecruitmentServiceImpl implements RecruitmentService {
         }
 
         //모집 변경
-        recruitment.changeRecruitment(recruitmentIntroduce, recruitmentCommentUseYn);
-        Movie movie = recruitment.getMovie();
-        Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
+        recruitment.changeRecruitment(recruitmentIntroduce);
+//        Movie movie = recruitment.getMovie();
+//        Banner banner = bannerRepository.getBannerByRecruitment(recruitment);
 
         //배너가 있는 모집일 경우
-        if (banner != null) {
-            banner.changeBanner(bannerYn, bannerMainText, bannerSubText);
+//        if (banner != null) {
+//            banner.changeBanner(bannerYn, bannerMainText, bannerSubText);
+//
+//            MainBanner mainBanner = mainBannerRepository.getMainBannerByBanner(banner);
+//
+//            //배너가 노출일 경우
+//            if (Boolean.FALSE.equals(bannerYn)) {
+//
+//                //배너 안보이게 할 경우 메인 배너에서 삭제
+//                if (mainBanner != null) {
+//                    mainBannerRepository.delete(mainBanner);
+//                }
+//
+//            } else {
+//
+//                //메인 배너가 없을 경우 생성
+//                if (mainBanner == null) {
+//
+//                    List<MainBanner> mainBannerList = mainBannerRepository.findAll();
+//
+//                    if (mainBannerList.size() < 30) {
+//                        MainBanner createMainBanner = MainBanner
+//                                .builder()
+//                                .banner(banner)
+//                                .build();
+//
+//                        mainBannerRepository.save(createMainBanner);
+//                    }
+//                }
+//            }
+//
+//            bannerRepository.save(banner);
+//        } else {
+//
+//            //배너 노출할 경우
+//            if (Boolean.TRUE.equals(bannerYn)) {
+//                Banner createBanner = Banner
+//                        .builder()
+//                        .bannerExposeYn(true)
+//                        .bannerImage(movie.getMovieBannerImage())
+//                        .bannerMainText(bannerMainText)
+//                        .bannerSubText(bannerSubText)
+//                        .recruitment(recruitment)
+//                        .build();
+//
+//                bannerRepository.save(createBanner);
+//
+//                List<MainBanner> mainBannerList = mainBannerRepository.findAll();
+//
+//                if (mainBannerList.size() < 30) {
+//                    MainBanner createMainBanner = MainBanner
+//                            .builder()
+//                            .banner(createBanner)
+//                            .build();
+//
+//                    mainBannerRepository.save(createMainBanner);
+//                }
+//            }
+//        }
 
-            MainBanner mainBanner = mainBannerRepository.getMainBannerByBanner(banner);
+        recruitmentRepository.save(recruitment);
 
-            //배너가 노출일 경우
-            if (Boolean.FALSE.equals(bannerYn)) {
+    }
 
-                //배너 안보이게 할 경우 메인 배너에서 삭제
-                if (mainBanner != null) {
-                    mainBannerRepository.delete(mainBanner);
-                }
+    @Override
+    public void updateRecruitmentCommentUse(Long recruitmentId, String userEmail, Boolean recruitmentCommentUseYn) {
+        User user = userRepository.getUserByUserEmail(userEmail);
 
-            } else {
+        Optional<Recruitment> optionalRecruitment = recruitmentRepository.findById(recruitmentId);
 
-                //메인 배너가 없을 경우 생성
-                if (mainBanner == null) {
-
-                    List<MainBanner> mainBannerList = mainBannerRepository.findAll();
-
-                    if (mainBannerList.size() < 30) {
-                        MainBanner createMainBanner = MainBanner
-                                .builder()
-                                .banner(banner)
-                                .build();
-
-                        mainBannerRepository.save(createMainBanner);
-                    }
-                }
-            }
-
-            bannerRepository.save(banner);
-        } else {
-
-            //배너 노출할 경우
-            if (Boolean.TRUE.equals(bannerYn)) {
-                Banner createBanner = Banner
-                        .builder()
-                        .bannerExposeYn(true)
-                        .bannerImage(movie.getMovieBannerImage())
-                        .bannerMainText(bannerMainText)
-                        .bannerSubText(bannerSubText)
-                        .recruitment(recruitment)
-                        .build();
-
-                bannerRepository.save(createBanner);
-
-                List<MainBanner> mainBannerList = mainBannerRepository.findAll();
-
-                if (mainBannerList.size() < 30) {
-                    MainBanner createMainBanner = MainBanner
-                            .builder()
-                            .banner(createBanner)
-                            .build();
-
-                    mainBannerRepository.save(createMainBanner);
-                }
-            }
+        //모집이 없을 경우
+        if (optionalRecruitment.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 모집 정보입니다.");
         }
 
+        Recruitment recruitment = optionalRecruitment.get();
+
+        //유저가 권한이 있는지
+        if (!user.getUserGrade().equals(UserGrade.ADMIN) && !recruitment.getCreatedBy().equals(userEmail)) {
+            throw new RuntimeException("모집 수정 권한이 없는 유저입니다.");
+        }
+
+        //모집 변경
+        recruitment.updateCommentUse(recruitmentCommentUseYn);
+
+        recruitmentRepository.save(recruitment);
     }
 }

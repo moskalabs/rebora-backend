@@ -22,6 +22,9 @@
             <a href="<%=CURRENT_SERVER%>/admin/recruitment/list" class="nav-link">모집 관리</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
+            <a href="<%=CURRENT_SERVER%>/admin/brand/list" class="nav-link">브랜드 관리</a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
             <a href="<%=CURRENT_SERVER%>/admin/cinema/list" class="nav-link">극장 관리</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
@@ -71,6 +74,14 @@
                         <i class="nav-icon fas fa-users"></i>
                         <p>
                             모집 관리
+                        </p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<%=CURRENT_SERVER%>/admin/brand/list" class="nav-link">
+                        <i class="nav-icon fas fa-star"></i>
+                        <p>
+                            브랜드 관리
                         </p>
                     </a>
                 </li>

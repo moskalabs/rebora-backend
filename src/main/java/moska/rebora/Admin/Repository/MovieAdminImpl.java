@@ -38,22 +38,18 @@ public class MovieAdminImpl implements MovieAdmin {
                         movie.moviePopularCount
                 ))
                 .from(movie)
-                .leftJoin(movie.cinemaBrandMovieList, brandMovie)
-                .leftJoin(brandMovie.brand, brand)
-                .where(getSearchWord(searchCondition.getSearchWord(), searchCondition.getSearchCondition()))
+                .where(
+                        getSearchWord(searchCondition.getSearchWord()))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .groupBy(movie.movieName)
                 .orderBy(movie.moviePopularCount.desc())
                 .fetch();
 
         long total = queryFactory
                 .select(movie.count())
                 .from(movie)
-                .leftJoin(movie.cinemaBrandMovieList, brandMovie)
-                .leftJoin(brandMovie.brand, brand)
-                .where(getSearchWord(searchCondition.getSearchWord(), searchCondition.getSearchCondition()))
-                .groupBy(movie.movieName)
+                .where(
+                        getSearchWord(searchCondition.getSearchWord()))
                 .fetchFirst();
 
 //        content.forEach(m -> {
@@ -92,13 +88,9 @@ public class MovieAdminImpl implements MovieAdmin {
         return moviePageDto;
     }
 
-    public BooleanExpression getSearchWord(String searchWord, String searchCondition) {
+    public BooleanExpression getSearchWord(String searchWord) {
         if (hasText(searchWord)) {
-            if (searchCondition.equals("movieName")) {
-                return movie.movieName.contains(searchWord);
-            } else {
-                return brand.brandName.eq(searchWord);
-            }
+            return movie.movieName.contains(searchWord);
         } else {
             return null;
         }

@@ -84,10 +84,14 @@ public class Recruitment extends BaseEntity {
     }
 
     public void changeRecruitment(
-            String recruitmentIntroduce,
-            Boolean recruitmentCommentUseYn
+            String recruitmentIntroduce
     ) {
         this.recruitmentIntroduce = recruitmentIntroduce;
+    }
+
+    public void updateCommentUse(
+            Boolean recruitmentCommentUseYn
+    ){
         this.recruitmentCommentUseYn = recruitmentCommentUseYn;
     }
 

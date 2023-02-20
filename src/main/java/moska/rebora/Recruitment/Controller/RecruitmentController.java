@@ -30,7 +30,7 @@ import static org.springframework.util.StringUtils.hasText;
 @Slf4j
 @Tag(name = "모집")
 public class RecruitmentController {
-    
+
     RecruitmentService recruitmentService;
 
     /**
@@ -245,18 +245,29 @@ public class RecruitmentController {
     @PutMapping("/updateRecruitment/{recruitmentId}")
     public BaseResponse updateRecruitment(
             @PathVariable Long recruitmentId,
-            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce,
-            @RequestParam("bannerYn") Boolean bannerYn,
-            @RequestParam(value = "bannerSubText", required = false) String bannerSubText,
-            @RequestParam(value = "bannerMainText", required = false) String bannerMainText,
-            @RequestParam(value = "recruitmentCommentUseYn") Boolean recruitmentCommentUseYn
+            @RequestParam("recruitmentIntroduce") String recruitmentIntroduce
     ) {
 
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        recruitmentService.updateRecruitment(recruitmentId, userEmail, recruitmentIntroduce, bannerYn, bannerSubText, bannerMainText, recruitmentCommentUseYn);
+        recruitmentService.updateRecruitment(recruitmentId, userEmail, recruitmentIntroduce);
 
         return baseResponse;
     }
+
+    @PutMapping("/updateRecruitmentCommentUse/{recruitmentId}")
+    public BaseResponse updateRecruitmentCommentUse(
+            @PathVariable Long recruitmentId,
+            @RequestParam Boolean recruitmentCommentUseYn
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        recruitmentService.updateRecruitmentCommentUse(recruitmentId, userEmail, recruitmentCommentUseYn);
+
+        return baseResponse;
+    }
+
 }

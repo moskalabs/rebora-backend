@@ -43,14 +43,6 @@ public interface RecruitmentService {
             @Param("impUid") String impUid
     );
 
-//    ReserveRecruitmentDto reserveRecruitment(@Param("movieId") Long movieId,
-//                                             @Param("theaterId") Long theaterId,
-//                                             @Param("userEmail") String userEmail,
-//                                             @Param("recruitmentIntroduce") String recruitmentIntroduce,
-//                                             @Param("bannerYn") Boolean bannerYn,
-//                                             @Param("bannerSubText") String bannerSubText,
-//                                             @Param("bannerMainText") String bannerMainText);
-
     void cancelReserve(@Param("recruitmentId") Long recruitmentId);
 
     void applyRecruitment(@Param("recruitmentId") Long recruitmentId,
@@ -62,9 +54,11 @@ public interface RecruitmentService {
     void updateRecruitment(
             @Param("recruitmentId") Long recruitmentId,
             @Param("userEmail") String userEmail,
-            @Param("recruitmentIntroduce") String recruitmentIntroduce,
-            @Param("bannerYn") Boolean bannerYn,
-            @Param("bannerSubText") String bannerSubText,
-            @Param("bannerMainText") String bannerMainText,
-            @Param("recruitmentCommentUseYn") Boolean recruitmentCommentUseYn);
+            @Param("recruitmentIntroduce") String recruitmentIntroduce);
+
+    void updateRecruitmentCommentUse(
+            @Param("recruitmentId") Long recruitmentId,
+            @Param("userEmail") String userEmail,
+            @RequestParam Boolean recruitmentCommentUseYn
+    );
 }

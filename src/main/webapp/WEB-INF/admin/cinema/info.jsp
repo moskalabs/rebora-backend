@@ -53,53 +53,25 @@
                                     <th class="border-end" scope="row" style="width: 20%;">극장 브랜드</th>
                                     <td style="width: 80%;">
                                         <div class="form-group clearfix" style="margin-bottom: 0; margin-top: 6px;">
-                                            <div class="icheck-primary d-inline">
-                                                <c:choose>
-                                                    <c:when test="${cinema.content.brandName == 'CGV'}">
-                                                        <input type="radio" value="CGV"
-                                                               name="brandName"
-                                                               id="CGV" checked>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <input type="radio" value="CGV"
-                                                               name="brandName"
-                                                               id="CGV">
-                                                    </c:otherwise>
-                                                </c:choose>
-                                                <label for="CGV">
-                                                    CGV
-                                                </label>
-                                            </div>
-                                            <div class="icheck-primary d-inline">
-                                                <c:choose>
-                                                    <c:when test="${cinema.content.brandName == '롯데시네마'}">
-                                                        <input type="radio" value="롯데시네마"
-                                                               name="brandName"
-                                                               id="롯데시네마" checked>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <input type="radio" value="롯데시네마"
-                                                               name="brandName"
-                                                               id="롯데시네마">
-                                                    </c:otherwise>
-                                                </c:choose>
-                                                <label for="롯데시네마">롯데시네마</label>
-                                            </div>
-                                            <div class="icheck-primary d-inline">
-                                                <c:choose>
-                                                    <c:when test="${cinema.content.brandName == '메가박스'}">
-                                                        <input type="radio" value="메가박스"
-                                                               name="brandName"
-                                                               id="메가박스" checked>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <input type="radio" value="메가박스"
-                                                               name="brandName"
-                                                               id="메가박스">
-                                                    </c:otherwise>
-                                                </c:choose>
-                                                <label for="메가박스">메가박스</label>
-                                            </div>
+                                            <c:forEach var="brand" items="${brandList}" varStatus="status">
+                                                <div class="icheck-primary d-inline">
+                                                    <c:choose>
+                                                        <c:when test="${cinema.content.brandName == brand.brandName}">
+                                                            <input type="radio" value="${brand.brandName}"
+                                                                   name="brandName"
+                                                                   id="${brand.brandName}" checked>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <input type="radio" value="${brand.brandName}"
+                                                                   name="brandName"
+                                                                   id="${brand.brandName}">
+                                                        </c:otherwise>
+                                                    </c:choose>
+                                                    <label for="${brand.brandName}">
+                                                            ${brand.brandName}
+                                                    </label>
+                                                </div>
+                                            </c:forEach>
                                         </div>
                                     </td>
                                 </tr>

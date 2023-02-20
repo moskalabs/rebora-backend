@@ -139,10 +139,12 @@
                                 </tr>
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 20%;">감독</th>
-                                    <td style="width: 80%;"><input type="text" value="${response.content.movieDirector}"
+                                    <td style="width: 80%;">
+                                        <input type="text" value="${response.content.movieDirector}"
                                                                    style="width:250px"
                                                                    class="form-control mb-2" id="movieDirector"
-                                                                   aria-describedby="emailHelp"></td>
+                                                                   aria-describedby="emailHelp">
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 20%;">러닝타임(분)</th>
@@ -318,13 +320,13 @@
                                                     <c:when test="${response.content.movieUseYn == false}">
                                                         <input style="margin: 0" class="form-check-input" type="radio"
                                                                value="false"
-                                                               name="movieUseY"
+                                                               name="movieUseYn"
                                                                id="movieUseN" checked>
                                                     </c:when>
                                                     <c:otherwise>
                                                         <input style="margin: 0" class="form-check-input" type="radio"
                                                                value="false"
-                                                               name="movieUseN"
+                                                               name="movieUseYn"
                                                                id="movieUseN">
                                                     </c:otherwise>
                                                 </c:choose>

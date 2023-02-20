@@ -152,6 +152,9 @@ public class UserServiceImpl implements UserService {
                     .userPushKey(userPushKey)
                     .userSnsKind(snsKind)
                     .userSnsId(userSnsId)
+                    .userBirth("1990-01-01")
+                    .isAuthenticated(false)
+                    .userAge(0)
                     .build();
 
             userRepository.save(user);
