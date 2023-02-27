@@ -117,18 +117,22 @@
                                                accept="image/gif,image/jpeg,image/png">
                                     </td>
                                 </tr>
-                                <tr>
-                                    <th class="border-end" scope="row" style="width: 25%;">참여한 모집 수</th>
-                                    <td>
-                                        <p>${user.content.participationHistoryCount} 명</p>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th class="border-end" scope="row" style="width: 25%;">모집한 모집 수</th>
-                                    <td>
-                                        <p>${user.content.recruiterCount} 명</p>
-                                    </td>
-                                </tr>
+                                <c:if test="${param.userId != null}">
+                                    <tr>
+                                        <th class="border-end" scope="row" style="width: 25%;">참여한 모집 수</th>
+                                        <td>
+                                            <p>${user.content.participationHistoryCount} 명</p>
+                                        </td>
+                                    </tr>
+                                </c:if>
+                                <c:if test="${param.userId != null}">
+                                    <tr>
+                                        <th class="border-end" scope="row" style="width: 25%;">모집한 모집 수</th>
+                                        <td>
+                                            <p>${user.content.recruiterCount} 명</p>
+                                        </td>
+                                    </tr>
+                                </c:if>
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 25%;">유저 푸쉬 여부</th>
                                     <td style="width: 100%; height: 60px; font-size:16px; align-items: center">

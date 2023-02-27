@@ -288,10 +288,11 @@ public class RecruitmentServiceImpl implements RecruitmentService {
             Banner banner = Banner.builder()
                     .bannerSubText(bannerSubText)
                     .bannerMainText(bannerMainText)
-                    .bannerExposeYn(false)
+                    .bannerExposeYn(true)
                     .bannerImage(movie.getMovieBannerImage())
                     .recruitment(recruitment)
                     .build();
+
             bannerRepository.save(banner);
             List<MainBanner> mainBannerList = mainBannerRepository.findAll();
 

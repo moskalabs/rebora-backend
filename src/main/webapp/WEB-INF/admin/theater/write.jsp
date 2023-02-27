@@ -134,24 +134,28 @@
                                         <input type="text"
                                                style="width:46px"
                                                class="form-control" id="theaterStartHour"
+                                               placeholder="01"
                                                maxlength="2"
                                         >
                                         <p class="mb-1">&nbsp;:&nbsp;</p>
                                         <input type="text"
                                                style="width:46px"
                                                class="form-control" id="theaterStartMinute"
+                                               placeholder="01"
                                                maxlength="2"
                                         >
                                         <p class="mb-1">&nbsp;&nbsp;~&nbsp;&nbsp;</p>
                                         <input type="text"
                                                style="width:46px"
                                                class="form-control" id="theaterEndHour"
+                                               placeholder="01"
                                                maxlength="2"
                                         >
                                         <p class="mb-1">&nbsp;:&nbsp;</p>
                                         <input type="text"
                                                style="width:46px"
                                                class="form-control" id="theaterEndMinute"
+                                               placeholder="01"
                                                maxlength="2"
                                         >
                                     </td>

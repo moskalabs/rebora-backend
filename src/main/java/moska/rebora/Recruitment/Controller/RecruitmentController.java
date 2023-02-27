@@ -1,5 +1,12 @@
 package moska.rebora.Recruitment.Controller;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +49,16 @@ public class RecruitmentController {
      * @return BasePageResponse<UserRecruitmentListDto>
      */
     @Tag(name = "모집")
+    @Operation(summary = "모집 리스트 가져오기")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "theaterRegion", value = "상영 지역", required = false),
+            @ApiImplicitParam(name = "recruitmentStatus", value = "모집 상태", required = false),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/getList")
     public BasePageResponse<UserRecruitmentListDto> getList(
             @PageableDefault(page = 0, size = 10) Pageable pageable,
@@ -73,6 +90,15 @@ public class RecruitmentController {
      * @return BasePageResponse<UserRecruitmentListDto>
      */
     @Tag(name = "모집")
+    @Operation(summary = "모집 리스트 영화로 가져오기")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "movieId", value = "영화 아이디", required = true)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/getListByMovie/{movieId}")
     public BasePageResponse<UserRecruitmentListDto> getListByMovie(
             @PathVariable Long movieId,
@@ -94,11 +120,19 @@ public class RecruitmentController {
      * @return BasePageResponse<UserRecruitmentListDto>
      */
     @Tag(name = "모집")
+    @Operation(summary = "모집리스트 영화 이름 검색으로 가져오기")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "movieId", value = "영화 아이디", required = true)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/getSearchList")
     public BasePageResponse<UserRecruitmentListDto> getSearchList(
             @RequestParam(required = false, defaultValue = "") String searchWord,
             @PageableDefault(page = 0, size = 10) Pageable pageable
-
     ) {
 
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -119,6 +153,14 @@ public class RecruitmentController {
      * @return BaseInfoResponse<RecruitmentInfoDto>
      */
     @Tag(name = "모집")
+    @Operation(summary = "모집 정보 가져오기")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "recruitmentId", value = "모집 아이디", required = true)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/info/{recruitmentId}")
     public BaseInfoResponse<RecruitmentInfoDto> info(
             @PathVariable Long recruitmentId
@@ -143,6 +185,24 @@ public class RecruitmentController {
      * @return BaseInfoResponse<ReserveRecruitmentDto>
      */
     @Tag(name = "모집")
+    @Operation(summary = "모집 생성")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userRecruitmentPeople", value = "모집 신청 인원", required = true),
+            @ApiImplicitParam(name = "movieId", value = "영화 아아디", required = true),
+            @ApiImplicitParam(name = "theaterId", value = "상영관 아이디", required = true),
+            @ApiImplicitParam(name = "recruitmentIntroduce", value = "모집 소개글", required = true),
+            @ApiImplicitParam(name = "bannerYn", value = "모집 배너 여부", required = true),
+            @ApiImplicitParam(name = "bannerSubText", value = "모집 서브텍스트", required = true),
+            @ApiImplicitParam(name = "bannerMainText", value = "모집 메인 텍스트", required = true),
+            @ApiImplicitParam(name = "recruitmentCommentUseYn", value = "모집 댓글 사용 여부", required = true),
+            @ApiImplicitParam(name = "merchantUid", value = "주문 번호", required = true),
+            @ApiImplicitParam(name = "impUid", value = "아임포트 uid", required = true)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PostMapping("/createRecruitment")
     public BaseInfoResponse<CreateRecruitmentDto> createRecruitment(
             @RequestParam Integer userRecruitmentPeople,
@@ -173,48 +233,6 @@ public class RecruitmentController {
 
         return baseInfoResponse;
     }
-
-    /**
-     * 모집 취소
-     *
-     * @param recruitmentId 모집 아이디
-     * @return BaseResponse
-     */
-    @PostMapping("/cancelReserve/{recruitmentId}")
-    public BaseResponse cancelReserve(
-            @PathVariable Long recruitmentId
-    ) {
-        BaseResponse baseResponse = new BaseResponse();
-        baseResponse.setResult(true);
-
-        recruitmentService.cancelReserve(recruitmentId);
-        return baseResponse;
-    }
-
-    /**
-     * 모집 신청
-     *
-     * @param recruitmentId         모집 PK
-     * @param userRecruitmentPeople 모집 신청 인원
-     * @return BaseResponse
-     */
-    @Tag(name = "모집")
-    @PostMapping("/applyRecruitment/{recruitmentId}")
-    public BaseResponse applyRecruitment(
-            @PathVariable Long recruitmentId,
-            @RequestParam("userRecruitmentPeople") Integer userRecruitmentPeople
-    ) {
-
-        String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-        BaseResponse baseResponse = new BaseResponse();
-        baseResponse.setResult(true);
-
-        recruitmentService.applyRecruitment(recruitmentId, userEmail, userRecruitmentPeople);
-
-        return baseResponse;
-    }
-
-
     /**
      * 모집 신청 취소
      *
@@ -222,6 +240,15 @@ public class RecruitmentController {
      * @return BaseResponse
      */
     @Tag(name = "모집")
+    @Operation(summary = "모집 신청 취소")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "recruitmentId", value = "모집 아이디", required = true)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PutMapping("/cancelRecruitment/{recruitmentId}")
     public BaseResponse cancelRecruitment(@PathVariable Long recruitmentId) {
         BaseResponse baseResponse = new BaseResponse();
@@ -236,12 +263,19 @@ public class RecruitmentController {
      *
      * @param recruitmentId           모집 아이디
      * @param recruitmentIntroduce    모집 소개
-     * @param bannerYn                배너 유무
-     * @param bannerSubText           배너 서브 텍스트
-     * @param bannerMainText          배너 메인 텍스트
-     * @param recruitmentCommentUseYn 모집 댓글 사용 여부
      * @return BaseResponse
      */
+    @Tag(name = "모집")
+    @Operation(summary = "모집 업데이트")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "recruitmentId", value = "모집 아이디", required = true),
+            @ApiImplicitParam(name = "recruitmentIntroduce", value = "모집 소개글", required = true)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PutMapping("/updateRecruitment/{recruitmentId}")
     public BaseResponse updateRecruitment(
             @PathVariable Long recruitmentId,
@@ -256,6 +290,17 @@ public class RecruitmentController {
         return baseResponse;
     }
 
+    @Tag(name = "모집")
+    @Operation(summary = "모집 댓글 변경 여부")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "recruitmentId", value = "모집 아이디", required = true),
+            @ApiImplicitParam(name = "recruitmentCommentUseYn", value = "모집 댓글 여부", required = true)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PutMapping("/updateRecruitmentCommentUse/{recruitmentId}")
     public BaseResponse updateRecruitmentCommentUse(
             @PathVariable Long recruitmentId,

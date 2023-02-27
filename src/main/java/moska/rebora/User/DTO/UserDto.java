@@ -7,6 +7,7 @@ import moska.rebora.Enum.UserGrade;
 import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.User.Entity.User;
 
+
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Schema(description = "유저 Dto")

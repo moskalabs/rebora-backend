@@ -1,11 +1,15 @@
 package moska.rebora.Config;
 
+import com.fasterxml.classmate.TypeResolver;
+import moska.rebora.Common.BaseInfoResponse;
+import moska.rebora.Common.BaseResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.data.domain.Pageable;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.schema.AlternateTypeRules;
 import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.ApiKey;
 import springfox.documentation.service.AuthorizationScope;
@@ -21,9 +25,16 @@ import java.util.List;
 public class SwaggerConfig{
 
     @Bean
-    public Docket api() {
+    public Docket api(TypeResolver typeResolver) {
 
         return new Docket(DocumentationType.OAS_30)
+                .additionalModels(
+                        typeResolver.resolve(BaseResponse.class),
+                        typeResolver.resolve(BaseInfoResponse.class)
+                )
+                .alternateTypeRules(
+                        AlternateTypeRules.newRule(typeResolver.resolve(Pageable.class), typeResolver.resolve(Pageable.class))
+                )
                 .useDefaultResponseMessages(false)
                 .select()
                 .apis(RequestHandlerSelectors.any())

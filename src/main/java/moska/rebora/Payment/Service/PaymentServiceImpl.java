@@ -115,18 +115,23 @@ public class PaymentServiceImpl implements PaymentService {
         List<UserRecruitment> userRecruitmentList = userRecruitmentRepository.getUserRecruitmentByRecruitment(recruitment);
 
         for (UserRecruitment userRecruitment : userRecruitmentList) {
-
+            if(userRecruitment.getPayment() != null){
+                continue;
+            }
             //예약 고유번호
             String customerUId = userRecruitment.getCustomerUId();
 
             User user = userRecruitment.getUser();
+
             log.info(user.getUserNickname() + "님의 예약 카드 결제 시작");
 
             String paymentId = createPaymentId(user.getId(), recruitment.getId());
             String paymentName = user.getUserNickname() + "님의 상영 확정된 모집 영화(" + movie.getMovieName() + ")의 " + userRecruitment.getUserRecruitmentPeople() + "명 예약 결제";
             Integer theaterPrice = (theater.getTheaterPrice() + movie.getMoviePrice()) * userRecruitment.getUserRecruitmentPeople();
+
             log.info("customerUId={}", customerUId);
-            if (customerUId.equals("")) {
+
+            if (customerUId == null) {
                 paymentName = "빌링키 정보가 없습니다.";
                 Payment payment = Payment.builder()
                         .id(paymentId)

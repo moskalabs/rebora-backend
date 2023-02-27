@@ -59,7 +59,8 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .leftJoin(userRecruitment.recruitment, recruitment)
                 .where(
                         user.userEmail.eq(userEmail),
-                        userRecruitment.userRecruitmentYn.eq(true)
+                        userRecruitment.userRecruitmentYn.eq(true),
+                        recruitment.recruitmentExposeYn.eq(true)
                 )
                 .fetchOne();
     }
@@ -70,7 +71,10 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                         recruitment.id.count()
                 )
                 .from(recruitment)
-                .where(recruitment.createdBy.eq(userEmail))
+                .where(
+                        recruitment.createdBy.eq(userEmail),
+                        recruitment.recruitmentExposeYn.eq(true)
+                )
                 .fetchOne();
     }
 
@@ -215,6 +219,12 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .fetch();
     }
 
+    /**
+     * 배치 유저 환불
+     *
+     * @param recruitmentId 모집 아이디
+     * @return List<UserRecruitment>
+     */
     @Override
     public List<UserRecruitment> getBatchRefundUserRecruitment(Long recruitmentId) {
         return queryFactory.select(userRecruitment)
@@ -228,6 +238,12 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .fetch();
     }
 
+    /**
+     * 배치 위시 모집
+     *
+     * @param recruitmentId 모집 아이디
+     * @return List<UserRecruitment>
+     */
     @Override
     public List<UserRecruitment> getBatchUserWishRecruitment(Long recruitmentId) {
         return queryFactory.select(userRecruitment)
@@ -240,6 +256,12 @@ public class UserRecruitmentRepositoryImpl implements UserRecruitmentCustom {
                 .fetch();
     }
 
+    /**
+     *
+     *
+     * @param userRecruitmentId
+     * @return
+     */
     public Optional<UserRecruitment> getUserRecruitmentById(Long userRecruitmentId) {
         return Optional.ofNullable(queryFactory.select(userRecruitment)
                 .from(userRecruitment)

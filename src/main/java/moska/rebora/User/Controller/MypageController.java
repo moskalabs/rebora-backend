@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +30,10 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RestController
 @RequestMapping("/api/user/mypage")
 @Slf4j
+@AllArgsConstructor
 public class MypageController {
 
-    @Autowired
     MypageService mypageService;
-
-    @Autowired
     UserService userService;
 
     /**
@@ -42,8 +41,13 @@ public class MypageController {
      *
      * @return JSONObject
      */
-    @Tag(name = "마이페이지", description = "마이페이지 정보 가져오기")
-    @Operation(summary = "마이페이지 정보 가져오기", description = "참여 내역 횟수 및 내가 모집한 모집 개수 가져오기")
+    @Tag(name = "마이페이지")
+    @Operation(summary = "마이페이지지 메인 정보 가져오기")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "마이페이지 정보 가져오기 성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/info")
     public MypageInfoDto info() {
         return mypageService.info(SecurityContextHolder.getContext().getAuthentication().getName());
@@ -56,8 +60,12 @@ public class MypageController {
      * @return UserRecruitmentDtoListResponse
      */
     @Tag(name = "마이페이지")
-    @Operation(summary = "내가 참여한 모집 가져오기  ", description = "내가 참여한 모집 가져오기 모든 상태의 모집 가져오기")
+    @Operation(summary = "내가 참여한 모집 리스트 가져오기")
     @GetMapping("/getParticipationHistory")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     public UserRecruitmentDtoListResponse getParticipationHistory(Pageable pageable) {
         UserRecruitmentDtoListResponse userRecruitmentDtoListResponse = new UserRecruitmentDtoListResponse();
         userRecruitmentDtoListResponse.setResult(true);
@@ -72,7 +80,11 @@ public class MypageController {
      * @return UserRecruitmentDtoListResponse
      */
     @Tag(name = "마이페이지")
-    @Operation(summary = "내가 모집한 모집 가져오기")
+    @Operation(summary = "내가 모집한 모집 리스트 가져오기")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/getMyRecruiter")
     public UserRecruitmentDtoListResponse getMyRecruiter(
             Pageable pageable
@@ -97,10 +109,12 @@ public class MypageController {
     @ApiImplicitParams({
             @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true),
             @ApiImplicitParam(name = "userPushYn", value = "유저 푸쉬 여부", required = true),
+            @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
     })
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "푸쉬 여부 변경 성공", content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
-            @ApiResponse(responseCode = "401", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     })
     public BaseResponse updatePushYn(
             @PathVariable Long userId,
@@ -123,6 +137,16 @@ public class MypageController {
      */
     @Tag(name = "마이페이지")
     @Operation(summary = "야간 푸쉬 여부 업데이트")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true),
+            @ApiImplicitParam(name = "userPushNightYn", value = "유저 푸쉬 여부", required = true),
+            @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PutMapping("/updatePushNightYn/{userId}")
     public BaseResponse updatePushNightYn(
             @PathVariable Long userId,
@@ -142,6 +166,11 @@ public class MypageController {
      */
     @Tag(name = "마이페이지")
     @Operation(summary = "마이페이지 내 정보 가져오기")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/getMyInfo")
     public UserDto getMyInfo() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -164,10 +193,16 @@ public class MypageController {
     @Tag(name = "마이페이지")
     @Operation(summary = "유저 정보 업데이트")
     @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "유저 아이디"),
             @ApiImplicitParam(name = "userNickname", value = "유저 닉네임", required = false),
             @ApiImplicitParam(name = "currentPassword", value = "현재 비밀번호", required = false),
             @ApiImplicitParam(name = "changePassword", value = "비밀번호 변경", required = false),
             @ApiImplicitParam(name = "file", value = "유저 이미지", required = false)
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
     })
     @PostMapping("/changeMyInfo/{userId}")
     public BaseResponse changeMyInfo(@PathVariable Long userId,

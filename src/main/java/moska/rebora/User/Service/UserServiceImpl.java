@@ -121,7 +121,9 @@ public class UserServiceImpl implements UserService {
                                @Param("userPushKey") String userPushKey,
                                @Param("authKey") String authKey,
                                @Param("userSnsKind") String userSnsKind,
-                               @Param("userSnsId") String userSnsId
+                               @Param("userSnsId") String userSnsId,
+                               @Param("userBirth") String userBirth,
+                               @Param("isAuthenticated") Boolean isAuthenticated
 
     ) throws SQLIntegrityConstraintViolationException {
 
@@ -152,8 +154,8 @@ public class UserServiceImpl implements UserService {
                     .userPushKey(userPushKey)
                     .userSnsKind(snsKind)
                     .userSnsId(userSnsId)
-                    .userBirth("1990-01-01")
-                    .isAuthenticated(false)
+                    .userBirth(userBirth)
+                    .isAuthenticated(isAuthenticated)
                     .userAge(0)
                     .build();
 

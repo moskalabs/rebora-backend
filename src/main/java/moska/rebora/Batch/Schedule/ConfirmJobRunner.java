@@ -23,7 +23,7 @@ public class ConfirmJobRunner extends JobRunner {
     protected void doRun(ApplicationArguments args) {
 
         JobDetail jobDetail = buildJobDetail(ConfirmSchJob.class, "confirmRecruitmentJob", "batch", new HashMap());
-        Trigger trigger = buildJobTrigger("0 0 0 * * ?"); // 30초마다 실행
+        Trigger trigger = buildJobTrigger("0 30 0 * * ?"); // 00시 30분에 실행
         //Trigger trigger = buildJobTrigger("0/30 * * * * ?"); // 30초마다 실행
 
         try {

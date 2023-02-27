@@ -99,6 +99,46 @@ public class TheaterServiceImpl implements TheaterService {
                                                Long movieId,
                                                Pageable pageable) {
 
-        return theaterRepository.getPageTheater(theaterRegion, LocalDate.parse(selectDate), movieId, pageable);
+        return theaterRepository.getPageTheater(theaterRegion, LocalDate.parse(convertDate(selectDate)), movieId, pageable);
+    }
+
+    String convertDate(String selectMonth){
+        String[] selectMonthList = selectMonth.split("-");
+        String monthSelect = selectMonthList[1];
+        String daySelect = selectMonthList[2];
+        if (Integer.parseInt(monthSelect) < 10) {
+            if (!monthSelect.equals("01") &&
+                    !monthSelect.equals("02") &&
+                    !monthSelect.equals("03") &&
+                    !monthSelect.equals("04") &&
+                    !monthSelect.equals("05") &&
+                    !monthSelect.equals("06") &&
+                    !monthSelect.equals("07") &&
+                    !monthSelect.equals("08") &&
+                    !monthSelect.equals("09")
+            ) {
+                monthSelect = String.format("%02d", Integer.parseInt(monthSelect));
+            }
+        }
+
+        if (Integer.parseInt(daySelect) < 10) {
+            if (!daySelect.equals("01") &&
+                    !daySelect.equals("02") &&
+                    !daySelect.equals("03") &&
+                    !daySelect.equals("04") &&
+                    !daySelect.equals("05") &&
+                    !daySelect.equals("06") &&
+                    !daySelect.equals("07") &&
+                    !daySelect.equals("08") &&
+                    !daySelect.equals("09")
+            ) {
+                daySelect = String.format("%02d", Integer.parseInt(daySelect));
+            }
+        }
+
+        log.info("monthSelect={}", monthSelect);
+        log.info("daySelect={}", daySelect);
+
+        return selectMonthList[0] + "-" + monthSelect + "-" + daySelect;
     }
 }

@@ -54,6 +54,7 @@
                                     <td style="width: 80%;">
                                         <input type="text" value="${brand.content.brandName}"
                                                style="width:250px"
+                                               placeholder="브랜드명을 입력해 주세요"
                                                class="form-control mb-2" id="brandName"
                                                aria-describedby="emailHelp">
                                     </td>

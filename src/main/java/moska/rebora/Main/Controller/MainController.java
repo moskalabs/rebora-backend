@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Main.Dto.MainDto;
 import moska.rebora.Main.Service.MainService;
@@ -20,17 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "메인" , description = "메인 화면")
 @RestController
+@AllArgsConstructor
 public class MainController {
-
-    @Autowired
     MainService mainService;
 
     @Tag(name = "메인")
     @Operation(summary = "메인 페이지 가져오기")
     @GetMapping("/api/main")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "메인 정보 가져오기 성공", content = @Content(schema = @Schema(implementation = MainDto.class))),
-            @ApiResponse(responseCode = "401", description = "인증 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+            @ApiResponse(responseCode = "200", description = "메인 정보 가져오기 성공", content = @Content(schema = @Schema(implementation = MainDto.class)))
     })
     public MainDto main() {
         return mainService.getMain();

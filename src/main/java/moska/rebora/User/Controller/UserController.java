@@ -63,7 +63,6 @@ public class UserController {
                        @RequestParam(value = "userPushKey", required = false, defaultValue = "") String userPushKey
     ) {
         log.info("user login userEmail={}, password={}", userEmail, password);
-
         return userService.login(userEmail, password, userPushKey);
     }
 
@@ -102,8 +101,11 @@ public class UserController {
             @RequestParam(value = "userPushKey", required = false) String userPushKey,
             @RequestParam(value = "authKey") String authKey,
             @RequestParam(value = "userSnsKind", required = false) String userSnsKind,
-            @RequestParam(value = "userSnsId", required = false) String userSnsId
+            @RequestParam(value = "userSnsId", required = false) String userSnsId,
+            @RequestParam(required = false, defaultValue = "1990-01-01") String userBirth,
+            @RequestParam(required = false, defaultValue = "false") Boolean isAuthenticated
     ) throws SQLIntegrityConstraintViolationException {
+
         return userService.signUp(
                 userEmail,
                 password,
@@ -114,7 +116,9 @@ public class UserController {
                 userPushKey,
                 authKey,
                 userSnsKind,
-                userSnsId
+                userSnsId,
+                userBirth,
+                isAuthenticated
         );
     }
 

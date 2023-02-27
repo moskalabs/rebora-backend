@@ -1,5 +1,12 @@
 package moska.rebora.Payment.Controller;
 
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +25,7 @@ import moska.rebora.Payment.Repository.PaymentRepository;
 import moska.rebora.Payment.Service.PaymentService;
 import moska.rebora.Recruitment.Entity.Recruitment;
 import moska.rebora.Recruitment.Repository.RecruitmentRepository;
+import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserRecruitment;
 import moska.rebora.User.Repository.UserRecruitmentRepository;
@@ -45,17 +53,26 @@ public class PaymentController {
     RecruitmentRepository recruitmentRepository;
 
     /**
-     * customerUId 생성
+     * 모집 예약 customerUId 생성
      *
      * @param recruitmentId 모집 아이디
      * @return BaseInfoResponse<CustomerUIdDto>
      */
+    @Tag(name = "결제")
+    @Operation(summary = "주문번호 생성(예약 결제)")
     @PostMapping("/createCustomerUid")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "recruitmentId", value = "모집 아이디", required = true),
+            @ApiImplicitParam(name = "userRecruitmentPeople", value = "모집 신청 인원", required = true),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "생성 성공"),
+            @ApiResponse(responseCode = "500", description = "생성 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     public BaseInfoResponse<CustomerUIdDto> createCustomerUId(
             @RequestParam Long recruitmentId,
             @RequestParam Integer userRecruitmentPeople
     ) {
-
         String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.getUserByUserEmail(userEmail);
 
@@ -66,17 +83,20 @@ public class PaymentController {
         return baseInfoResponse;
     }
 
-    /**
-     * 모집 예약 등록
-     *
-     * @param userRecruitmentId 유저 모집 아이디
-     * @return BaseResponse
-     */
+    @Tag(name = "결제")
+    @Operation(summary = "예약 결제 빌링키 등록 완료")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userRecruitmentId", value = "유저 모집 아이디", required = true),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "성공"),
+            @ApiResponse(responseCode = "403", description = "권한 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "500", description = "오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PostMapping("/reserveRecruitment/{userRecruitmentId}")
     public BaseResponse reserveRecruitment(
             @PathVariable Long userRecruitmentId
     ) {
-
         BaseResponse baseResponse = new BaseResponse();
         baseResponse.setResult(true);
 
@@ -86,12 +106,22 @@ public class PaymentController {
     }
 
     /**
-     * 주문 번호 생성
+     * 즉시 결제 주문 번호 생성
      *
      * @param recruitmentId         모집 아이디
      * @param userRecruitmentPeople 유저 모집 신청 인원
      * @return BaseResponse
      */
+    @Tag(name = "결제")
+    @Operation(summary = "주문 번호 생성(즉시 결제)")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "recruitmentId", value = "모집 아이디", required = true),
+            @ApiImplicitParam(name = "userRecruitmentPeople", value = "모집 신청 인원", required = true),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "생성 성공"),
+            @ApiResponse(responseCode = "500", description = "생성 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PostMapping("/createMerchantUid")
     public BaseInfoResponse<MerchantUidDto> saveMerchantUid(
             @RequestParam Long recruitmentId,
@@ -108,6 +138,12 @@ public class PaymentController {
         return baseInfoResponse;
     }
 
+    @Tag(name = "결제")
+    @Operation(summary = "모집 생성 주문 번호 생성(즉시 결제)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "생성 성공"),
+            @ApiResponse(responseCode = "500", description = "생성 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @GetMapping("/getNewRecruitmentMerchantUid")
     public BaseInfoResponse<MerchantUidDto> getRecruitmentMerchantUid() {
 
@@ -145,6 +181,17 @@ public class PaymentController {
      * @param impUid            거래고유번호
      * @return BaseResponse
      */
+    @Tag(name = "결제")
+    @Operation(summary = "즉시 결제 정보 저장")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userRecruitmentId", value = "유저 모집 아이디", required = true),
+            @ApiImplicitParam(name = "merchantUid", value = "거래 번호", required = true),
+            @ApiImplicitParam(name = "impUid", value = "아임포트 고유 아이디", required = true),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "생성 성공"),
+            @ApiResponse(responseCode = "500", description = "생성 오류", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PostMapping("/saveImmediatePayment/{userRecruitmentId}")
     public BaseResponse saveImmediatePayment(
             @PathVariable Long userRecruitmentId,

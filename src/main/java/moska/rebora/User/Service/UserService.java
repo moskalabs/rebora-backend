@@ -27,7 +27,10 @@ public interface UserService {
             @Param("userPushKey") String userPushKey,
             @Param("authKey") String authKey,
             @Param("userSnsKind") String userSnsKind,
-            @Param("userSnsId") String userSnsId
+            @Param("userSnsId") String userSnsId,
+            @Param("userBirth") String userBirth,
+            @Param("isAuthenticated") Boolean isAuthenticated
+
     ) throws SQLIntegrityConstraintViolationException;
 
     BaseResponse sendVerificationEmail(@Param("userEmail") String userEmail,

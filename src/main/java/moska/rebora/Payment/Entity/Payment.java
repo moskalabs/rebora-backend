@@ -66,7 +66,7 @@ public class Payment extends BaseEntity {
     @Column(columnDefinition = "LONGTEXT")
     private String paymentMemo;
 
-    @OneToOne(fetch = FetchType.LAZY, mappedBy = "payment", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "payment", cascade = CascadeType.ALL)
     private UserRecruitment userRecruitment;
 
     @OneToMany(mappedBy = "payment")

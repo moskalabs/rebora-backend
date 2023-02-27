@@ -62,6 +62,7 @@ public class MainServiceImpl implements MainService {
 
         List<BannerDto> bannerRecentlyDtoList = mainBannerRepository.getMainBanner();
         List<BannerDto> bannerDtoList = new ArrayList<>();
+
         if (bannerRecentlyDtoList.isEmpty()) {
             Banner banner = bannerRepository.getBannerById(1L);
             BannerDto bannerDto = new BannerDto();

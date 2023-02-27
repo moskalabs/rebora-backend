@@ -98,7 +98,9 @@
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 20%;">극장명</th>
                                     <td style="width: 80%;">
-                                        <input type="text" value="${cinema.content.cinemaName}" style="width:500px"
+                                        <input type="text" value="${cinema.content.cinemaName}"
+                                               style="width:500px"
+                                               placeholder="극장명을 입력해주세요."
                                                class="form-control" id="cinemaName">
                                     </td>
                                 </tr>

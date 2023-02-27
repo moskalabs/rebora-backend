@@ -181,14 +181,26 @@ public class OathServiceImpl implements OathService {
 
     public UserLoginDto getUserLoginDto(User user, UserSnsKind userSnsKind) {
 
-        log.info("로그인 snsKind={} userSnsKind={} snsBoolean={}", user.getUserSnsKind(), userSnsKind, !user.getUserSnsKind().equals(userSnsKind));
 
         //일반 유저인 경우
         if (user.getUserSnsKind() == null) {
-            throw new DuplicateElementException("SNS로 가입하지 않은 일반 유저입니다.");
+            throw new DuplicateElementException("죄송하지만 일반로그인으로 다시 진행해 주세요. 감사합니다.");
             //SNS 종류가 다를 경우
         } else if (!user.getUserSnsKind().equals(userSnsKind)) {
-            throw new DuplicateElementException("이미 가입된 SNS 아이디가 존재합니다. 다시 로그인 해주세요. 가입된 SNS : " + user.getUserSnsKind());
+
+            String snsName = "";
+
+            if(user.getUserSnsKind().equals(UserSnsKind.KAKAO)){
+                snsName = "카카오";
+            }else if(user.getUserSnsKind().equals(UserSnsKind.NAVER)){
+                snsName = "네이버";
+            }else if(user.getUserSnsKind().equals(UserSnsKind.APPLE)){
+                snsName = "애플";
+            }else{
+                snsName = "";
+            }
+
+            throw new DuplicateElementException("죄송하지만 "+ snsName +"로그인으로 다시 진행해 주세요. 감사합니다.");
         } else {
 
             return UserLoginDto.builder()
@@ -342,7 +354,9 @@ public class OathServiceImpl implements OathService {
             String userSnsId,
             Boolean userPushYn,
             Boolean userPushNightYn,
-            String userPushKey
+            String userPushKey,
+            String userBirth,
+            Boolean isAuthenticated
     ) {
 
         String bcryptPassword = passwordEncoder.encode(userSnsKind.name());
@@ -360,8 +374,8 @@ public class OathServiceImpl implements OathService {
                 .userEmail(userEmail)
                 .userSnsKind(userSnsKind)
                 .userPushKey(userPushKey)
-                .userBirth("1990-01-01")
-                .isAuthenticated(false)
+                .userBirth(userBirth)
+                .isAuthenticated(isAuthenticated)
                 .userAge(0)
                 .build();
 

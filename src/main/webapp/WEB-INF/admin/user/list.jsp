@@ -544,7 +544,7 @@
     }
 
     function createUser() {
-        location.href = "<%=CURRENT_SERVER%>/admin/user/info?userId";
+        location.href = "<%=CURRENT_SERVER%>/admin/user/info";
     }
 
     //추가 개발하애함

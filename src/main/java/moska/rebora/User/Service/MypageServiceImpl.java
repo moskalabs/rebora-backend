@@ -55,6 +55,7 @@ public class MypageServiceImpl implements MypageService {
      */
     @Override
     public MypageInfoDto info(@Param("userEmail") String userEmail) {
+
         MypageInfoDto mypageInfoDto = new MypageInfoDto();
 
         mypageInfoDto.setResult(true);

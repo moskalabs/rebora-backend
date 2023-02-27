@@ -34,7 +34,7 @@ public class UserLoginDto extends BaseResponse {
     private Boolean userPushNightYn;
     @Schema(description = "유저 사용 여부")
     private Boolean userUseYn;
-    @Schema(description = "유저 등급 NORMAL - 일반, ADMIN - 관리자")
+    @Schema(description = "유저 등급 NORMAL - 일반, ADMIN - 관리자, DORMANCY - 휴면, WITHDRAWAL - 탈퇴")
     private UserGrade userGrade;
     @Schema(description = "유저 이미지")
     private String userImage;

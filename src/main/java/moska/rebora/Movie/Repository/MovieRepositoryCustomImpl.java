@@ -213,7 +213,11 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
     }
 
     public BooleanExpression notAdult(String userEmail, String userBirth) {
-        LocalDate userBirthDate = LocalDate.parse(userBirth);
-        return Strings.hasText(userEmail) && !userEmail.equals("anonymousUser") && userBirthDate.isBefore(ADULT_BIRTH) ? null : movie.movieRating.ne(MovieRating.ADULT);
+        if(userBirth == null){
+            return movie.movieRating.ne(MovieRating.ADULT);
+        }else{
+            LocalDate userBirthDate = LocalDate.parse(userBirth);
+            return Strings.hasText(userEmail) && !userEmail.equals("anonymousUser") && userBirthDate.isBefore(ADULT_BIRTH) ? null : movie.movieRating.ne(MovieRating.ADULT);
+        }
     }
 }

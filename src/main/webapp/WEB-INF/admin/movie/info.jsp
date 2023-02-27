@@ -55,6 +55,7 @@
                                     <td style="width: 80%;">
                                         <input type="text" value="${response.content.movieName}" style="width:250px"
                                                class="form-control" id="movieName"
+                                               placeholder="영화 이름을 입력해 주세요."
                                                aria-describedby="emailHelp">
                                     </td>
                                 </tr>
@@ -141,24 +142,27 @@
                                     <th class="border-end" scope="row" style="width: 20%;">감독</th>
                                     <td style="width: 80%;">
                                         <input type="text" value="${response.content.movieDirector}"
-                                                                   style="width:250px"
-                                                                   class="form-control mb-2" id="movieDirector"
-                                                                   aria-describedby="emailHelp">
+                                               style="width:250px"
+                                               placeholder="영화 감독을 입력해 주세요"
+                                               class="form-control mb-2" id="movieDirector"
+                                               aria-describedby="emailHelp">
                                     </td>
                                 </tr>
                                 <tr>
                                     <th class="border-end" scope="row" style="width: 20%;">러닝타임(분)</th>
                                     <td style="width: 80%;"><input type="text"
                                                                    value="${response.content.movieRunningTime}"
+                                                                   placeholder="러닝타임을 입력주세요(분)"
                                                                    style="width:250px"
                                                                    class="form-control mb-2" id="movieRunningTime"
                                                                    aria-describedby="emailHelp"></td>
                                 </tr>
                                 <tr>
-                                    <th class="border-end" scope="row" style="width: 20%;">영화 가격</th>
+                                    <th class="border-end" scope="row" style="width: 20%;">영화 가격(원)</th>
                                     <td style="width: 80%;"><input type="text"
                                                                    value="${response.content.moviePrice}"
-                                                                   style="width:100px"
+                                                                   style="width:250px"
+                                                                   placeholder="영화 가격을 입력해주세요(원)"
                                                                    class="form-control mb-2" id="moviePrice"
                                                                    aria-describedby="emailHelp"></td>
                                 </tr>
@@ -166,7 +170,8 @@
                                     <th class="border-end" scope="row" style="width: 20%;">평점</th>
                                     <td style="width: 80%;"><input type="text"
                                                                    value="${response.content.convertStartRation}"
-                                                                   style="width:100px"
+                                                                   style="width:250px"
+                                                                   placeholder="평점을 입력해주세요 5.0 -> 50"
                                                                    class="form-control mb-2" id="movieStarRating"
                                                                    aria-describedby="emailHelp"></td>
                                 </tr>
@@ -235,6 +240,7 @@
                                     <td style="width: 80%;">
                                         <input type="text" value="${response.content.movieDetailLink}" style="width:80%"
                                                class="form-control mb-2" id="movieDetailLink"
+                                               placeholder="상세링크를 입력해주세요 -> https://포함"
                                                aria-describedby="emailHelp">
                                     </td>
                                 </tr>
@@ -243,6 +249,7 @@
                                     <td style="width: 80%;">
                                         <input type="text" value="${response.content.moviePopularCount}"
                                                style="width:80%"
+                                               placeholder="영화 누적 카운트를 입력해 주세요"
                                                class="form-control mb-2" id="moviePopularCount"
                                                aria-describedby="emailHelp">
                                     </td>
@@ -461,6 +468,8 @@
         let changeMovieRecruitmentImage = $('input#changeMovieRecruitmentImage')[0].files[0]
 
         let formData = new FormData();
+
+        console.log(movieName);
 
         if (movieName != "") {
             formData.append("movieName", movieName);

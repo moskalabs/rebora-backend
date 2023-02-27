@@ -401,8 +401,6 @@
         } else if (theaterPrice === "") {
             SwalAlertError("상영 가격을 입력해 주세요");
         } else {
-
-
             $.ajax({
                 url     : "<%=CURRENT_SERVER%>/admin/theater/theaterSave",
                 data    : {
@@ -424,7 +422,21 @@
                 method  : "POST",
                 dataType: "json",
             }).done(function (data) {
-                console.log(data);
+                if (data.result) {
+                    Swal.fire({
+                        title: "완료",
+                        text : "저장이 완료되었습니다."
+                    }).then(() => {
+                        goToList();
+                    })
+                } else {
+                    Swal.fire({
+                        title: "오류",
+                        text : data.message
+                    }).then(() => {
+                        return false;
+                    })
+                }
             })
         }
     }

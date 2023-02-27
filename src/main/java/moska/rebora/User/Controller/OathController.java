@@ -6,6 +6,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.nimbusds.jose.shaded.json.parser.JSONParser;
 import com.nimbusds.jose.shaded.json.parser.ParseException;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import springfox.documentation.annotations.ApiIgnore;
 
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +49,7 @@ import java.util.HashMap;
 @RestController
 @RequestMapping("/api/user/oath")
 @Slf4j
+@Tag(name = "SNS 유저", description = "SNS 유저")
 @AllArgsConstructor
 public class OathController {
 
@@ -52,8 +62,19 @@ public class OathController {
      * @param userPushKey 유저 푸쉬 키
      * @return UserLoginDto
      */
+    @Tag(name = "SNS 유저")
+    @Operation(summary = "네이버 로그인")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authToken", value = "토큰", required = true),
+            @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "네이버 로그인 정보 가져오기 성공 result가 false일 경우 회원가입", content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
+            @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "409", description = "이미 가입된 이메일", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PostMapping("/naverLogin")
-    public UserLoginDto naverLogin(
+    UserLoginDto naverLogin(
             @RequestParam String authToken,
             @RequestParam(value = "userPushKey", required = false, defaultValue = "") String userPushKey
     ) {
@@ -71,6 +92,17 @@ public class OathController {
      * @param userPushKey 유저 푸쉬 키
      * @return UserLoginDto
      */
+    @Tag(name = "SNS 유저")
+    @Operation(summary = "카카오 로그인")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "authToken", value = "토큰", required = true),
+            @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "카카오 로그인 정보 가져오기 성공 result가 false일 경우 회원가입", content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
+            @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "409", description = "이미 가입된 이메일", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PostMapping("/kakaoLogin")
     public UserLoginDto kakaoLogin(
             @RequestParam String authToken,
@@ -86,6 +118,17 @@ public class OathController {
      * @param userPushKey 유저 푸쉬 키
      * @return UserLoginDto
      */
+    @Tag(name = "SNS 유저")
+    @Operation(summary = "애플  로그인")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "idToken", value = "토큰", required = true),
+            @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
+    })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "애플 로그인 정보 가져오기 성공 result가 false일 경우 회원가입", content = @Content(schema = @Schema(implementation = UserLoginDto.class))),
+            @ApiResponse(responseCode = "500", description = "로그인 실패", content = @Content(schema = @Schema(implementation = BaseResponse.class))),
+            @ApiResponse(responseCode = "409", description = "이미 가입된 이메일", content = @Content(schema = @Schema(implementation = BaseResponse.class)))
+    })
     @PostMapping("/appleLogin")
     public UserLoginDto appleLogin(
             @RequestParam String idToken,
@@ -94,7 +137,7 @@ public class OathController {
         return oathService.login(idToken, UserSnsKind.APPLE, userPushKey);
     }
 
-
+    @ApiIgnore
     @CrossOrigin(origins = "https://appleid.apple.com")
     @PostMapping(value = "/appleCallback")
     public ResponseEntity<Object> appleCallback(String code, String id_token, String user) throws ParseException, URISyntaxException {
@@ -141,7 +184,22 @@ public class OathController {
      * @param userPushKey     유저 푸쉬 키
      * @return UserLoginDto
      */
+
     @PostMapping("/signUpSns")
+    @Tag(name = "SNS 유저")
+    @Operation(summary = "SNS 회원가입")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userEmail", value = "유저 이메일", required = true),
+            @ApiImplicitParam(name = "userName", value = "유저 이름", required = true),
+            @ApiImplicitParam(name = "userNickname", value = "유저 닉네임", required = true),
+            @ApiImplicitParam(name = "userSnsKind", value = "유저 SNS 종류", required = true),
+            @ApiImplicitParam(name = "userSnsId", value = "유저 SNS ID", required = true),
+            @ApiImplicitParam(name = "userPushYn", value = "유저 푸쉬 여부", required = false),
+            @ApiImplicitParam(name = "userPushNightYn", value = "유저 야간 푸쉬 여부", required = false),
+            @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
+            @ApiImplicitParam(name = "userBirth", value = "유저 생년월일", required = false),
+            @ApiImplicitParam(name = "isAuthenticated", value = "유저 본인인증 여부", required = false)
+    })
     public UserLoginDto signUpSns(
             @RequestParam String userEmail,
             @RequestParam String userName,
@@ -150,9 +208,11 @@ public class OathController {
             @RequestParam String userSnsId,
             @RequestParam(required = false, defaultValue = "false") Boolean userPushYn,
             @RequestParam(required = false, defaultValue = "false") Boolean userPushNightYn,
-            @RequestParam(required = false, defaultValue = "") String userPushKey
+            @RequestParam(required = false, defaultValue = "") String userPushKey,
+            @RequestParam(required = false, defaultValue = "1990-01-01") String userBirth,
+            @RequestParam(required = false, defaultValue = "false") Boolean isAuthenticated
     ) {
-        return oathService.signUpSns(userEmail, userName, userNickname, UserSnsKind.valueOf(userSnsKind), userSnsId, userPushYn, userPushNightYn, userPushKey);
+        return oathService.signUpSns(userEmail, userName, userNickname, UserSnsKind.valueOf(userSnsKind), userSnsId, userPushYn, userPushNightYn, userPushKey, userBirth, isAuthenticated);
     }
 
     /**
@@ -162,6 +222,7 @@ public class OathController {
      * @param authToken   토큰
      * @return BaseInfoResponse<SnsInfo>
      */
+    @ApiIgnore
     @GetMapping("/getSnsInfo")
     public BaseInfoResponse<SnsInfo> getSnsInfo(
             String userSnsKind,

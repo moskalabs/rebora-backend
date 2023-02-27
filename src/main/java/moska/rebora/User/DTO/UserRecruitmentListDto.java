@@ -16,9 +16,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @Schema(description = "유저_모집 리스트 DTO")
-public class
-
-UserRecruitmentListDto {
+public class UserRecruitmentListDto {
 
     @Schema(description = "유저_모집 아이디")
     private Long userRecruitmentId;
