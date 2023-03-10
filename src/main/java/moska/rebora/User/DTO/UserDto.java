@@ -7,7 +7,6 @@ import moska.rebora.Enum.UserGrade;
 import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.User.Entity.User;
 
-
 @EqualsAndHashCode(callSuper = true)
 @Data
 @Schema(description = "유저 Dto")
@@ -37,6 +36,12 @@ public class UserDto extends BaseResponse {
     private UserSnsKind userSnsKind;
     @Schema(description = "유저 SNS 아이디")
     private String userSnsId;
+    @Schema(description = "유저 생년 월일")
+    private String userBirth;
+    @Schema(description = "유저 핸드폰 번호")
+    private String userPhone;
+    @Schema(description = "인증 여부")
+    private Boolean isAuthenticated;
     @Schema(description = "알림 횟수")
     private Integer notificationCount;
 
@@ -53,5 +58,8 @@ public class UserDto extends BaseResponse {
         userImage = user.getUserImage();
         userSnsKind = user.getUserSnsKind();
         userSnsId = user.getUserSnsId();
+        this.userBirth = user.getUserBirth();
+        this.isAuthenticated = user.getIsAuthenticated();
+        this.userPhone = user.getUserPhone();
     }
 }

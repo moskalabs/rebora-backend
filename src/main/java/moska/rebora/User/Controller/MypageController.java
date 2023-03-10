@@ -50,7 +50,8 @@ public class MypageController {
     })
     @GetMapping("/info")
     public MypageInfoDto info() {
-        return mypageService.info(SecurityContextHolder.getContext().getAuthentication().getName());
+        return mypageService.
+                info(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
     /**

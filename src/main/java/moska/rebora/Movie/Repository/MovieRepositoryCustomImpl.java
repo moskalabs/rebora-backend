@@ -63,7 +63,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
                         movie.movieStarRating,
                         userMovie.userMovieWish,
                         userMovie.id.as("userMovieId")
-                ))
+                )).distinct()
                 .from(movie)
                 .leftJoin(movie.userMovieList, userMovie).on(userMovie.user.userEmail.eq(userEmail))
                 .leftJoin(userMovie.user, user)

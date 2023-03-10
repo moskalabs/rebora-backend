@@ -2,6 +2,8 @@ package moska.rebora.User.Service;
 
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.EmailAuthKind;
+import moska.rebora.Enum.UserCarrierType;
+import moska.rebora.User.DTO.UserAuthenticatedDto;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
@@ -29,7 +31,9 @@ public interface UserService {
             @Param("userSnsKind") String userSnsKind,
             @Param("userSnsId") String userSnsId,
             @Param("userBirth") String userBirth,
-            @Param("isAuthenticated") Boolean isAuthenticated
+            @Param("isAuthenticated") Boolean isAuthenticated,
+            @Param("userPhone") String userPhone,
+            @Param("userCarrierType") String userCarrierType
 
     ) throws SQLIntegrityConstraintViolationException;
 
@@ -46,4 +50,8 @@ public interface UserService {
     );
 
     boolean isOnValidUser(User user);
+
+    void updateUserAuthenticated(Long userId, String impUid);
+
+    UserAuthenticatedDto getUserAuthenticated(String impUid);
 }

@@ -11,9 +11,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import moska.rebora.Common.BaseInfoResponse;
 import moska.rebora.Common.BaseResponse;
 import moska.rebora.Enum.EmailAuthKind;
+import moska.rebora.Enum.UserCarrierType;
 import moska.rebora.Main.Dto.MainDto;
+import moska.rebora.User.DTO.UserAuthenticatedDto;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserEmailDto;
 import moska.rebora.User.DTO.UserLoginDto;
@@ -90,6 +93,10 @@ public class UserController {
             @ApiImplicitParam(name = "userPushNightYn", value = "유저 푸쉬 야간 여부", required = false),
             @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
             @ApiImplicitParam(name = "authKey", value = "이메일 인증 키", required = true),
+            @ApiImplicitParam(name = "userBirth", value = "유저 생년월일", required = false),
+            @ApiImplicitParam(name = "isAuthenticated", value = "유저 인증 여부", required = false),
+            @ApiImplicitParam(name = "userPhone", value = "유저 핸드폰 번호", required = false),
+            @ApiImplicitParam(name = "userCarrierType", value = "유저 통신사 타입", required = false)
     })
     UserLoginDto signUp(
             @RequestParam("userEmail") String userEmail,
@@ -103,7 +110,9 @@ public class UserController {
             @RequestParam(value = "userSnsKind", required = false) String userSnsKind,
             @RequestParam(value = "userSnsId", required = false) String userSnsId,
             @RequestParam(required = false, defaultValue = "1990-01-01") String userBirth,
-            @RequestParam(required = false, defaultValue = "false") Boolean isAuthenticated
+            @RequestParam(required = false, defaultValue = "false") Boolean isAuthenticated,
+            @RequestParam(required = false, defaultValue = "01012341234") String userPhone,
+            @RequestParam(required = false, defaultValue = "SKT") String userCarrierType
     ) throws SQLIntegrityConstraintViolationException {
 
         return userService.signUp(
@@ -118,7 +127,9 @@ public class UserController {
                 userSnsKind,
                 userSnsId,
                 userBirth,
-                isAuthenticated
+                isAuthenticated,
+                userPhone,
+                userCarrierType
         );
     }
 
@@ -238,5 +249,39 @@ public class UserController {
         userRepository.save(user);
 
         return baseResponse;
+    }
+
+    @Tag(name = "유저")
+    @Operation(summary = "본인 인증 업데이트")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userId", value = "유저 아이디", required = true),
+            @ApiImplicitParam(name = "impUid", value = "아임포트 고유번호", required = true)
+    })
+    @PutMapping("/updateUserAuthenticated/{userId}")
+    BaseResponse updateUserAuthenticated(
+            @PathVariable Long userId,
+            @RequestParam String impUid
+    ) {
+        BaseResponse baseResponse = new BaseResponse();
+        baseResponse.setResult(true);
+        userService.updateUserAuthenticated(userId, impUid);
+        return baseResponse;
+    }
+
+    @Tag(name = "유저")
+    @Operation(summary = "본인 인증 정보 가져오기")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "impUid", value = "아임포트 고유번호", required = true)
+    })
+    @GetMapping("/getUserAuthenticated")
+    BaseInfoResponse<UserAuthenticatedDto> getUserAuthenticated(
+            @RequestParam String impUid
+    ) {
+        BaseInfoResponse<UserAuthenticatedDto> baseInfoResponse = new BaseInfoResponse<>();
+
+        baseInfoResponse.setResult(true);
+        baseInfoResponse.setContent(userService.getUserAuthenticated(impUid));
+
+        return baseInfoResponse;
     }
 }

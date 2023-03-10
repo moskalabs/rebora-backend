@@ -1,24 +1,31 @@
 package moska.rebora.User.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mchange.util.DuplicateElementException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import moska.rebora.Common.BaseResponse;
+import moska.rebora.Common.Service.AuthenticateToken;
 import moska.rebora.Common.Util;
 import moska.rebora.Config.JwtAuthToken;
 import moska.rebora.Config.JwtAuthTokenProvider;
 import moska.rebora.Config.PasswordAuthAuthenticationManager;
 import moska.rebora.Config.PasswordAuthAuthenticationToken;
 import moska.rebora.Enum.EmailAuthKind;
+import moska.rebora.Enum.UserCarrierType;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.Enum.UserSnsKind;
 import moska.rebora.Notification.Repository.NotificationRepository;
+import moska.rebora.User.DTO.UserAuthenticatedDto;
 import moska.rebora.User.DTO.UserDto;
 import moska.rebora.User.DTO.UserLoginDto;
 import moska.rebora.User.Entity.User;
 import moska.rebora.User.Entity.UserEmailAuth;
 import moska.rebora.User.Repository.UserEmailAuthRepository;
 import moska.rebora.User.Repository.UserRepository;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.repository.query.Param;
@@ -28,12 +35,20 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+
+import static moska.rebora.Common.CommonConst.RESPONSE_OK;
 
 @Service
 @Slf4j
@@ -56,6 +71,7 @@ public class UserServiceImpl implements UserService {
 
     Util util;
 
+    AuthenticateToken authenticateToken;
 
     private static final Date expiredDate = Date.from(LocalDateTime.now().plusYears(1L).atZone(ZoneId.systemDefault()).toInstant());
 
@@ -123,7 +139,9 @@ public class UserServiceImpl implements UserService {
                                @Param("userSnsKind") String userSnsKind,
                                @Param("userSnsId") String userSnsId,
                                @Param("userBirth") String userBirth,
-                               @Param("isAuthenticated") Boolean isAuthenticated
+                               @Param("isAuthenticated") Boolean isAuthenticated,
+                               @Param("userPhone") String userPhone,
+                               @Param("userCarrierType") String userCarrierType
 
     ) throws SQLIntegrityConstraintViolationException {
 
@@ -157,6 +175,8 @@ public class UserServiceImpl implements UserService {
                     .userBirth(userBirth)
                     .isAuthenticated(isAuthenticated)
                     .userAge(0)
+                    .userPhone(userPhone)
+                    .userCarrierType(UserCarrierType.valueOf(userCarrierType))
                     .build();
 
             userRepository.save(user);
@@ -323,7 +343,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public boolean isOnValidUser(User user) {
-
         //유저 사용 여부
         if (!user.getUserUseYn()) {
             return false;
@@ -333,6 +352,63 @@ public class UserServiceImpl implements UserService {
             return false;
         } else {
             return true;
+        }
+    }
+
+    @Override
+    public void updateUserAuthenticated(Long userId, String impUid) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            throw new NullPointerException("존재하지 않는 유저입니다.");
+        }
+
+        User user = optionalUser.get();
+
+        UserAuthenticatedDto userAuthenticated = getUserAuthenticated(impUid);
+
+        user.updateAuthenticated(userAuthenticated.getUserBirth(), userAuthenticated.getUserPhone(), true, userAuthenticated.getUserCarrierType());
+
+        userRepository.save(user);
+    }
+
+    @Override
+    public UserAuthenticatedDto getUserAuthenticated(String impUid) {
+
+        try {
+            String token = authenticateToken.getAuthenticateToken();
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            Map<String, Object> params = new HashMap<>();
+            params.put("imp_uid", impUid);
+
+            String requestBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(params);
+            HttpRequest.BodyPublisher body = HttpRequest.BodyPublishers.ofString(requestBody);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.iamport.kr/certifications/" + impUid))
+                    .header("Authorization", "Bearer " + token)
+                    .header("Content-Type", "application/json")
+                    .method("GET", body)
+                    .build();
+
+            HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+            JSONParser jsonParser = new JSONParser();
+
+            if (response.statusCode() != RESPONSE_OK) {
+                throw new RuntimeException("본인인증 하던 도중 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+
+            JSONObject result = (JSONObject) jsonParser.parse(response.body());
+            JSONObject jsonObject = (JSONObject) result.get("response");
+
+            if (!(Boolean) jsonObject.get("certified")) {
+                throw new RuntimeException("본인인증 하던 도중 오류가 발생했습니다. 다시 시도해주세요.");
+            }
+
+            return new UserAuthenticatedDto(jsonObject);
+        } catch (IOException | InterruptedException | ParseException e) {
+            throw new RuntimeException("본인인증 하던 도중 오류가 발생했습니다. 다시 시도해주세요.");
         }
     }
 }

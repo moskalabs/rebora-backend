@@ -46,6 +46,8 @@ public class UserLoginDto extends BaseResponse {
     private String userSnsId;
     @Schema(description = "유저 생년 월일")
     private String userBirth;
+    @Schema(description = "유저 핸드폰 번호")
+    private String userPhone;
     @Schema(description = "인증 여부")
     private Boolean isAuthenticated;
     @Schema(description = "알림 개수")
@@ -70,6 +72,7 @@ public class UserLoginDto extends BaseResponse {
         this.notificationCount = notificationCount;
         this.userBirth = user.getUserBirth();
         this.isAuthenticated = user.getIsAuthenticated();
+        this.userPhone = user.getUserPhone();
     }
 
     public UserLoginDto() {

@@ -198,7 +198,9 @@ public class OathController {
             @ApiImplicitParam(name = "userPushNightYn", value = "유저 야간 푸쉬 여부", required = false),
             @ApiImplicitParam(name = "userPushKey", value = "유저 푸쉬 키", required = false),
             @ApiImplicitParam(name = "userBirth", value = "유저 생년월일", required = false),
-            @ApiImplicitParam(name = "isAuthenticated", value = "유저 본인인증 여부", required = false)
+            @ApiImplicitParam(name = "isAuthenticated", value = "유저 본인인증 여부", required = false),
+            @ApiImplicitParam(name = "userPhone", value = "유저 핸드폰 번호", required = false),
+            @ApiImplicitParam(name = "userCarrierType", value = "유저 통신사 타입", required = false)
     })
     public UserLoginDto signUpSns(
             @RequestParam String userEmail,
@@ -210,9 +212,11 @@ public class OathController {
             @RequestParam(required = false, defaultValue = "false") Boolean userPushNightYn,
             @RequestParam(required = false, defaultValue = "") String userPushKey,
             @RequestParam(required = false, defaultValue = "1990-01-01") String userBirth,
-            @RequestParam(required = false, defaultValue = "false") Boolean isAuthenticated
+            @RequestParam(required = false, defaultValue = "false") Boolean isAuthenticated,
+            @RequestParam(required = false, defaultValue = "010-1234-1234") String userPhone,
+            @RequestParam(required = false, defaultValue = "SKT") String userCarrierType
     ) {
-        return oathService.signUpSns(userEmail, userName, userNickname, UserSnsKind.valueOf(userSnsKind), userSnsId, userPushYn, userPushNightYn, userPushKey, userBirth, isAuthenticated);
+        return oathService.signUpSns(userEmail, userName, userNickname, UserSnsKind.valueOf(userSnsKind), userSnsId, userPushYn, userPushNightYn, userPushKey, userBirth, isAuthenticated, userPhone, userCarrierType);
     }
 
     /**

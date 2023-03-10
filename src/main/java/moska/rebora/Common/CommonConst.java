@@ -22,4 +22,6 @@ public class CommonConst {
     public static final String KAKAO_TOKEN_ME_URL = "https://kapi.kakao.com/v2/user/me";
 
     public static final LocalDate ADULT_BIRTH = LocalDate.now().minusYears(19L);
+
+    public static final int RESPONSE_OK = 200;
 }

@@ -2,6 +2,7 @@ package moska.rebora.User.Entity;
 
 import lombok.*;
 import moska.rebora.Common.BaseTimeEntity;
+import moska.rebora.Enum.UserCarrierType;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.Enum.UserSnsKind;
 import org.hibernate.annotations.ColumnDefault;
@@ -102,6 +103,11 @@ public class User extends BaseTimeEntity {
     @Comment("유저 핸드폰 번호")
     private String userPhone;
 
+    @Enumerated(value = EnumType.STRING)
+    @Column(length = 10)
+    @Comment("유저 통신사 종류")
+    private UserCarrierType userCarrierType;
+
     public User() {
     }
 
@@ -185,14 +191,27 @@ public class User extends BaseTimeEntity {
         this.userImage = userImage;
     }
 
-    public void changePushKey(String userPushKey){
-        if (!userPushKey.equals("")){
+    public void changePushKey(String userPushKey) {
+        if (!userPushKey.equals("")) {
             this.userPushKey = userPushKey;
         }
     }
 
+    public void updateAuthenticated(
+            String userBirth,
+            String userPhone,
+            Boolean isAuthenticated,
+            UserCarrierType userCarrierType
+    ) {
+
+        this.userBirth = userBirth;
+        this.userPhone = userPhone;
+        this.isAuthenticated = isAuthenticated;
+        this.userCarrierType = userCarrierType;
+    }
+
     @Builder
-    public User(Long id, String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userCustomerId, UserSnsKind userSnsKind, String userSnsId, Boolean isAuthenticated, Integer userAge, String userBirth, String userPhone) {
+    public User(Long id, String userEmail, String password, String userName, String userNickname, String userPushKey, Boolean userPushYn, Boolean userPushNightYn, Boolean userUseYn, UserGrade userGrade, String userImage, String userBillingKey, String userCustomerId, UserSnsKind userSnsKind, String userSnsId, Boolean isAuthenticated, Integer userAge, String userBirth, String userPhone, UserCarrierType userCarrierType) {
         this.id = id;
         this.userEmail = userEmail;
         this.password = password;
@@ -212,5 +231,6 @@ public class User extends BaseTimeEntity {
         this.userAge = userAge;
         this.userBirth = userBirth;
         this.userPhone = userPhone;
+        this.userCarrierType = userCarrierType;
     }
 }

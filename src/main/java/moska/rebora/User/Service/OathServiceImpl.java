@@ -14,6 +14,7 @@ import moska.rebora.Config.JwtAuthToken;
 import moska.rebora.Config.JwtAuthTokenProvider;
 import moska.rebora.Config.PasswordAuthAuthenticationManager;
 import moska.rebora.Config.PasswordAuthAuthenticationToken;
+import moska.rebora.Enum.UserCarrierType;
 import moska.rebora.Enum.UserGrade;
 import moska.rebora.Notification.Repository.NotificationRepository;
 import moska.rebora.User.DTO.ApplePublicKeyDto;
@@ -190,17 +191,17 @@ public class OathServiceImpl implements OathService {
 
             String snsName = "";
 
-            if(user.getUserSnsKind().equals(UserSnsKind.KAKAO)){
+            if (user.getUserSnsKind().equals(UserSnsKind.KAKAO)) {
                 snsName = "카카오";
-            }else if(user.getUserSnsKind().equals(UserSnsKind.NAVER)){
+            } else if (user.getUserSnsKind().equals(UserSnsKind.NAVER)) {
                 snsName = "네이버";
-            }else if(user.getUserSnsKind().equals(UserSnsKind.APPLE)){
+            } else if (user.getUserSnsKind().equals(UserSnsKind.APPLE)) {
                 snsName = "애플";
-            }else{
+            } else {
                 snsName = "";
             }
 
-            throw new DuplicateElementException("죄송하지만 "+ snsName +"로그인으로 다시 진행해 주세요. 감사합니다.");
+            throw new DuplicateElementException("죄송하지만 " + snsName + "로그인으로 다시 진행해 주세요. 감사합니다.");
         } else {
 
             return UserLoginDto.builder()
@@ -356,7 +357,9 @@ public class OathServiceImpl implements OathService {
             Boolean userPushNightYn,
             String userPushKey,
             String userBirth,
-            Boolean isAuthenticated
+            Boolean isAuthenticated,
+            String userPhone,
+            String userCarrierType
     ) {
 
         String bcryptPassword = passwordEncoder.encode(userSnsKind.name());
@@ -377,6 +380,8 @@ public class OathServiceImpl implements OathService {
                 .userBirth(userBirth)
                 .isAuthenticated(isAuthenticated)
                 .userAge(0)
+                .userPhone(userPhone)
+                .userCarrierType(UserCarrierType.valueOf(userCarrierType))
                 .build();
 
         userRepository.save(user);

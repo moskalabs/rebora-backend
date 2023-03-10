@@ -30,7 +30,9 @@ public interface OathService {
             Boolean userPushNightYn,
             String userPushKey,
             String userBirth,
-            Boolean isAuthenticated
+            Boolean isAuthenticated,
+            String userPhone,
+            String userCarrierType
     );
 
     List<ApplePublicKeyDto> getPublicAppleKeys();
